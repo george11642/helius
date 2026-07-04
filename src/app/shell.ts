@@ -1,52 +1,54 @@
-// Renders the Helius app shell: header (wordmark + offline badge + model
-// chip), a two-pane main (chat/voice | map), a footer status bar, and a
-// hidden tool-trace overlay. Feature modules (agent/llm/map/speech) should
-// mount into the containers ShellRefs exposes rather than touching the DOM
-// directly, so the shell stays the single source of layout truth.
+// Renders the Helius app shell: header (wordmark + status chips), a
+// two-column main (fixed-width chat/voice column | flexible map column), a
+// full-width tool-trace rail, and a footer status bar. Feature modules
+// (chat, trace, status, voice, boot, beacon, devloc, route) mount into the
+// containers ShellRefs exposes rather than touching the DOM directly, so
+// this file stays the single source of layout truth.
 
 export interface ShellRefs {
-  chatPanel: HTMLElement;
-  mapPanel: HTMLElement;
-  toolTrace: HTMLElement;
+  headerChips: HTMLElement;
+  chatMessages: HTMLElement;
+  chatInputRow: HTMLElement;
+  mapRoot: HTMLElement;
+  routeToastLayer: HTMLElement;
+  toolTraceRail: HTMLElement;
   statusText: HTMLElement;
-  modelChip: HTMLElement;
-  offlineBadge: HTMLElement;
 }
 
 export function renderShell(root: HTMLElement): ShellRefs {
   root.innerHTML = `
     <header class="shell-header">
-      <div class="wordmark">HELIUS</div>
-      <div class="header-chips">
-        <span class="chip offline-badge" data-state="unknown">Offline-ready: no</span>
-        <span class="chip model-chip">Model: not loaded</span>
+      <div class="brand">
+        <span class="wordmark">HELIUS <span class="sun-glyph">&#9728;</span></span>
+        <span class="subtitle">works when nothing else does</span>
       </div>
+      <div class="header-chips"></div>
     </header>
     <main class="shell-main">
-      <section class="chat-panel" aria-label="Conversation">
-        <!-- TODO(agent, speech): mount chat transcript + voice controls here -->
-        <p class="placeholder">Model not loaded yet. Voice and chat will appear here.</p>
+      <section class="chat-col" aria-label="Conversation">
+        <div class="chat-messages"></div>
+        <div class="chat-input-row"></div>
       </section>
-      <section class="map-panel" aria-label="Map">
-        <!-- TODO(map): mount the MapLibre canvas here once a region pack loads -->
-        <p class="placeholder">Map will render here once a region pack is loaded.</p>
+      <section class="map-col" aria-label="Map">
+        <div id="map-root" class="map-canvas">
+          <p class="map-placeholder">OFFLINE MAP &mdash; loads with region pack</p>
+        </div>
+        <div class="route-toast-layer"></div>
       </section>
     </main>
+    <div class="tool-trace-rail" hidden></div>
     <footer class="shell-footer">
-      <span class="status-text">Ready.</span>
+      <span class="status-text">Booting Helius&hellip;</span>
     </footer>
-    <div class="tool-trace" hidden>
-      <!-- TODO(agent): render the live tool-call chain here, e.g.
-           locate → offline_map → route_back → sun_calc → morse_beacon -->
-    </div>
   `;
 
   return {
-    chatPanel: root.querySelector('.chat-panel')!,
-    mapPanel: root.querySelector('.map-panel')!,
-    toolTrace: root.querySelector('.tool-trace')!,
+    headerChips: root.querySelector('.header-chips')!,
+    chatMessages: root.querySelector('.chat-messages')!,
+    chatInputRow: root.querySelector('.chat-input-row')!,
+    mapRoot: root.querySelector('#map-root')!,
+    routeToastLayer: root.querySelector('.route-toast-layer')!,
+    toolTraceRail: root.querySelector('.tool-trace-rail')!,
     statusText: root.querySelector('.shell-footer .status-text')!,
-    modelChip: root.querySelector('.model-chip')!,
-    offlineBadge: root.querySelector('.offline-badge')!,
   };
 }
