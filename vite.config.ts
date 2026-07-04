@@ -26,6 +26,15 @@ const crossOriginIsolationHeaders = {
 export default defineConfig({
   server: { headers: crossOriginIsolationHeaders },
   preview: { headers: crossOriginIsolationHeaders },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/maplibre-gl')) return 'maplibre-gl-vendor';
+        },
+      },
+    },
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
