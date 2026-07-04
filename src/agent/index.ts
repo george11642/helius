@@ -25,12 +25,23 @@ export interface CreateHeliusOptions {
   onEvent: AgentEventHandler;
   /** Region pack for the map + routing graph (default 'sandia'). */
   pack?: string;
+  /**
+   * Pre-warm BOTH model tiers at startup for an instant E2B↔E4B hot-swap.
+   * Default false — pre-warming two q4f16 stacks risks a WebGPU OOM on ordinary
+   * machines. Enable only where memory is known-ample (e.g. the demo box, via a
+   * URL param / localStorage flag the shell reads).
+   */
+  prewarm?: boolean;
 }
 
 export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
   setPack(opts.pack ?? 'sandia');
 
-  const engine = createEngine(opts.modelBaseUrl, (status) => opts.onEvent({ type: 'engine-status', status }));
+  const engine = createEngine(
+    opts.modelBaseUrl,
+    (status) => opts.onEvent({ type: 'engine-status', status }),
+    opts.prewarm ?? false,
+  );
 
   const registry = createTools({
     emit: opts.onEvent,

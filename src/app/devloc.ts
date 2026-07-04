@@ -58,18 +58,16 @@ export function mountDevLoc(opts: DevLocOptions = {}): void {
     coords.textContent = `${preset.lat.toFixed(4)}, ${preset.lon.toFixed(4)}`;
     opts.onFixChange?.(preset.lat, preset.lon, SIMULATED_ACCURACY_M);
     try {
-      // Soft dependency: src/tools/location.ts is owned by a parallel
-      // workstream and may not exist yet. A non-literal specifier keeps this
-      // out of TypeScript's static module resolution and Vite's build-time
-      // chunk graph, so neither typecheck nor build hard-fails while it's
-      // still landing — see the identical pattern + rationale in main.ts.
-      const modulePath = '../tools/location.ts';
-      const mod = (await import(/* @vite-ignore */ modulePath)) as {
-        setSimulatedFix?: (next: { lat?: number; lon?: number; elevationM?: number; accuracyM?: number }) => void;
-      };
-      mod.setSimulatedFix?.({ lat: preset.lat, lon: preset.lon, elevationM: preset.elevationM, accuracyM: SIMULATED_ACCURACY_M });
+      // src/tools/location.ts now definitively exists — a static, literal
+      // import so it's actually bundled into production output. (A non-literal
+      // specifier + @vite-ignore was used earlier as a soft dependency while
+      // this was still landing; that only worked in dev — production builds
+      // never discover or emit the file, so the import 404s there. Same
+      // lesson as main.ts's agent import; see that file for the full story.)
+      const { setSimulatedFix } = await import('../tools/location');
+      setSimulatedFix({ lat: preset.lat, lon: preset.lon, elevationM: preset.elevationM, accuracyM: SIMULATED_ACCURACY_M });
     } catch (err) {
-      console.warn('[helius] tools/location.ts not available yet — GPS fix is display-only', err);
+      console.warn('[helius] tools/location.ts failed to load — GPS fix is display-only', err);
     }
   }
 

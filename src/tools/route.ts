@@ -22,14 +22,16 @@ interface Poi {
   name: string;
   lat: number;
   lon: number;
+  role?: string;
 }
 interface PoisFile {
   trailheads?: Poi[];
 }
 
-// Destination enum -> slot in the pack's trailheads[]. Data-driven: the NAME +
-// coordinates come from the pack's pois.json, only the slot order lives here —
-// so a different pack's first three trailheads route cleanly with no code change.
+// Destination enum resolution. Primary: match the trailhead's `role`
+// (`trailhead` / `crest` / `tram_station`) — set by the pack pipeline. Fallback
+// (packs without roles): the slot order below. Both keep resolution data-driven,
+// so a new pack's destinations route with no code change.
 const DEST_SLOT: Record<string, number> = { trailhead: 0, crest: 1, tram_station: 2 };
 
 const graphCache = new Map<string, Promise<RoutingGraph>>();
@@ -92,7 +94,7 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
 
   const trailheads = pois.trailheads ?? [];
   const slot = DEST_SLOT[destKey] ?? 0;
-  const dest = trailheads[slot] ?? trailheads[0];
+  const dest = trailheads.find((t) => t.role === destKey) ?? trailheads[slot] ?? trailheads[0];
   if (!dest) {
     return {
       data: { error: 'unknown_destination', destination: destKey },

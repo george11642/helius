@@ -59,6 +59,9 @@ const instances: Partial<Record<ModelTier, Instance>> = {};
 const tierLoads = new Map<ModelTier, Promise<Instance>>();
 let activeTier: ModelTier = 'E2B';
 const activeStops = new Map<number, InterruptableStoppingCriteria>();
+// Requests aborted before generation actually started (InterruptableStoppingCriteria
+// only bites once decoding is underway; a request can sit behind a model load).
+const abortedIds = new Set<number>();
 
 const active = (): Instance | undefined => instances[activeTier];
 
@@ -166,6 +169,7 @@ async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
     // just those small JSON/jinja entries (weights stay cached) and retry ONCE
     // before giving up.
     const purged = await purgeConfigCache();
+    tierLoads.delete(tier); // ensure the retry starts fresh, not the rejected promise
     try {
       await loadTier(tier, true);
     } catch (err2) {
@@ -225,7 +229,18 @@ interface GenSpec {
 }
 
 async function generate(spec: GenSpec): Promise<void> {
+  // Abort can land while this request is still queued behind a model load or
+  // input preprocessing — before the stopping-criteria can bite. Bail at each
+  // pre-generation await point and resolve the request cleanly as aborted.
+  const bailIfAborted = (): boolean => {
+    if (!abortedIds.has(spec.id)) return false;
+    abortedIds.delete(spec.id);
+    post({ type: 'result', id: spec.id, aborted: true, result: { text: '', rawText: '', nTokens: 0, prefillMs: 0, decodeTps: 0 } });
+    return true;
+  };
+
   const { processor, model } = await ensureActive();
+  if (bailIfAborted()) return;
 
   const chatText = processor.apply_chat_template(spec.messages, {
     add_generation_prompt: true,
@@ -239,6 +254,7 @@ async function generate(spec: GenSpec): Promise<void> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputs = (await processor(chatText, image, audio, { add_special_tokens: false })) as any;
+  if (bailIfAborted()) return;
   const promptLen: number = inputs.input_ids.dims.at(-1);
 
   let nTokens = 0;
@@ -282,6 +298,7 @@ async function generate(spec: GenSpec): Promise<void> {
   const prefillMs = tFirst ? Math.round(tFirst - t0) : 0;
   const decodeTps = nTokens > 1 ? +((nTokens - 1) / ((tLast - tFirst) / 1000)).toFixed(1) : 0;
 
+  abortedIds.delete(spec.id);
   post({
     type: 'result',
     id: spec.id,
@@ -325,6 +342,9 @@ ctx.addEventListener('message', (ev: MessageEvent<WorkerRequest>) => {
       }).catch((err) => post({ type: 'error', id: msg.id, message: String(err).slice(0, 300) }));
       break;
     case 'abort': {
+      // Mark it aborted (caught at the pre-generation bail points) AND interrupt
+      // it if decoding has already started — covers both windows.
+      abortedIds.add(msg.id);
       const stop = activeStops.get(msg.id);
       if (stop) stop.interrupt();
       break;

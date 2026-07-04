@@ -40,19 +40,6 @@ interface Pending {
 
 const TRANSCRIBE_SYSTEM = 'Transcribe the following speech segment in English into English text.';
 
-/**
- * Whether to pre-warm BOTH tiers at startup so setTier is an instant hot-swap.
- * navigator.deviceMemory is privacy-capped at 8, so 8 means "8 GB or more"
- * (the 32 GB demo box reports 8) — enough headroom for two ~4 GB q4f16 stacks.
- * Low-memory phones report <8 and fall back to load-on-demand.
- */
-function shouldPrewarm(): boolean {
-  const nav = navigator as Navigator & { deviceMemory?: number };
-  const mem = nav.deviceMemory ?? 8;
-  const cores = nav.hardwareConcurrency ?? 8;
-  return mem >= 8 && cores >= 8;
-}
-
 /** Lift raw RGBA pixels off any canvas/bitmap source so they can be transferred to the worker. */
 export function frameFromImage(image: ImageBitmap | HTMLCanvasElement | OffscreenCanvas): RawFrame {
   const width = image.width;
@@ -65,7 +52,11 @@ export function frameFromImage(image: ImageBitmap | HTMLCanvasElement | Offscree
   return { data: img.data.buffer, width, height };
 }
 
-export function createEngine(modelBaseUrl: string, onStatus: (s: EngineStatus) => void): Engine {
+export function createEngine(
+  modelBaseUrl: string,
+  onStatus: (s: EngineStatus) => void,
+  prewarm = false,
+): Engine {
   const worker = new Worker(new URL('../workers/llm.worker.ts', import.meta.url), { type: 'module' });
 
   let nextId = 1;
@@ -163,7 +154,10 @@ export function createEngine(modelBaseUrl: string, onStatus: (s: EngineStatus) =
     load(nextTier: ModelTier): Promise<void> {
       tier = nextTier;
       const p = loadPromise();
-      send({ type: 'load', tier: nextTier, modelBaseUrl, prewarm: shouldPrewarm() });
+      // prewarm is opt-in (default false): pre-warming BOTH q4f16 tiers risks a
+      // WebGPU OOM that can kill the tab on ordinary machines. The demo box
+      // enables it explicitly (createHelius opts) for the instant hot-swap.
+      send({ type: 'load', tier: nextTier, modelBaseUrl, prewarm });
       return p;
     },
     setTier(nextTier: ModelTier): Promise<void> {

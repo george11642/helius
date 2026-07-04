@@ -211,16 +211,38 @@ export interface ParsedTurn {
 const CALL_OPEN = '<|tool_call>';
 const CALL_CLOSE = '<tool_call|>';
 
-/** Read the balanced-brace body starting at `open` (index of the `{`). */
+/**
+ * Read the balanced-brace body starting at `open` (index of the `{`).
+ * String-aware: braces inside a template `<|"|>…<|"|>` value or a JSON `"…"`
+ * string are literal, not structural — otherwise `{message:<|"|>A } B<|"|>}`
+ * would close early and truncate.
+ */
 function balancedBrace(s: string, open: number): { body: string; end: number } | null {
   if (s[open] !== '{') return null;
   let depth = 0;
-  for (let i = open; i < s.length; i++) {
+  let i = open;
+  while (i < s.length) {
+    // Skip a whole template-quoted string (checked first — it starts with '<',
+    // and its own inner '"' must not trip the JSON-string branch below).
+    if (s.startsWith(STR_OPEN, i)) {
+      const close = s.indexOf(STR_OPEN, i + STR_OPEN.length);
+      if (close === -1) return null; // unterminated string → no balanced brace
+      i = close + STR_OPEN.length;
+      continue;
+    }
+    // Skip a JSON-quoted string, honoring backslash escapes.
+    if (s[i] === '"') {
+      i++;
+      while (i < s.length && s[i] !== '"') i += s[i] === '\\' ? 2 : 1;
+      i++; // step past the closing quote (or off the end)
+      continue;
+    }
     if (s[i] === '{') depth++;
     else if (s[i] === '}') {
       depth--;
       if (depth === 0) return { body: s.slice(open + 1, i), end: i };
     }
+    i++;
   }
   return null;
 }

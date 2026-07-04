@@ -50,9 +50,16 @@ export async function startRecording(): Promise<VoiceRecorder> {
     const blob = new Blob(chunks, { type: recorder.mimeType });
     const arrayBuffer = await blob.arrayBuffer();
     const decodeCtx = new AudioContext();
-    const decoded = await decodeCtx.decodeAudioData(arrayBuffer);
-    await decodeCtx.close();
-    return resampleTo16kMono(decoded);
+    try {
+      const decoded = await decodeCtx.decodeAudioData(arrayBuffer);
+      return await resampleTo16kMono(decoded);
+    } finally {
+      // Without this, a decodeAudioData rejection (corrupt/empty clip — e.g.
+      // a too-quick tap-and-release) leaks the AudioContext; browsers cap how
+      // many can be open at once, so repeated failures would eventually break
+      // recording entirely.
+      await decodeCtx.close();
+    }
   }
 
   function cancel(): void {

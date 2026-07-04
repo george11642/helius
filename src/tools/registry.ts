@@ -29,8 +29,10 @@ export interface ToolRegistry {
 
 /** Shared prompt for sign reading — used by both the tool and the façade's readSign(). */
 export const READ_SIGN_PROMPT =
-  'Read the text on this sign exactly as written. If it is not in English, translate it to English. ' +
-  'Then give ONE short, actionable instruction for a hiker based on it. Keep the whole reply under 40 words.';
+  'Read this trail sign. Reply in exactly three short lines, nothing else:\n' +
+  '1. Verbatim: the sign text exactly as written.\n' +
+  '2. English: a faithful, word-for-word translation. Do NOT add any warning or hazard that is not written on the sign.\n' +
+  '3. Do: one short action for the hiker, based ONLY on what the sign actually says.';
 
 const UNIT_MS = 200;
 

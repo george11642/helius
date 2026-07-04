@@ -76,6 +76,26 @@ function ok(cond: boolean, name: string): void {
   );
   eq(r.calls[0].args, { message: 'SOS', mode: 'arm' }, 'morse_beacon: two string args');
 }
+// ---- string-aware brace/quote scanning: braces/quotes INSIDE a string value
+//      must not close the call early (Codex finding) ----
+{
+  const r = parseToolCalls('<|tool_call>call:morse_beacon{message:<|"|>SOS } DONE<|"|>}<tool_call|>');
+  eq(r.calls.length, 1, 'brace-in-template-string: one call');
+  eq(r.calls[0].args, { message: 'SOS } DONE' }, 'brace-in-template-string: brace kept inside value');
+  eq(r.calls[0].argsOk, true, 'brace-in-template-string: argsOk');
+}
+{
+  const r = parseToolCalls('<|tool_call>call:note{text:<|"|>say "hi" now<|"|>}<tool_call|>');
+  eq(r.calls[0].args, { text: 'say "hi" now' }, 'quote-in-template-string: JSON quotes kept literal');
+}
+{
+  const r = parseToolCalls('<|tool_call>call:note{text:"a } b"}<tool_call|>');
+  eq(r.calls[0].args, { text: 'a } b' }, 'brace-in-JSON-string: brace kept inside value');
+}
+{
+  const r = parseToolCalls('<|tool_call>call:x{a:{b:<|"|>y } z<|"|>},c:2}<tool_call|>');
+  eq(r.calls[0].args, { a: { b: 'y } z' }, c: 2 }, 'nested object + brace-in-string');
+}
 // boolean + nested + sequence values
 {
   const { args, ok: aok } = parseArgs('flag:true,list:[1,2,3],nested:{a:<|"|>x<|"|>,b:2}');

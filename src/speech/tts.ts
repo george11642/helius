@@ -150,3 +150,20 @@ export function setMuted(next: boolean): void {
 export function isMuted(): boolean {
   return muted;
 }
+
+// For the "Download for offline" affordance (status.ts): forces kokoro's
+// weights to load and its HF-CDN response cache to populate, without
+// actually playing anything — a real offline-readiness check has to confirm
+// this happened at least once, since it otherwise only loads lazily on the
+// first 'speak' event. Returns whether it succeeded.
+export async function warmCache(): Promise<boolean> {
+  const tts = await loadTts();
+  if (!tts) return false;
+  try {
+    await tts.generate('ready', { voice: VOICE });
+    return true;
+  } catch (err) {
+    console.warn('[helius] kokoro-js cache warm-up failed', err);
+    return false;
+  }
+}

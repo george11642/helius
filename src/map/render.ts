@@ -75,7 +75,12 @@ function ensureDemFetchBridge(): void {
     try {
       const tile = await reader.getZxy(Number(z), Number(x), Number(y));
       if (!tile) return new Response(null, { status: 404, statusText: 'No DEM tile' });
-      return new Response(tile.data, {
+      // .slice(0) copies the buffer: hillshade (sharedDemProtocolUrl) and
+      // contours (contourProtocolUrl) can both request the same z/x/y DEM
+      // tile, and downstream code may transfer the bytes to a worker
+      // (detaching the buffer) — without a copy here, whichever consumer
+      // reads second would get an already-detached ArrayBuffer.
+      return new Response(tile.data.slice(0), {
         status: 200,
         headers: { 'Content-Type': 'image/webp', 'Cache-Control': tile.cacheControl ?? 'no-cache' },
       });

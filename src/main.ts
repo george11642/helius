@@ -11,12 +11,16 @@ import { speak, setMuted } from './speech/tts';
 import { HeliusMap } from './map/render';
 import type { RouteLineString } from './map/render';
 import type { AgentEvent } from './lib/contract';
-import type { HeliusHandle, CreateHeliusOptions } from './app/mock-agent';
+import type { HeliusHandle } from './app/mock-agent';
 
 // Matches the convention documented on CreateHeliusOptions.modelBaseUrl in
-// src/agent/index.ts ("Base URL of the model mirror, trailing slash").
-// The mock agent ignores it entirely.
-const MODEL_BASE_URL = 'http://localhost:8737/models/';
+// src/agent/index.ts ("Base URL of the model mirror, trailing slash"). Dev
+// talks to the local model-mirror server; production points at the live R2
+// bucket (CORS + Range support verified). VITE_MODEL_BASE_URL overrides both
+// for one-off testing. The mock agent ignores this value entirely.
+const MODEL_BASE_URL =
+  import.meta.env.VITE_MODEL_BASE_URL ??
+  (import.meta.env.DEV ? 'http://localhost:8737/models/' : 'https://pub-186c78c24ee54dda820fe564c0ac4608.r2.dev/');
 
 // Matches src/tools/location.ts's own default fix — the map's starting view
 // before any devloc preset or real GPS fix arrives.
@@ -109,7 +113,13 @@ function dispatch(e: AgentEvent): void {
       void initMapOnce();
     }
   }
-  if (e.type === 'agent-turn-start') setActivity('thinking…');
+  if (e.type === 'agent-turn-start') {
+    setActivity('thinking…');
+    // Locked for the whole turn, not just while a request is in flight — a
+    // second concurrent send would corrupt shared conversation history (the
+    // agent loop serializes on its side too; this is the UI-side half).
+    chat.setEnabled(false);
+  }
   if (e.type === 'tool-start') setActivity(`running ${e.call.name}()`);
   if (e.type === 'assistant-token') setActivity('responding…');
   if (e.type === 'speak') {
@@ -117,7 +127,10 @@ function dispatch(e: AgentEvent): void {
     speak(e.text);
   }
   if (e.type === 'assistant-done') status.setStats(e.stats);
-  if (e.type === 'agent-turn-done') setActivity('ready');
+  if (e.type === 'agent-turn-done') {
+    setActivity('ready');
+    chat.setEnabled(true);
+  }
   if (e.type === 'route' && isRouteLineString(e.geojson)) {
     // route_back may still be a stub with no/placeholder geojson until the
     // real-graph integration lands — in that case just skip drawing and keep
@@ -139,23 +152,29 @@ function dispatch(e: AgentEvent): void {
 async function startAgent(): Promise<HeliusHandle> {
   const params = new URLSearchParams(location.search);
   const forceMock = params.get('mock') === '1';
+  // deviceMemory caps out at 8 in the API even on higher-RAM machines, so
+  // this is opt-in (URL param or a sticky localStorage flag) rather than
+  // auto-detected — auto-prewarming both tiers could OOM a real 8GB judge
+  // machine. Passed through as a plain (non-literal) options object so it
+  // type-checks whether or not CreateHeliusOptions has picked up `prewarm`
+  // yet (structural assignability tolerates the extra field either way).
+  const prewarm = params.has('prewarm') || localStorage.getItem('helius-prewarm') === '1';
 
   if (!forceMock) {
     try {
-      // Soft dependency: src/agent/index.ts is owned by a parallel workstream
-      // and may not exist yet. A non-literal specifier keeps this out of
-      // TypeScript's static module resolution and Vite's build-time chunk
-      // graph, so neither typecheck nor build hard-fails while it's still
-      // landing — the try/catch below covers both "module doesn't exist" and
-      // "createHelius() itself threw/rejected" the same way.
-      const agentPath = './agent/index.ts';
-      const real = (await import(/* @vite-ignore */ agentPath)) as {
-        createHelius?: (opts: CreateHeliusOptions) => Promise<HeliusHandle>;
-      };
-      if (typeof real.createHelius === 'function') {
-        return await real.createHelius({ modelBaseUrl: MODEL_BASE_URL, onEvent: dispatch });
-      }
-      console.warn('[helius] ./agent/index.ts has no createHelius export; using mock agent');
+      // src/agent/index.ts now definitively exists — a STATIC, literal-specifier
+      // import so Rollup's dependency graph actually discovers and bundles it
+      // into the production build. (Previously used a non-literal specifier +
+      // @vite-ignore as a soft dependency while this module was still landing;
+      // that only ever worked in dev, where Vite serves any source file
+      // on-the-fly — in a production build the file is invisible to the
+      // bundler and never gets emitted, so the import 404s and silently falls
+      // back to the mock agent. Verified this was actually happening before
+      // fixing it.) The try/catch below still covers genuine runtime failures
+      // (createHelius() throwing — e.g. WebGPU unsupported).
+      const real = await import('./agent/index');
+      const opts = { modelBaseUrl: MODEL_BASE_URL, onEvent: dispatch, prewarm };
+      return await real.createHelius(opts);
     } catch (err) {
       console.warn('[helius] real agent unavailable, falling back to mock agent', err);
     }

@@ -66,14 +66,18 @@ and works identically for the dev mirror (`localhost:8737`) and prod R2.
 
 E2B and E4B are **both full multimodal q4f16** checkpoints (embed, decoder,
 vision encoder, audio encoder) loaded the same way. The worker keeps a
-per-tier instance cache. On startup it loads the primary tier, reports `ready`,
-then — if `navigator.deviceMemory ≥ 8` and `hardwareConcurrency ≥ 8` — **silently
+per-tier instance cache. On startup it loads the primary tier and reports
+`ready`; then, **only if pre-warm is explicitly enabled** (`createHelius({ prewarm })`,
+wired to a `?prewarm=1` / localStorage flag the shell sets), it **silently
 pre-warms the other tier** into the cache. `setTier` is then an instant ref
-swap (`ready { loadMs: 0 }`); if the target isn't warm (low-memory device, or
-pre-warm still in flight), it falls back to an on-demand load with a `compiling`
-status. A pre-warm failure (e.g. GPU OOM) is swallowed and the tier simply
-loads on demand later. E4B decodes ~2× slower than E2B — that contrast is the
-MatFormer "elasticity" beat.
+swap (`ready { loadMs: 0 }`); otherwise — pre-warm off, or still in flight — it
+falls back to an on-demand load with a `compiling` status (~19 s). Pre-warm is
+**opt-in and off by default on purpose**: holding two q4f16 stacks resident
+risks a WebGPU OOM, which can kill the tab rather than throw, so ordinary
+machines shouldn't do it automatically (`navigator.deviceMemory` is privacy-
+capped at 8, so a memory heuristic can't tell an 8 GB laptop from a 32 GB one).
+A pre-warm failure is swallowed; the tier just loads on demand later. E4B
+decodes ~2× slower than E2B — that contrast is the MatFormer "elasticity" beat.
 
 ### Cache resilience
 
@@ -164,7 +168,7 @@ Two cooperating layers persist everything after the first load:
 | Model config + weights (`.onnx` / `.onnx_data` / …) | transformers.js **Cache Storage** (`transformers-cache`), from `remoteHost`; Workbox `ml-models` CacheFirst as a backstop | Streamed once from R2/mirror, then served from cache — offline forever after. |
 | Map packs (`*.pmtiles`) | Workbox `map-data` CacheFirst, `rangeRequests: true` | pmtiles are read via Range; the app "pack warm-up" does one full `GET` (a cacheable `200`), and `rangeRequests` then slices that cached full body to answer offline Range reads. |
 | Map glyphs + sprites (`/vendor/…`) | Workbox `map-assets` CacheFirst | Too many fontstacks to precache; cached on demand. |
-| Pack metadata (`pois.json` / manifests) | Workbox `pack-data` CacheFirst | Small, static per region. |
+| Pack data (`pois.json` / manifests / `graph.bin`) | Workbox `pack-data` CacheFirst — registered **before** the model-weights rule | Per-region routing + POI data; ordering keeps `graph.bin` out of the LLM shards' eviction budget. |
 
 **Cross-origin isolation.** WebGPU + transformers.js need a `crossOriginIsolated`
 context (SharedArrayBuffer / WASM threads). Dev (`vite.config.ts`) and prod

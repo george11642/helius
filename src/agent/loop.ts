@@ -101,6 +101,18 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
           continue;
         }
 
+        // Never run a tool on arguments we couldn't parse — feed the error back
+        // so the model re-emits a well-formed call instead of acting on garbage.
+        if (!call.argsOk) {
+          emit({ type: 'tool-error', name: call.name, message: 'malformed arguments', step });
+          history.push({
+            role: 'tool',
+            name: call.name,
+            content: JSON.stringify({ error: 'malformed_arguments', hint: 're-emit the tool call with valid arguments' }),
+          });
+          continue;
+        }
+
         const res = await tool.run(call.args);
         const ms = round(performance.now() - t0);
         if (res.data && typeof res.data.error === 'string') {
