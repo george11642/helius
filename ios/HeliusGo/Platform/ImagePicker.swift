@@ -9,7 +9,14 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
+        // On the simulator the "camera" is a synthetic scene (useless for reading a
+        // real sign), yet isSourceTypeAvailable(.camera) reports true on modern
+        // simulators — so force the photo library there; use the real camera on device.
+        #if targetEnvironment(simulator)
+        picker.sourceType = .photoLibrary
+        #else
         picker.sourceType = UIImagePickerController.isSourceTypeAvailable(.camera) ? .camera : .photoLibrary
+        #endif
         picker.delegate = context.coordinator
         return picker
     }

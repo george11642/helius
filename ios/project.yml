@@ -47,10 +47,12 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIStatusBarStyle: UIStatusBarStyleLightContent
+        UIRequiresFullScreen: true
         NSLocationWhenInUseUsageDescription: Helius uses your location to place you on the trail and route you back before dark.
         NSMicrophoneUsageDescription: Helius listens so you can talk to it hands-free while hiking.
         NSSpeechRecognitionUsageDescription: Helius turns your speech into text entirely on-device.
         NSCameraUsageDescription: Helius reads trail signs through your camera, on-device.
+        NSPhotoLibraryUsageDescription: Helius reads a trail-sign photo you choose, entirely on-device.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.helius.go

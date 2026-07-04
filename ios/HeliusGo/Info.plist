@@ -26,10 +26,14 @@
 	<string>Helius uses your location to place you on the trail and route you back before dark.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Helius listens so you can talk to it hands-free while hiking.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Helius reads a trail-sign photo you choose, entirely on-device.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Helius turns your speech into text entirely on-device.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
 	<key>UISupportedInterfaceOrientations</key>
