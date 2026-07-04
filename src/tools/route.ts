@@ -11,11 +11,17 @@ import { route } from '../map/route';
 import type { GeoJSONLineString, RoutingGraph } from '../map/graph';
 import { getFix } from './location';
 import { getPack } from './pack';
+import { PACK_COVERAGE, coverageForBbox, distanceToNearestM } from './coverage';
+import { fmtDistance, fmtDurationMin } from './format';
 
 export interface PendingRoute {
   geojson: GeoJSONLineString;
   distanceM: number;
   etaMin: number;
+  /** Resolved destination name, e.g. "La Luz Trailhead" — authoritative for the UI. */
+  dest: string;
+  /** Pre-formatted human line the UI can show verbatim (deterministic numbers). */
+  display: string;
 }
 
 interface Poi {
@@ -77,7 +83,7 @@ export function takePendingRoute(): PendingRoute | null {
   const r = pendingRoute;
   pendingRoute = null;
   if (!r || r.pack !== getPack()) return null; // stale: computed for a pack we've since left
-  return { geojson: r.geojson, distanceM: r.distanceM, etaMin: r.etaMin };
+  return { geojson: r.geojson, distanceM: r.distanceM, etaMin: r.etaMin, dest: r.dest, display: r.display };
 }
 
 /** Drop cached graph + POIs (and any pending route) so the next route_back
@@ -90,9 +96,30 @@ export function clearPackCache(): void {
 
 const asString = (v: unknown, fb: string): string => (typeof v === 'string' && v.trim() ? v : fb);
 
+/** Honest structured failure for a fix with no usable trail data around it. */
+function offCoverageResult(pack: string, distanceM: number): ToolResult {
+  const packName = PACK_COVERAGE[pack]?.name ?? pack;
+  const km = +(distanceM / 1000).toFixed(1);
+  const display = `You are ~${km} km outside the ${packName} coverage area — I have no trail data at your position. Switch region packs, or use demo GPS to explore this pack.`;
+  return {
+    data: { error: 'out_of_coverage', pack, coverage_km_away: km, display },
+    summary: `route_back: ~${km} km outside "${pack}" coverage — no trail data here`,
+  };
+}
+
 export async function runRouteBack(args: Record<string, unknown>): Promise<ToolResult> {
   const pack = getPack();
   const destKey = asString(args.destination, 'trailhead');
+
+  const from = getFix();
+  if (!from) {
+    const display =
+      'I have no position fix — GPS is unavailable or permission was denied, and demo GPS is off. Enable location access or turn on demo GPS, then ask again.';
+    return {
+      data: { error: 'no_fix', display },
+      summary: 'route_back: no position fix — cannot route',
+    };
+  }
 
   let graph: RoutingGraph;
   let pois: PoisFile;
@@ -105,6 +132,12 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
     };
   }
 
+  // Coverage truth, layer 1: outside the routing graph's own bounding box means
+  // the position is flatly outside the mapped region — say so, never fabricate.
+  const b = graph.raw.bbox;
+  const graphCov = coverageForBbox(from.lat, from.lon, [b.minLon, b.minLat, b.maxLon, b.maxLat]);
+  if (!graphCov.inBbox) return offCoverageResult(pack, graphCov.distanceToBboxM);
+
   const trailheads = pois.trailheads ?? [];
   const slot = DEST_SLOT[destKey] ?? 0;
   const dest = trailheads.find((t) => t.role === destKey) ?? trailheads[slot] ?? trailheads[0];
@@ -115,26 +148,36 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
     };
   }
 
-  const from = getFix();
   const result = route(graph, { lat: from.lat, lon: from.lon }, { lat: dest.lat, lon: dest.lon });
 
   if ('error' in result) {
     if (result.error === 'off_network') {
+      // Coverage truth, layer 2: inside the bbox but off the trail network.
+      // nearest_m is Infinity when the spatial index found nothing within
+      // ~3 km — fall back to the distance to the nearest known trailhead so
+      // the honest message still carries a real number.
+      if (!Number.isFinite(result.nearest_m)) {
+        const d = distanceToNearestM(from.lat, from.lon, trailheads);
+        return offCoverageResult(pack, d ?? graphCov.distanceToBboxM);
+      }
       const m = Math.round(result.nearest_m);
+      const display = `You are ${fmtDistance(m)} from the nearest mapped trail in the ${PACK_COVERAGE[pack]?.name ?? pack} pack — too far off-network to route to ${dest.name}. Head toward the trail network, or use demo GPS.`;
       return {
-        data: { error: 'off_network', nearest_m: m, dest: dest.name },
+        data: { error: 'off_network', nearest_m: m, dest: dest.name, display },
         summary: `route_back: off-network (~${m} m from nearest trail) — can't route to ${dest.name}`,
       };
     }
     return {
-      data: { error: 'no_path', dest: dest.name },
+      data: { error: 'no_path', dest: dest.name, display: `The trail network here doesn't connect your position to ${dest.name} — no honest route exists in this pack's data.` },
       summary: `route_back: no trail path to ${dest.name}`,
     };
   }
 
   // Success: stash geometry (stamped with the pack it's for) for the loop to
-  // emit; return compact numbers only.
-  pendingRoute = { geojson: result.geojson, distanceM: result.distanceM, etaMin: result.etaMin, pack };
+  // emit; return compact numbers plus the pre-formatted display line — the
+  // model quotes `display` verbatim instead of converting units itself.
+  const display = `Route to ${dest.name}: ${fmtDistance(result.distanceM)}, about ${fmtDurationMin(result.etaMin)}.`;
+  pendingRoute = { geojson: result.geojson, distanceM: result.distanceM, etaMin: result.etaMin, dest: dest.name, display, pack };
   const km = result.distanceM / 1000;
   const mi = km * 0.621371;
   return {
@@ -146,6 +189,7 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
       eta_min: Math.round(result.etaMin),
       ascent_m: result.ascentM, // null in graph v1 (no elevation); pace_eta can still reason on distance
       waypoints: result.geojson.coordinates.length,
+      display,
     },
     summary: `route to ${dest.name}: ${km.toFixed(2)} km / ${mi.toFixed(2)} mi, ~${Math.round(result.etaMin)} min, ${result.geojson.coordinates.length} pts`,
   };

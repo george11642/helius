@@ -161,6 +161,10 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
               geojson: pendingRoute.geojson,
               distanceM: pendingRoute.distanceM,
               etaMin: pendingRoute.etaMin,
+              // Authoritative pre-formatted values — the UI renders these, so
+              // the numbers on screen never depend on model prose.
+              dest: pendingRoute.dest,
+              display: pendingRoute.display,
             });
           }
         }

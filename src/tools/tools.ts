@@ -3,8 +3,18 @@
 // tool specs and a name -> Tool lookup.
 export { createTools, READ_SIGN_PROMPT } from './registry';
 export type { ToolRegistry, ToolContext, EngineForTools } from './registry';
-export { setSimulatedFix, getFix } from './location';
-export type { GpsFix } from './location';
+export {
+  setSimulatedFix,
+  getFix,
+  getFixState,
+  setDemoMode,
+  isDemoMode,
+  startRealGeolocation,
+  stopRealGeolocation,
+} from './location';
+export type { GpsFix, FixState, FixSource, GeoStatus } from './location';
+export { PACK_COVERAGE, coverageForBbox, coverageForPack, distanceToNearestM } from './coverage';
+export { fmtDistance, fmtDurationMin, fmtClock, fmtLatLon } from './format';
 export { setPendingFrame, takePendingFrame, hasPendingFrame } from './camera';
 export { toMorse, morseTiming, morseDurationMs } from './morse';
 export type { MorseStep } from './morse';

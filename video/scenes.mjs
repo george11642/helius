@@ -16,7 +16,9 @@ import { dirname, join } from 'node:path';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DEMO_URL = process.env.DEMO_URL || 'http://localhost:4174/?prewarm=1';
+// ?demo=1 is REQUIRED for determinism: it auto-applies devloc preset 0 (La Luz)
+// at mount. Without it the app uses real geolocation and starts with no fix.
+const DEMO_URL = process.env.DEMO_URL || 'http://localhost:4174/?prewarm=1&demo=1';
 const LABEL = process.env.TAKE_LABEL || 'dry';
 const OUTDIR = join(HERE, 'takes', LABEL);
 const SIGN = join(HERE, 'sign.y4m');

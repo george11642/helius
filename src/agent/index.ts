@@ -7,7 +7,7 @@ import { createEngine, frameFromImage } from '../llm/engine';
 import { createTools } from '../tools/registry';
 import { setPack, listPacks, defaultFixFor } from '../tools/pack';
 import { clearPackCache } from '../tools/route';
-import { setSimulatedFix } from '../tools/location';
+import { getFix, isDemoMode, setSimulatedFix } from '../tools/location';
 import { createAgentLoop } from './loop';
 import { SYSTEM_PROMPT } from './prompt';
 
@@ -92,8 +92,12 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
     switchPack: async (packId: string): Promise<void> => {
       setPack(packId);
       clearPackCache(); // next route_back lazy-loads the new pack's graph + POIs
-      const fix = defaultFixFor(packId);
-      if (fix) setSimulatedFix(fix);
+      // Only DEMO GPS follows the pack around: hopping the simulated fix to the
+      // new region is the demo affordance. A real GPS fix is the truth — it
+      // stays put, and locate/route_back report coverage against the new pack
+      // honestly instead of teleporting the user.
+      const fix = isDemoMode() ? defaultFixFor(packId) : getFix();
+      if (isDemoMode() && fix) setSimulatedFix(fix);
       const info = (await listPacks()).find((p) => p.id === packId);
       if (!info) throw new Error(`unknown pack: ${packId}`);
       opts.onEvent({

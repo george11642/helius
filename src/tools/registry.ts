@@ -6,7 +6,10 @@
 import type { AgentEventHandler, Tool, ToolResult, ToolSpec } from '../lib/contract';
 import type { RawFrame } from '../llm/protocol';
 import { daylightLeft } from '../lib/sun';
-import { getFix } from './location';
+import { getFix, getFixState, type GpsFix } from './location';
+import { getPack } from './pack';
+import { coverageForPack } from './coverage';
+import { fmtClock, fmtDistance, fmtDurationMin, fmtLatLon } from './format';
 import { morseTiming, morseDurationMs, toMorse } from './morse';
 import { takePendingFrame } from './camera';
 import { runRouteBack } from './route';
@@ -37,7 +40,6 @@ export const READ_SIGN_PROMPT =
 
 const UNIT_MS = 200;
 
-const hhmm = (d: Date): string => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const round = (n: number): number => Math.round(n);
 const asString = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
 const asNumber = (v: unknown): number | null =>
@@ -50,7 +52,12 @@ function spec(name: string, description: string, properties: Record<string, unkn
 }
 
 const SPECS: Record<string, ToolSpec> = {
-  locate: spec('locate', "Get the user's current position (lat, lon, accuracy, elevation) from GPS or the simulated fix.", {}, []),
+  locate: spec(
+    'locate',
+    "Get the user's current position (lat, lon, accuracy, elevation) from real GPS or demo GPS, plus whether it falls inside the active map pack's coverage area.",
+    {},
+    [],
+  ),
   sun_clock: spec(
     'sun_clock',
     'Get sunset time and remaining minutes of daylight and usable light at the current position and date.',
@@ -104,18 +111,65 @@ const SPECS: Record<string, ToolSpec> = {
 
 // -------------------------------------------------------------- tool impls ----
 
+// Shared honest failure for every position-dependent tool: there is NO fix.
+// Structured so the model relays the real situation instead of inventing one.
+function noFixResult(toolName: string): ToolResult {
+  const { geoStatus } = getFixState();
+  const why =
+    geoStatus === 'denied'
+      ? 'location permission was denied'
+      : geoStatus === 'requesting'
+        ? 'still waiting for the first GPS fix'
+        : 'GPS is unavailable on this device';
+  const display = `No position fix — ${why}. Enable location access, or turn on demo GPS from the gear panel.`;
+  return {
+    data: { error: 'no_fix', geo_status: geoStatus, display },
+    summary: `${toolName}: no position fix (${geoStatus})`,
+  };
+}
+
+/** Coverage of a fix vs the ACTIVE pack's region bbox — shared by locate + route. */
+function packCoverage(f: GpsFix): { in_coverage: boolean; coverage_km_away: number | null; packName: string } {
+  const cov = coverageForPack(f.lat, f.lon, getPack());
+  if (!cov) return { in_coverage: false, coverage_km_away: null, packName: getPack() };
+  return {
+    in_coverage: cov.inBbox,
+    coverage_km_away: cov.inBbox ? 0 : +(cov.distanceToBboxM / 1000).toFixed(1),
+    packName: cov.pack.name,
+  };
+}
+
 function locate(): ToolResult {
   const f = getFix();
+  if (!f) return noFixResult('locate');
+  const { demoMode } = getFixState();
+  const cov = packCoverage(f);
+  const covText = cov.in_coverage
+    ? `inside the ${cov.packName} map area`
+    : `~${cov.coverage_km_away} km OUTSIDE the ${cov.packName} map area — no trail data at this position`;
+  const display = `${fmtLatLon(f.lat, f.lon, f.accuracyM)}${f.elevationM !== null ? `, ${f.elevationM} m elevation` : ''} — ${covText}${demoMode ? ' [demo GPS]' : ''}`;
   return {
-    data: { lat: f.lat, lon: f.lon, accuracy_m: f.accuracyM, elevation_m: f.elevationM },
-    summary: `fix ${f.lat.toFixed(4)},${f.lon.toFixed(4)} ±${f.accuracyM}m @${f.elevationM}m`,
+    data: {
+      lat: f.lat,
+      lon: f.lon,
+      accuracy_m: f.accuracyM,
+      elevation_m: f.elevationM,
+      source: demoMode ? 'demo' : 'gps',
+      pack: getPack(),
+      in_coverage: cov.in_coverage,
+      coverage_km_away: cov.coverage_km_away,
+      display,
+    },
+    summary: `fix ${f.lat.toFixed(4)},${f.lon.toFixed(4)} ±${f.accuracyM}m${f.elevationM !== null ? ` @${f.elevationM}m` : ''} · ${cov.in_coverage ? 'in coverage' : `${cov.coverage_km_away} km off coverage`}${demoMode ? ' · demo' : ''}`,
   };
 }
 
 function sunClock(): ToolResult {
   const f = getFix();
+  if (!f) return noFixResult('sun_clock');
   const now = new Date();
   const s = daylightLeft(now, f.lat, f.lon);
+  const display = `Sunset ${fmtClock(s.sunset)} — ${fmtDurationMin(s.minutesToSunset)} of daylight left, fully dark by ${fmtClock(s.civilDuskEnd)} (${fmtDurationMin(s.minutesToDark)} of usable light).`;
   return {
     data: {
       now: now.toISOString(),
@@ -123,8 +177,9 @@ function sunClock(): ToolResult {
       civil_dusk: s.civilDuskEnd.toISOString(),
       minutes_to_sunset: s.minutesToSunset,
       minutes_to_dark: s.minutesToDark,
+      display,
     },
-    summary: `sunset ${hhmm(s.sunset)}, ${s.minutesToSunset} min light, dark in ${s.minutesToDark} min`,
+    summary: `sunset ${fmtClock(s.sunset)}, ${s.minutesToSunset} min light, dark in ${s.minutesToDark} min`,
   };
 }
 
@@ -139,9 +194,30 @@ function paceEta(args: Record<string, unknown>): ToolResult {
   const now = new Date();
   const arrival = new Date(now.getTime() + etaMin * 60000);
   const f = getFix();
+  if (!f) {
+    // Naismith needs no position — but the sunset comparison does. Give the
+    // honest partial answer instead of guessing a sunset for nowhere.
+    const display = `Walking ${fmtDistance(distance)} takes about ${fmtDurationMin(etaMin)} (arrive ${fmtClock(arrival)}). No position fix, so I can't compare that against sunset.`;
+    return {
+      data: {
+        eta_min: etaMin,
+        arrival: arrival.toISOString(),
+        distance_m: round(distance),
+        ascent_m: round(ascent),
+        margin_min: null,
+        beats_sunset: null,
+        note: 'no position fix — sunset comparison unavailable',
+        display,
+      },
+      summary: `ETA ${etaMin} min, arrive ${fmtClock(arrival)} — no fix, sunset unknown`,
+    };
+  }
   const sun = daylightLeft(now, f.lat, f.lon);
   const marginMin = sun.minutesToSunset - etaMin;
   const verdict = marginMin >= 0 ? `${marginMin} min before sunset` : `${-marginMin} min AFTER sunset`;
+  const display = `Walking ${fmtDistance(distance)}${ascent > 0 ? ` with ${round(ascent)} m of climb` : ''} takes about ${fmtDurationMin(etaMin)} — arrive ${fmtClock(arrival)}, ${
+    marginMin >= 0 ? `${fmtDurationMin(marginMin)} before sunset (${fmtClock(sun.sunset)})` : `${fmtDurationMin(-marginMin)} AFTER sunset (${fmtClock(sun.sunset)})`
+  }.`;
   return {
     data: {
       eta_min: etaMin,
@@ -150,8 +226,9 @@ function paceEta(args: Record<string, unknown>): ToolResult {
       ascent_m: round(ascent),
       margin_min: marginMin,
       beats_sunset: marginMin >= 0,
+      display,
     },
-    summary: `ETA ${etaMin} min, arrive ${hhmm(arrival)} — ${verdict}`,
+    summary: `ETA ${etaMin} min, arrive ${fmtClock(arrival)} — ${verdict}`,
   };
 }
 
@@ -181,6 +258,7 @@ function morseBeacon(args: Record<string, unknown>, ctx: ToolContext): ToolResul
 
 function safetyPlan(args: Record<string, unknown>, _ctx: ToolContext): ToolResult {
   const f = getFix();
+  if (!f) return noFixResult('safety_plan');
   const now = new Date();
   const sun = daylightLeft(now, f.lat, f.lon);
   const situation = asString(args.situation);

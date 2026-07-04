@@ -91,7 +91,10 @@ export type AgentEvent =
   | { type: 'agent-turn-start' }
   | { type: 'agent-turn-done' }
   | { type: 'speak'; text: string }                              // TTS layer picks this up
-  | { type: 'route'; geojson: unknown; distanceM: number; etaMin: number } // map layer draws
+  // dest/display are authoritative pre-formatted values from the route tool so
+  // the UI can render real numbers without trusting model prose. Optional =
+  // additive: existing consumers of the original shape are unaffected.
+  | { type: 'route'; geojson: unknown; distanceM: number; etaMin: number; dest?: string; display?: string } // map layer draws
   | { type: 'beacon'; action: 'arm' | 'start' | 'stop'; pattern?: string }
   | { type: 'pack-changed'; pack: PackInfo; fix: { lat: number; lon: number } }; // region switch
 

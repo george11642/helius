@@ -26,13 +26,13 @@ Numbers you can quote (all measured, MacBook Air M5 / Chrome / WebGPU — see `s
 
 Tick every box. This is the difference between a flawless run and a cold-load stall.
 
-- [ ] Open the **judge URL with `?prewarm=1`** appended (e.g. `https://<your-pages-url>/?prewarm=1`). `?prewarm=1` pre-loads both model sizes so the tier swap later is instant. **Only ever use it on this rehearsed machine** — it holds two models in GPU memory, which is safe here but not on an unknown laptop.
+- [ ] Open the **judge URL with `?prewarm=1&demo=1`** appended (e.g. `https://<your-pages-url>/?prewarm=1&demo=1`). `?prewarm=1` pre-loads both model sizes so the tier swap later is instant — **only ever use it on this rehearsed machine** (it holds two models in GPU memory, safe here but not on an unknown laptop). `?demo=1` turns on **DEMO GPS** with the La Luz preset — without it the app uses *real* geolocation, and a desk-bound Mac would honestly report "no fix" instead of the rehearsed demo scene.
 - [ ] Watch the boot overlay run: **downloading model… → compiling WebGPU shaders… → "ready — E2B in X.Xs"**, then it fades. (Cold first load streams ~3.4 GB; once cached it's seconds.)
 - [ ] **Wait ~30 s after "ready"** so E4B finishes pre-warming silently in the background (there's no bar for it — just give it time).
 - [ ] Click the **"Download for offline"** chip in the header. Wait until the offline badge turns green: **⬢ OFFLINE-READY**. (This warms the map pack + the voice model — the model download alone doesn't make you truly offline-ready.)
 - [ ] Confirm the badge reads **⬢ OFFLINE-READY** (green), not "◇ online".
 - [ ] **Grant mic + camera now:** tap the mic 🎙 once and Allow; tap the camera 📷 once, Allow, then close it (×). Getting the permission prompts out of the way now means no fumbling live.
-- [ ] Bottom-left **gear ⚙ → "SIMULATE GPS (demo mode)"** → confirm **"La Luz upper switchbacks (default)"** is selected. (Macs have no GPS; this is intentional demo mode.)
+- [ ] Bottom-left **gear ⚙ → "SIMULATE GPS (demo mode)"** → confirm **"La Luz upper switchbacks (default)"** is selected and the coords line shows **DEMO GPS**. (`?demo=1` applies it automatically; picking any preset also switches to demo GPS. In the field, real phone GPS is the primary source — demo mode is an explicit overlay.)
 - [ ] **Fire one throwaway warm-up turn:** type `how much daylight do I have?` and send. This JIT-compiles the tool path and primes the tok/s meter so the real run is silky. (Then it's fine to leave it in the transcript, or reload and re-warm if you want a clean slate — if you reload, redo this checklist.)
 - [ ] Decide on audio: leave TTS **unmuted (🔊)** if you want judges to hear the voice, or **mute (🔇)** if you'll talk over it. The mute chip is in the header.
 
@@ -113,7 +113,7 @@ Stay calm and narrate every recovery as robustness. Most of these you'll never h
 
 ## 4. The 10-minute rehearsal drill — run this end-to-end TWICE before the call
 
-1. Fresh Chrome window → open **`…?prewarm=1`**. Time the boot once so you know your number.
+1. Fresh Chrome window → open **`…?prewarm=1&demo=1`**. Time the boot once so you know your number.
 2. Click **"Download for offline"** → confirm **⬢ OFFLINE-READY**.
 3. Grant **mic + camera** (tap each once).
 4. **Wi-Fi OFF** → confirm the badge stays green.
