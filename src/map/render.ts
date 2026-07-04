@@ -213,6 +213,48 @@ interface PoiRecord {
   ele?: number;
 }
 
+/**
+ * pois.json's actual shape (verified against the generated file) is
+ * `{trailheads: [{name,lat,lon}], peaks: [{name,lat,lon,ele}]}` — no
+ * `kind` field — not the flat `[{kind,name,lat,lon,ele?}]` array
+ * originally specced. This accepts either: the grouped shape (real data),
+ * or a flat array (in case the generator changes to match the original
+ * contract later). Anything else is treated as unparseable.
+ */
+interface RawNamedPoint {
+  name: string;
+  lat: number;
+  lon: number;
+  ele?: number | null;
+}
+
+function normalizePois(raw: unknown): PoiRecord[] | null {
+  if (Array.isArray(raw)) {
+    const arr = raw as Array<Partial<PoiRecord>>;
+    return arr.every((r) => r.kind === 'trailhead' || r.kind === 'peak') ? (arr as PoiRecord[]) : null;
+  }
+  if (raw && typeof raw === 'object') {
+    const grouped = raw as { trailheads?: RawNamedPoint[]; peaks?: RawNamedPoint[] };
+    if (Array.isArray(grouped.trailheads) || Array.isArray(grouped.peaks)) {
+      const trailheads: PoiRecord[] = (grouped.trailheads ?? []).map((r) => ({
+        kind: 'trailhead',
+        name: r.name,
+        lat: r.lat,
+        lon: r.lon,
+      }));
+      const peaks: PoiRecord[] = (grouped.peaks ?? []).map((r) => ({
+        kind: 'peak',
+        name: r.name,
+        lat: r.lat,
+        lon: r.lon,
+        ele: r.ele ?? undefined,
+      }));
+      return [...trailheads, ...peaks];
+    }
+  }
+  return null;
+}
+
 // ---------- one-time injected CSS for the HTML markers below ----------
 
 const MARKER_STYLE_ID = 'helius-map-marker-styles';
@@ -399,8 +441,7 @@ export class HeliusMap {
       try {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as PoiRecord[];
-        return Array.isArray(data) ? data : null;
+        return normalizePois(await res.json());
       } catch {
         return null;
       }

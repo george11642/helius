@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Helius map probe</title>
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; background: #0a0e14; }
+      #map { position: absolute; inset: 0; }
+      #hud {
+        position: absolute; z-index: 10; top: 8px; left: 8px;
+        display: flex; gap: 6px; flex-wrap: wrap;
+        font: 12px system-ui, sans-serif;
+      }
+      #hud button {
+        background: #12151d; color: #8a919e; border: 1px solid #2a3648;
+        border-radius: 4px; padding: 6px 10px; cursor: pointer;
+      }
+      #hud button:hover { border-color: #ffb454; color: #ffb454; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="hud">
+      <button id="btn-terrain">Toggle terrain</button>
+      <button id="btn-beacon">Toggle beacon</button>
+      <button id="btn-replay">Replay route</button>
+    </div>
+
+    <script type="module">
+      import { HeliusMap } from '/src/map/render.ts';
+
+      // MAPPROBE:{...} lines are the diagnostic contract this page promises —
+      // see src/map/README.md for the exact shapes an orchestrator should
+      // grep the devtools console for.
+      function mlog(obj) {
+        console.log('MAPPROBE:' + JSON.stringify(obj));
+      }
+
+      // Fixed test polyline standing in for a real routed path: a gentle
+      // interpolation from the La Luz switchbacks down toward the trailhead,
+      // with a bit of perpendicular wiggle so it reads as a trail and not a
+      // ruler line. Deterministic and embedded here — no fetch involved, so
+      // this page can probe drawRoute()'s animation/marker logic in
+      // isolation from the routing/graph module.
+      function buildFixtureRoute() {
+        const start = [-106.4439, 35.1983];
+        const end = [-106.4818, 35.2286];
+        const n = 12;
+        const dLon = end[0] - start[0];
+        const dLat = end[1] - start[1];
+        const len = Math.hypot(dLon, dLat);
+        const perp = [-dLat / len, dLon / len]; // unit vector perpendicular to the start->end direction
+        const wiggleAmplitude = 0.0035;
+        const coordinates = [];
+        for (let i = 0; i < n; i++) {
+          const t = i / (n - 1);
+          const wiggle = Math.sin(t * Math.PI * 2.5) * wiggleAmplitude * Math.sin(t * Math.PI); // tapers to 0 at both ends
+          coordinates.push([
+            start[0] + dLon * t + perp[0] * wiggle,
+            start[1] + dLat * t + perp[1] * wiggle,
+          ]);
+        }
+        return { type: 'LineString', coordinates };
+      }
+
+      function measureFps(map, durationMs) {
+        return new Promise((resolve) => {
+          let frames = 0;
+          const startTime = performance.now();
+          const onRender = () => frames++;
+          map.on('render', onRender);
+          setTimeout(() => {
+            map.off('render', onRender);
+            const elapsedSec = (performance.now() - startTime) / 1000;
+            resolve(frames / elapsedSec);
+          }, durationMs);
+        });
+      }
+
+      const heliusMap = new HeliusMap();
+      const fixtureRoute = buildFixtureRoute();
+      let idleCount = 0;
+
+      heliusMap
+        .init(document.getElementById('map'), 'sandia')
+        .then(async () => {
+          const map = heliusMap.instance;
+          if (!map) {
+            mlog({ event: 'init-skipped', reason: 'webgl-unsupported' });
+            return;
+          }
+
+          mlog({ event: 'style-loaded' });
+
+          map.on('idle', () => {
+            idleCount += 1;
+            mlog({ event: 'idle', count: idleCount });
+          });
+
+          map.on('error', (e) => {
+            mlog({
+              event: 'error',
+              sourceId: e && e.sourceId,
+              message: (e && e.error && e.error.message) || String(e),
+            });
+          });
+
+          heliusMap.setFix(35.1983, -106.4439, 15);
+          mlog({ event: 'fix-set', lat: 35.1983, lon: -106.4439, accuracyM: 15 });
+
+          const fpsPromise = measureFps(map, 3000);
+          map.easeTo({ center: [-106.45, 35.2], zoom: 13.4, duration: 3000 });
+          const fps = await fpsPromise;
+          mlog({ event: 'fps-estimate', fps: Math.round(fps * 10) / 10, windowMs: 3000 });
+
+          setTimeout(() => {
+            heliusMap.drawRoute(fixtureRoute, { animateMs: 1500 });
+            mlog({ event: 'route-drawn', points: fixtureRoute.coordinates.length });
+          }, 2000);
+        })
+        .catch((err) => {
+          mlog({ event: 'init-error', message: String(err) });
+        });
+
+      let terrainOn = true;
+      document.getElementById('btn-terrain').addEventListener('click', () => {
+        const map = heliusMap.instance;
+        if (!map) return;
+        terrainOn = !terrainOn;
+        for (const id of ['hillshade', 'contours-minor', 'contours-major', 'contours-label']) {
+          if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', terrainOn ? 'visible' : 'none');
+        }
+        mlog({ event: 'terrain-toggled', on: terrainOn });
+      });
+
+      document.getElementById('btn-beacon').addEventListener('click', () => {
+        heliusMap.setBeaconMode(!heliusMap.isBeaconOn);
+        mlog({ event: 'beacon-toggled', on: heliusMap.isBeaconOn });
+      });
+
+      document.getElementById('btn-replay').addEventListener('click', () => {
+        heliusMap.clearRoute();
+        heliusMap.drawRoute(fixtureRoute, { animateMs: 1500 });
+        mlog({ event: 'route-replayed' });
+        heliusMap.flyToRoute();
+      });
+    </script>
+  </body>
+</html>

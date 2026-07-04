@@ -329,7 +329,11 @@ export function buildStyle(pack = 'sandia', opts: BuildStyleOptions = {}): Style
   return {
     version: 8,
     glyphs: `${vendorBase}/fonts/{fontstack}/{range}.pbf`,
-    sprite: `${vendorBase}/sprites/v4/dark`,
+    // Unlike glyphs, MapLibre rejects a root-relative sprite URL outright
+    // ("must be absolute" — verified live: it threw and silently aborted
+    // style load, leaving a blank map with no other symptom). Resolve
+    // against the current origin so dev and prod both work unmodified.
+    sprite: new URL(`${vendorBase}/sprites/v4/dark`, window.location.href).toString(),
     sources,
     layers,
   };

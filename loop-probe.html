@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Helius agent-loop probe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { background:#0a0e14; color:#e6edf3; font:13px/1.5 ui-monospace,Menlo,monospace; margin:1.5rem; }
+  h1 { color:#ffb454; font-size:1rem; }
+  #bar { margin:.5rem 0; }
+  button { background:#ffb454; color:#0a0e14; border:0; padding:.4rem .8rem; border-radius:6px; font-weight:700; cursor:pointer; margin-right:.4rem; }
+  input { background:#0d1420; color:#e6edf3; border:1px solid #263041; border-radius:6px; padding:.4rem; width:28rem; }
+  #status { color:#8a919e; }
+  #log { white-space:pre-wrap; border:1px solid #263041; padding:.75rem; border-radius:8px; margin-top:.75rem; }
+  .ev-engine-status { color:#8a919e; } .ev-assistant-token { color:#e6edf3; }
+  .ev-tool-start { color:#79c0ff; } .ev-tool-done { color:#7fd962; } .ev-tool-error { color:#f26d78; }
+  .ev-assistant-done { color:#ffb454; } .ev-speak { color:#d2a8ff; } .ev-user-message { color:#58d0c0; }
+  .ev-agent-turn-start,.ev-agent-turn-done,.ev-beacon { color:#8a919e; }
+</style>
+</head>
+<body>
+<h1>Helius agent-loop probe — createHelius → sendText, all AgentEvents as PROBE: lines</h1>
+<div id="bar">
+  <input id="q" value="I'm off the trail. Get me back to the trailhead before sunset." />
+  <button id="send">send</button>
+  <button id="e2b">tier E2B</button>
+  <button id="e4b">tier E4B</button>
+  <button id="stop">abort</button>
+  <span id="status">booting…</span>
+</div>
+<div id="log"></div>
+<script type="module">
+  import { createHelius } from '/src/agent/index.ts';
+
+  const logEl = document.getElementById('log');
+  const statusEl = document.getElementById('status');
+  const setStatus = (s) => { statusEl.textContent = s; };
+  let autofired = false;
+
+  function onEvent(e) {
+    // Machine-readable line the orchestrator greps for.
+    console.log('PROBE:' + JSON.stringify(e));
+    const div = document.createElement('div');
+    div.className = 'ev-' + e.type;
+    if (e.type === 'assistant-token') {
+      // coalesce streamed tokens onto one line for readability
+      const last = logEl.lastElementChild;
+      if (last && last.dataset.tok === '1') { last.textContent += e.text; return; }
+      div.dataset.tok = '1';
+      div.textContent = e.text;
+    } else {
+      div.textContent = `[${e.type}] ` + JSON.stringify(Object.fromEntries(Object.entries(e).filter(([k]) => k !== 'type')));
+    }
+    logEl.appendChild(div);
+
+    if (e.type === 'engine-status') {
+      setStatus(JSON.stringify(e.status));
+      if (e.status.state === 'ready' && !autofired) {
+        autofired = true;
+        setStatus(`ready (${e.status.tier}, ${e.status.loadMs}ms) — firing scripted turn`);
+        helius.sendText(document.getElementById('q').value);
+      }
+    }
+    if (e.type === 'agent-turn-done') setStatus('turn done');
+  }
+
+  const helius = await createHelius({ modelBaseUrl: 'http://localhost:8737/models/', onEvent });
+  window.helius = helius;
+
+  document.getElementById('send').onclick = () => helius.sendText(document.getElementById('q').value);
+  document.getElementById('e2b').onclick = () => helius.setTier('E2B');
+  document.getElementById('e4b').onclick = () => helius.setTier('E4B');
+  document.getElementById('stop').onclick = () => helius.abort();
+  setStatus('helius created — loading model (watch engine-status)…');
+</script>
+</body>
+</html>

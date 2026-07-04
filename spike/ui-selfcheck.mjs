@@ -36,7 +36,34 @@ async function waitFor(page, fn, { timeout = 15000, interval = 150 } = {}) {
   return last;
 }
 
+// Mandatory check (per team-lead, after the pnpm override deduping
+// @huggingface/transformers to a single 4.2.0 copy): kokoro-js 1.2.1 was
+// written against the transformers.js 3.x API. Verify it still loads and
+// produces real (non-silent) audio under 4.2.0 — independent of the browser/
+// WebGPU pipeline, via kokoro-js's Node-native device:'cpu' path, so this
+// isolates the JS-API compatibility question from browser/GPU availability.
+async function checkKokoroAudio() {
+  try {
+    const { KokoroTTS } = await import('kokoro-js');
+    const tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
+      dtype: 'q8',
+      device: 'cpu',
+    });
+    const audio = await tts.generate('Testing one two three.', { voice: 'af_heart' });
+    const data = audio.data;
+    const mid = data.slice(Math.floor(data.length * 0.25), Math.floor(data.length * 0.75));
+    let sumSq = 0;
+    for (let i = 0; i < mid.length; i++) sumSq += mid[i] * mid[i];
+    const rms = Math.sqrt(sumSq / mid.length);
+    record('kokoro-js produces non-silent audio under transformers.js 4.2.0', rms > 0.01, `rms=${rms.toFixed(4)}, samples=${data.length}, sr=${audio.sampling_rate}`);
+  } catch (err) {
+    record('kokoro-js produces non-silent audio under transformers.js 4.2.0', false, `threw: ${err && err.message ? err.message : err}`);
+  }
+}
+
 async function main() {
+  await checkKokoroAudio();
+
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 

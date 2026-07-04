@@ -22,6 +22,19 @@ const FALLBACK_OPTIONS: Parameters<typeof KokoroTTS.from_pretrained>[1] = { dtyp
 let ttsPromise: Promise<KokoroTTS | null> | null = null;
 let muted = false;
 
+// Test-only instrumentation hook: no-op unless spike/kokoro-webgpu-verify.mjs
+// (or similar) sets window.__ttsTestHook before this module loads. Never set
+// in normal use — lets verification scripts observe real load/generate
+// timing and the actual synthesized audio without adding a production UI.
+declare global {
+  interface Window {
+    __ttsTestHook?: (event: { phase: string; ms: number; data?: Float32Array; sampleRate?: number }) => void;
+  }
+}
+function reportHook(phase: string, extra?: { data: Float32Array; sampleRate: number }): void {
+  window.__ttsTestHook?.({ phase, ms: performance.now(), ...extra });
+}
+
 const audioCtx = new AudioContext();
 const gain = audioCtx.createGain();
 gain.connect(audioCtx.destination);
@@ -39,12 +52,37 @@ document.addEventListener('keydown', resumeOnce);
 const queue: string[] = [];
 let draining = false;
 
+// Verified (spike/kokoro-webgpu-verify.mjs): calling KokoroTTS.from_pretrained
+// a second time for the SAME model with a different `device` after the first
+// attempt failed does NOT retry cleanly under transformers.js 4.2.0 — the
+// second call inherits the first's error verbatim (a session/model caching
+// bug keyed by model id, not by device/dtype). Wasm-only and webgpu-only each
+// work fine in isolation; it's specifically the retry-after-failure pattern
+// that's broken. Fix: detect WebGPU availability *before* ever calling
+// from_pretrained, and call it exactly once with the right options — no
+// retry needed, and no kokoro/transformers internals touched.
+async function hasWebGpuAdapter(): Promise<boolean> {
+  try {
+    const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
+    if (!gpu) return false;
+    return Boolean(await gpu.requestAdapter());
+  } catch {
+    return false;
+  }
+}
+
 function loadTts(): Promise<KokoroTTS | null> {
   if (!ttsPromise) {
-    ttsPromise = KokoroTTS.from_pretrained(MODEL_ID, PRIMARY_OPTIONS)
-      .catch(() => KokoroTTS.from_pretrained(MODEL_ID, FALLBACK_OPTIONS))
+    reportHook('load-start');
+    ttsPromise = hasWebGpuAdapter()
+      .then((webgpu) => KokoroTTS.from_pretrained(MODEL_ID, webgpu ? PRIMARY_OPTIONS : FALLBACK_OPTIONS))
+      .then((tts) => {
+        reportHook('load-done');
+        return tts;
+      })
       .catch((err: unknown) => {
         console.warn('[helius] kokoro-js failed to load; TTS disabled', err);
+        reportHook('load-error');
         return null;
       });
   }
@@ -75,10 +113,13 @@ async function drain(): Promise<void> {
     const text = queue.shift()!;
     if (!tts) continue; // model unavailable — drop queued lines silently
     try {
+      reportHook('generate-start');
       const raw = await tts.generate(text, { voice: VOICE });
+      reportHook('generate-done', { data: raw.data, sampleRate: raw.sampling_rate });
       await playRawAudio(raw);
     } catch (err) {
       console.warn('[helius] kokoro-js generate/play failed', err);
+      reportHook('generate-error');
     }
   }
   draining = false;
@@ -88,6 +129,17 @@ export function speak(text: string): void {
   if (!text.trim()) return;
   queue.push(text);
   void drain();
+}
+
+// Test-only: lets verification scripts call the real speak() with an
+// arbitrary phrase (e.g. to check duration bounds) without going through the
+// whole agent/mock event pipeline. Harmless — just exposes the function
+// already exported above.
+window.__heliusSpeakForTest = speak;
+declare global {
+  interface Window {
+    __heliusSpeakForTest?: (text: string) => void;
+  }
 }
 
 export function setMuted(next: boolean): void {

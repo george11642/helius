@@ -1,7 +1,4 @@
-// Model loading + inference runtime (Gemma 4 E2B via @huggingface/transformers,
-// WebGPU). TODO: implement a loadLlmEngine() factory that streams weights in
-// through src/workers/model-fetch.worker.ts and returns one of these.
-
-export interface LlmEngine {
-  generate(prompt: string): AsyncIterable<string>;
-}
+// Public surface of the LLM layer. The real engine (worker client) lives in
+// engine.ts; the worker host is ../workers/llm.worker.ts.
+export { createEngine, frameFromImage } from './engine';
+export type { Engine, EngineResult, GenerateOptions } from './engine';
