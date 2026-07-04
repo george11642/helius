@@ -82,7 +82,7 @@ else
   fi
 fi
 
-# ---------- VIDEO: trim per-scene clips (scenes-timing.json), concat, overlay captions, guard ≤62s ----------
+# ---------- VIDEO: pace per-scene clips to the VO beats, concat, overlay captions, guard 58-62s ----------
 # ProRes mezzanine for the real path; software for --smoke (avoids the hw
 # videotoolbox encoder stalling when the GPU is busy with model tabs).
 if [ "$SMOKE" = "1" ] || [ "$ROUGH" = "1" ]; then MEZZ=(-c:v libx264 -preset ultrafast -crf 12); else MEZZ=(-c:v prores_videotoolbox -profile:v 3); fi
@@ -96,36 +96,57 @@ if [ "$SMOKE" = "1" ]; then
 fi
 [ -f "$TIMING" ] || { echo "!! no $TIMING — run scenes.mjs first (or use --smoke)." >&2; exit 1; }
 
-# Plan: per-scene trimmed window (label startSec durSec) from the timings + a beat
-# budget. The helper totals it and EXITS NONZERO if the budget already exceeds 62s.
-PLAN=$(node - "$TIMING" "$CAPTURE_LEAD" <<'NODE'
+# Plan: pace each scene to a NARRATION beat. The warmed demo runs far faster than
+# the 58.5s VO, so a straight trim races ahead of it. Instead every scene is held
+# to a target window matched to the script order (hook→ask→chips→route→mic→tier→
+# sign→beacon→close): if the real clip is SHORTER than target we freeze its last
+# frame (tpad clone) up to target; if LONGER we trim the tail. Net: each clip ==
+# its target, so the cut tracks the voice-over. Targets sum to ~60s; override any
+# with a flat JSON map in BEATS_JSON (or ./beats.json) for final-cut tuning. The
+# helper EXITS NONZERO if the paced total falls outside 58-62s (real path).
+BEATS_FILE="${BEATS_JSON:-beats.json}"; [ -f "$BEATS_FILE" ] || BEATS_FILE=""
+[ -n "$BEATS_FILE" ] && echo "==> BEATS override: $BEATS_FILE" >&2
+MODE="real"; [ "$SMOKE" = "1" ] && MODE="smoke"
+PLAN=$(node - "$TIMING" "$CAPTURE_LEAD" "$MODE" "$BEATS_FILE" <<'NODE'
 const fs = require('fs');
-const [, , tp, lead] = process.argv;
+const [, , tp, lead, mode, beatsFile] = process.argv;
 const L = parseFloat(lead) || 0;
+const MIN_REAL = 0.20;   // floor the real window so tpad always has a last frame to clone
 const T = JSON.parse(fs.readFileSync(tp, 'utf8'));
-// beat budget (seconds): hook ~5, demo ~30, tech ~8, close ~8
-const BUD = { 'idle-ready': 2, 'hero-ask': 3, 'trace-chips': 12, 'route-draw': 6, 'mic-pulse': 2, 'tier-swap': 8, 'read-sign': 9, 'beacon': 5, 'end-hold': 3, a: 1.5, b: 1.5, c: 1.4 };
+// Beat targets (seconds), script order — sum ~= 60 so the cut fills the 58.5s VO.
+const BEATS = { 'idle-ready': 4, 'hero-ask': 5, 'trace-chips': 12, 'route-draw': 8, 'mic-pulse': 3, 'tier-swap': 6, 'read-sign': 8, 'beacon': 8, 'end-hold': 6 };
+if (beatsFile) { try { Object.assign(BEATS, JSON.parse(fs.readFileSync(beatsFile, 'utf8'))); } catch (e) { console.error('bad BEATS_JSON: ' + e.message); process.exit(4); } }
+const scenes = T.scenes || [];
+if (!scenes.length) { console.error('no scenes in timing'); process.exit(2); }
 let total = 0; const rows = [];
-for (const s of (T.scenes || [])) {
-  const cap = BUD[s.label] ?? 6;
-  const dur = Math.max(0.4, Math.min((s.ms || cap * 1000) / 1000, cap));
-  rows.push(`${s.label} ${(L + (s.startMs || 0) / 1000).toFixed(3)} ${dur.toFixed(3)}`);
-  total += dur;
+for (const s of scenes) {
+  const real = Math.max((s.ms || 0) / 1000, 0);
+  let target;
+  if (s.label in BEATS) target = BEATS[s.label];
+  else if (mode === 'smoke') target = Math.max(0.4, Math.min(real || 1.5, 6)); // smoke: cap, never stretch
+  else { target = 6; console.error(`   (no beat for '${s.label}', defaulting ${target}s)`); }
+  const ex = Math.min(Math.max(real, MIN_REAL), target);  // real window, floored, never past target
+  const pad = +(target - ex).toFixed(3);                   // frozen tail (0 when we trimmed instead)
+  rows.push(`${s.label} ${(L + (s.startMs || 0) / 1000).toFixed(3)} ${ex.toFixed(3)} ${pad.toFixed(3)}`);
+  total += target;
+  console.error(`   ${s.label.padEnd(12)} real ${real.toFixed(1)}s → ${target}s  ${pad > 0.001 ? 'hold +' + pad.toFixed(1) + 's' : 'trim'}`);
 }
-if (!rows.length) { console.error('no scenes in timing'); process.exit(2); }
-if (total > 62) { console.error(`plan budget ${total.toFixed(1)}s exceeds the 62s limit`); process.exit(3); }
-console.error(`==> plan: ${rows.length} scenes, ${total.toFixed(1)}s trimmed total`);
+total = +total.toFixed(3);
+if (total > 62) { console.error(`paced plan ${total}s exceeds 62s`); process.exit(3); }
+if (mode !== 'smoke' && total < 58) { console.error(`paced plan ${total}s under 58s (would not fill the VO)`); process.exit(3); }
+console.error(`==> plan: ${rows.length} scenes paced to ${total}s (VO ~58.5s)`);
 process.stdout.write(rows.join('\n'));
 NODE
-) || { echo "!! FAIL: scene plan exceeds the 62s limit (or timing parse failed)." >&2; exit 1; }
+) || { echo "!! FAIL: paced plan outside the 58-62s window (or timing/BEATS parse failed)." >&2; exit 1; }
 
-# Extract each trimmed scene clip, letterboxed to a clean 1920x1080p60.
+# Extract each scene → clean 1920x1080p60, holding the last frame (tpad clone) to
+# fill its beat. stop_duration=0 is a safe no-op, so tpad is appended unconditionally.
 i=0; CONCATLIST="$WORK/concat.txt"; : > "$CONCATLIST"
-while read -r label st du; do
+while read -r label st ex pad; do
   [ -z "$label" ] && continue
   clip="$WORK/clip_$(printf '%02d' "$i").mov"
-  ffmpeg -hide_banner -loglevel error -y -ss "$st" -t "$du" -i "$CAPTURE" \
-    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=60,format=yuv420p,setpts=PTS-STARTPTS" \
+  ffmpeg -hide_banner -loglevel error -y -ss "$st" -t "$ex" -i "$CAPTURE" \
+    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=60,format=yuv420p,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${pad}" \
     -an "${MEZZ[@]}" "$clip"
   echo "file '$clip'" >> "$CONCATLIST"; i=$((i + 1))
 done <<< "$PLAN"
@@ -134,13 +155,21 @@ done <<< "$PLAN"
 DEMO="$WORK/demo.mov"
 ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i "$CONCATLIST" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMO"
 
-# Overlay captions onto the trimmed demo.
+# Overlay captions — ONLY if they carry alpha. An opaque caption webm (pix_fmt
+# yuv420p) composites its black background over the entire demo and would ship an
+# all-black master; detect that and SKIP (a caption-less but visible cut beats a
+# black one) with a loud warning so the Remotion render gets re-done with alpha.
 DEMOCAP="$DEMO"
 if [ -n "$CAPS" ]; then
-  DEMOCAP="$WORK/democap.mov"
-  ffmpeg -hide_banner -loglevel error -y -i "$DEMO" -i "$CAPS" \
-    -filter_complex "[0:v]format=yuv420p[b];[1:v]scale=1920:1080,fps=60[c];[b][c]overlay=shortest=1[v]" \
-    -map "[v]" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMOCAP"
+  CAPPF=$(ffprobe -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=nw=1:nk=1 "$CAPS" 2>/dev/null || echo "")
+  if echo "$CAPPF" | grep -qiE 'yuva|rgba|bgra|argb|abgr|gbrap|ya8|ya16'; then
+    DEMOCAP="$WORK/democap.mov"
+    ffmpeg -hide_banner -loglevel error -y -i "$DEMO" -i "$CAPS" \
+      -filter_complex "[0:v]format=yuv420p[b];[1:v]scale=1920:1080,fps=60,format=yuva420p[c];[b][c]overlay=shortest=1[v]" \
+      -map "[v]" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMOCAP"
+  else
+    echo "!! WARNING: captions '$CAPS' have NO alpha (pix_fmt=${CAPPF:-unknown}) — an opaque overlay would black out the video. SKIPPING captions. Re-render the Remotion webm with alpha (vp8/vp9, pixel-format yuva420p)." >&2
+  fi
 fi
 
 # Optional broll bookends (xfade); shift the audio to start at the demo.
@@ -162,10 +191,15 @@ else
   cp "$DEMOCAP" "$VISUALS"
 fi
 
-# HARD runtime guard — FAIL LOUDLY if the assembled visuals exceed 62s.
+# HARD runtime guard — FAIL LOUDLY if the paced cut drifts out of the VO window.
+# Real path: must land 58-62s (fills the 58.5s VO). Smoke: upper-bound only.
 VDUR=$(dur "$VISUALS")
 echo "==> assembled visuals: ${VDUR}s" >&2
-node -e "process.exit(parseFloat('${VDUR}') > 62 ? 1 : 0)" || { echo "!! FAIL: assembled runtime ${VDUR}s exceeds the 62s limit." >&2; exit 1; }
+if [ "$SMOKE" = "1" ]; then
+  node -e "process.exit(parseFloat('${VDUR}') > 62 ? 1 : 0)" || { echo "!! FAIL: assembled runtime ${VDUR}s exceeds 62s." >&2; exit 1; }
+else
+  node -e "const d=parseFloat('${VDUR}'); process.exit(d>=57.5 && d<=62 ? 0 : 1)" || { echo "!! FAIL: assembled runtime ${VDUR}s outside the 58-62s window." >&2; exit 1; }
+fi
 
 # ---------- final encode ----------
 echo "==> encoding → $OUT" >&2
