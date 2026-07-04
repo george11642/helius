@@ -29,7 +29,7 @@ behalf** — this is the prefilled draft he reviews and submits himself.
 
 **Links:**
 - Repository: https://github.com/george11642/helius
-- Demo video (≤60s): https://youtu.be/csRsCrKx_oM (unlisted)
+- Demo video (≤60s): https://youtu.be/csRsCrKx_oM (public)
 - Live app (judge URL): _[Cloudflare Pages — TBD]_
 
 ---

@@ -6,7 +6,7 @@ Everything is done except the form itself. **George submits the form** (deadline
 ## The three links that matter
 - **Judge URL:** https://helius-9d0.pages.dev (verified: onboarding gate, model
   from R2, offline reload 3.0s, real turn, /api/brief live with NVIDIA key)
-- **Video (unlisted, 60.0s):** https://youtu.be/csRsCrKx_oM
+- **Video (public, 60.0s):** https://youtu.be/csRsCrKx_oM
 - **Repo (PUBLIC, tag v1.0):** https://github.com/george11642/helius
 
 ## What shipped today after the morning handoff (wave 2)
