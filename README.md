@@ -135,6 +135,24 @@ Without a key the endpoint answers `501 {reason:'not_configured'}` and the UI hi
 
 ---
 
+## Helius Go — native iOS companion (built, not judgeable)
+
+The same core also runs **natively on iPhone**: `ios/` contains **Helius Go**, a SwiftUI app
+running Gemma 4 E2B fully on-device via LiteRT-LM (constrained decoding, native tool loop)
+with the same seven tools, the same offline MapLibre/PMTiles map (bundled Sandia pack,
+animated route draw), on-device speech in/out, Vision-based sign reading, and a **real
+hardware-torch Morse SOS beacon**. It builds, installs, and runs on a physical iPhone 16e
+(Gemma loads in ~6.2 s on the A18; offline routing live).
+
+**Why it isn't part of the judged deliverable:** there is no viable way to put a native iOS
+app in remote judges' hands inside a 24-hour window. TestFlight requires Apple's beta review,
+the App Store far more; ad-hoc/free-provisioning installs need a cabled Mac, expire in
+7 days, and can't be distributed by link. So the **PWA is the product** — it delivers the
+same on-device Gemma experience through a URL anyone can open — and Helius Go exists as
+proof the core runs natively on mobile hardware. Build + sideload runbook: `ios/README.md`.
+
+---
+
 ## Local development
 
 ```bash
