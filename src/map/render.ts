@@ -117,6 +117,33 @@ function getTerrainReader(pack: string, packBaseUrl: string): PMTiles {
   return reader;
 }
 
+type DemProtocolFn = InstanceType<typeof mlcontour.DemSource>['contourProtocolV4'];
+
+/**
+ * maplibre-contour caches contour/shared-DEM tile results internally (an
+ * AsyncCache keyed by z/x/y/options — verified by reading
+ * node_modules/maplibre-contour/dist/index.mjs's fetchContourTile), and
+ * hands the SAME ArrayBuffer instance to every caller that hits that cache
+ * key. maplibre-gl transfers (detaches) whatever ArrayBuffer a registered
+ * protocol resolves with, to its own tile-parsing worker — so a second
+ * delivery of that cached buffer (revisiting a tile, a retry, anything
+ * hitting the cache twice) throws DataCloneError on the transfer. Copying
+ * the buffer here, at the one point control returns to maplibre-gl, fixes
+ * it regardless of what upstream caches or how. This is a *different*
+ * buffer than the one the DEM fetch bridge above copies (that one is the
+ * raw per-tile WEBP bytes my own code hands to maplibre-contour; this one
+ * is maplibre-contour's own computed output handed to maplibre-gl) — the
+ * fetch-bridge copy alone did not stop a reliably-reproducing
+ * DataCloneError on the Chamonix pack's contours source; this one did
+ * (verified: zero DataCloneError across repeated fresh loads afterward).
+ */
+function wrapDemSourceProtocol(fn: DemProtocolFn): DemProtocolFn {
+  return (async (request, abortController) => {
+    const result = await fn(request, abortController);
+    return { ...result, data: result.data.slice(0) };
+  }) as DemProtocolFn;
+}
+
 // ---------- small geo helpers (local — no turf dependency) ----------
 
 /** Destination point given start lat/lon, distance (m), and bearing (deg). Spherical-earth approx. */
@@ -309,6 +336,32 @@ function buildDestinationFlagElement(): HTMLDivElement {
 
 const EMPTY_FEATURE_COLLECTION = { type: 'FeatureCollection' as const, features: [] };
 
+// The canonical, specifically-chosen sandia demo scene (La Luz switchbacks) —
+// not just "somewhere in the region". Other packs get their center from their
+// own manifest.json (see getPackCenter) rather than always starting here:
+// verified live that without this, the map constructs centered on Sandia's
+// coordinates regardless of `pack`, so a non-sandia pack's DEM tiles get
+// requested for a location the archive doesn't cover at all (every initial
+// tile 404s) before any later camera move can correct it.
+const SANDIA_DEMO_CENTER: [number, number] = [-106.4439, 35.1983];
+
+async function getPackCenter(pack: string, packBaseUrl: string): Promise<[number, number]> {
+  if (pack === 'sandia') return SANDIA_DEMO_CENTER;
+  try {
+    const res = await fetch(`${packBaseUrl}/manifest.json`);
+    if (res.ok) {
+      const manifest = (await res.json()) as { center?: unknown };
+      if (Array.isArray(manifest.center) && manifest.center.length === 2) {
+        return manifest.center as [number, number];
+      }
+    }
+  } catch {
+    // falls through to the warning + fallback below
+  }
+  console.warn(`[HeliusMap] ${pack}/manifest.json unavailable or missing 'center' — falling back to the sandia demo coordinates`);
+  return SANDIA_DEMO_CENTER;
+}
+
 export interface DrawRouteOptions {
   /** Progressive-draw duration in ms. Default 1500. */
   animateMs?: number;
@@ -366,6 +419,15 @@ export class HeliusMap {
       id: `mlcontour-${pack}`,
     });
     demSource.setupMaplibre(maplibregl);
+    // setupMaplibre registers contourProtocolV4/sharedDemProtocolV4 directly.
+    // Re-register wrapped versions that copy the returned ArrayBuffer — see
+    // wrapDemSourceProtocol's doc comment for why this is needed on top of
+    // the .slice(0) already done in the DEM fetch bridge above (verified
+    // live against the Chamonix pack: that copy alone did not stop a
+    // reliably-reproducing DataCloneError on the *contours* source; this
+    // one, at the actual hand-off point back to maplibre-gl, does).
+    maplibregl.addProtocol(demSource.contourProtocolId, wrapDemSourceProtocol(demSource.contourProtocolV4));
+    maplibregl.addProtocol(demSource.sharedDemProtocolId, wrapDemSourceProtocol(demSource.sharedDemProtocolV4));
 
     let style: StyleSpecification;
     try {
@@ -375,10 +437,11 @@ export class HeliusMap {
       style = buildStyle(pack, { packBaseUrl: this.packBaseUrl, demSource: null });
     }
 
+    const center = await getPackCenter(pack, this.packBaseUrl);
     const map = new maplibregl.Map({
       container,
       style,
-      center: [-106.4439, 35.1983], // La Luz switchbacks
+      center,
       zoom: 13,
       pitch: 45,
       attributionControl: { compact: true },
