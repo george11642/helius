@@ -1,0 +1,20 @@
+# Cross-origin isolation (WebGPU + transformers.js need SharedArrayBuffer/WASM
+# threads, which require a crossOriginIsolated context) — see vite.config.ts
+# for the matching dev/preview headers and why credentialless (not
+# require-corp) is used: R2's public bucket doesn't send
+# Cross-Origin-Resource-Policy headers, so require-corp would block those
+# fetches outright; credentialless allows cross-origin no-cors loads through
+# (with credentials stripped, which is fine — R2/HF CDN assets are public,
+# no cookies involved) without needing the origin's cooperation.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+
+# Service worker + shell HTML must always be revalidated so PWA updates
+# (vite-plugin-pwa registerType: autoUpdate) are picked up promptly instead
+# of being served stale from an intermediate cache.
+/index.html
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache

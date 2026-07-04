@@ -3,13 +3,24 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // WebGPU + transformers.js need a crossOriginIsolated context for WASM
 // threads/SharedArrayBuffer. These headers turn that on for both `vite dev`
-// and `vite preview`. Consequence: any cross-origin asset fetched at runtime
-// (Hugging Face CDN, Cloudflare R2, etc.) MUST respond with CORS headers
-// (Cross-Origin-Resource-Policy / Access-Control-Allow-Origin) or the
-// isolated page will refuse to load it.
+// and `vite preview` — matching prod exactly (public/_headers sets the same
+// COOP/COEP trio for Cloudflare Pages, plus a Cache-Control: no-cache on
+// /index.html and /sw.js that dev doesn't need, since the dev/preview
+// servers don't cache responses the way a CDN edge does):
+//
+//   Cross-Origin-Opener-Policy: same-origin
+//   Cross-Origin-Embedder-Policy: credentialless
+//
+// credentialless (not require-corp) because R2's public bucket doesn't send
+// Cross-Origin-Resource-Policy headers — require-corp would hard-block
+// those fetches, while credentialless lets cross-origin no-cors loads
+// through with credentials stripped (fine: R2/HF CDN assets are public, no
+// cookies involved). This used to be require-corp in dev only, which meant
+// R2/HF loads could fail locally while working in prod — changed to match
+// prod so dev accurately reflects what will actually happen there.
 const crossOriginIsolationHeaders = {
   'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Embedder-Policy': 'credentialless',
 };
 
 export default defineConfig({
