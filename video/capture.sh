@@ -63,7 +63,7 @@ DUR=(); [ -n "$SECONDS_ARG" ] && DUR=(-t "$SECONDS_ARG")
 echo "==> recording → $OUT  (${LABEL}, 60fps, cursor on; press q to stop)" >&2
 exec ffmpeg -hide_banner \
   -f avfoundation -framerate 60 -capture_cursor 1 -i "${IDX}:none" \
-  "${DUR[@]}" \
+  ${DUR[@]+"${DUR[@]}"} \
   -vf "crop=1920:1080:0:${CROP_Y}" \
   "${VCODEC[@]}" \
   -pix_fmt yuv420p \

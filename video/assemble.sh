@@ -85,7 +85,7 @@ fi
 # ---------- VIDEO: trim per-scene clips (scenes-timing.json), concat, overlay captions, guard ≤62s ----------
 # ProRes mezzanine for the real path; software for --smoke (avoids the hw
 # videotoolbox encoder stalling when the GPU is busy with model tabs).
-if [ "$SMOKE" = "1" ]; then MEZZ=(-c:v libx264 -preset ultrafast -crf 12); else MEZZ=(-c:v prores_videotoolbox -profile:v 3); fi
+if [ "$SMOKE" = "1" ] || [ "$ROUGH" = "1" ]; then MEZZ=(-c:v libx264 -preset ultrafast -crf 12); else MEZZ=(-c:v prores_videotoolbox -profile:v 3); fi
 XF=0.6
 CAPTURE_LEAD="${CAPTURE_LEAD:-0}"  # seconds the capture ran before scenes.mjs t0 (manual sync knob)
 
@@ -123,7 +123,7 @@ NODE
 i=0; CONCATLIST="$WORK/concat.txt"; : > "$CONCATLIST"
 while read -r label st du; do
   [ -z "$label" ] && continue
-  clip="$WORK/clip_$(printf '%02d' "$i").mp4"
+  clip="$WORK/clip_$(printf '%02d' "$i").mov"
   ffmpeg -hide_banner -loglevel error -y -ss "$st" -t "$du" -i "$CAPTURE" \
     -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=60,format=yuv420p,setpts=PTS-STARTPTS" \
     -an "${MEZZ[@]}" "$clip"
@@ -131,20 +131,20 @@ while read -r label st du; do
 done <<< "$PLAN"
 [ "$i" -gt 0 ] || { echo "!! no clips extracted" >&2; exit 1; }
 
-DEMO="$WORK/demo.mp4"
+DEMO="$WORK/demo.mov"
 ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i "$CONCATLIST" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMO"
 
 # Overlay captions onto the trimmed demo.
 DEMOCAP="$DEMO"
 if [ -n "$CAPS" ]; then
-  DEMOCAP="$WORK/democap.mp4"
+  DEMOCAP="$WORK/democap.mov"
   ffmpeg -hide_banner -loglevel error -y -i "$DEMO" -i "$CAPS" \
     -filter_complex "[0:v]format=yuv420p[b];[1:v]scale=1920:1080,fps=60[c];[b][c]overlay=shortest=1[v]" \
     -map "[v]" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMOCAP"
 fi
 
 # Optional broll bookends (xfade); shift the audio to start at the demo.
-VISUALS="$WORK/visuals.mp4"; DEMODUR=$(dur "$DEMOCAP")
+VISUALS="$WORK/visuals.mov"; DEMODUR=$(dur "$DEMOCAP")
 if [ -n "$INTRO" ] && [ -f "$INTRO" ] && [ -n "$OUTRO" ] && [ -f "$OUTRO" ]; then
   ID=$(dur "$INTRO")
   OFF1=$(node -e "console.log((${ID}-${XF}).toFixed(3))")
