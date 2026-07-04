@@ -1,0 +1,21 @@
+{
+  "id": "fontainebleau",
+  "name": "For\u00eat de Fontainebleau",
+  "bbox": [
+    2.53,
+    48.36,
+    2.72,
+    48.47
+  ],
+  "center": [
+    2.625,
+    48.415
+  ],
+  "files": {
+    "basemap.pmtiles": 3840740,
+    "pois.json": 5000,
+    "graph.bin": 820131,
+    "terrain.pmtiles": 8220504
+  },
+  "totalBytes": 12886375
+}

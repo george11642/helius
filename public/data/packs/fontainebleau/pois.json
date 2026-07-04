@@ -1,0 +1,264 @@
+{
+  "trailheads": [
+    {
+      "name": "Barbizon village",
+      "lat": 48.4462,
+      "lon": 2.6108,
+      "role": "trailhead"
+    },
+    {
+      "name": "Gorges de Franchard",
+      "lat": 48.4058,
+      "lon": 2.6386,
+      "role": "crest"
+    },
+    {
+      "name": "Fontainebleau-Avon station",
+      "lat": 48.4183,
+      "lon": 2.7267,
+      "role": "tram_station"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Rocher des Demoiselles",
+      "lat": 48.3794182,
+      "lon": 2.6732098,
+      "ele": 126
+    },
+    {
+      "name": "Rocher d'Avon",
+      "lat": 48.3927308,
+      "lon": 2.7169046,
+      "ele": 127
+    },
+    {
+      "name": "Rocher du Mauvais Passage",
+      "lat": 48.3799717,
+      "lon": 2.6619126,
+      "ele": 123
+    },
+    {
+      "name": "Mont Aigu",
+      "lat": 48.4048716,
+      "lon": 2.663426,
+      "ele": 123
+    },
+    {
+      "name": "Maison Poteau",
+      "lat": 48.3901154,
+      "lon": 2.5346137,
+      "ele": null
+    },
+    {
+      "name": "Pignon Poteau",
+      "lat": 48.3898797,
+      "lon": 2.5320546,
+      "ele": null
+    },
+    {
+      "name": "Les Gros sablons",
+      "lat": 48.384885,
+      "lon": 2.5388108,
+      "ele": null
+    },
+    {
+      "name": "Les Gros sablons Est",
+      "lat": 48.3846401,
+      "lon": 2.5410511,
+      "ele": null
+    },
+    {
+      "name": "Cimetière aux ânes Pignon Nord",
+      "lat": 48.3793305,
+      "lon": 2.5465048,
+      "ele": null
+    },
+    {
+      "name": "Rocher de la Tortue Est",
+      "lat": 48.3761521,
+      "lon": 2.5457753,
+      "ele": null
+    },
+    {
+      "name": "Rocher de la Tortue",
+      "lat": 48.3759195,
+      "lon": 2.5426988,
+      "ele": null
+    },
+    {
+      "name": "La Grande Montagne",
+      "lat": 48.370864,
+      "lon": 2.5384046,
+      "ele": null
+    },
+    {
+      "name": "Rocher de la Cathédrale",
+      "lat": 48.3643497,
+      "lon": 2.5340924,
+      "ele": null
+    },
+    {
+      "name": "J.A. Martin Pignon Nord",
+      "lat": 48.3623213,
+      "lon": 2.5344939,
+      "ele": null
+    },
+    {
+      "name": "J.A. Martin Pignon Sud",
+      "lat": 48.3616833,
+      "lon": 2.5340487,
+      "ele": null
+    },
+    {
+      "name": "Cimetière aux ânes, Pignon Sud",
+      "lat": 48.3776096,
+      "lon": 2.5462985,
+      "ele": null
+    },
+    {
+      "name": "Pignon des Cassis",
+      "lat": 48.387834,
+      "lon": 2.5365434,
+      "ele": null
+    },
+    {
+      "name": "Pignon des Poivres",
+      "lat": 48.3806619,
+      "lon": 2.5469271,
+      "ele": null
+    },
+    {
+      "name": "Le Comptage",
+      "lat": 48.3825327,
+      "lon": 2.5457154,
+      "ele": null
+    },
+    {
+      "name": "Rocher de Corne-Biche",
+      "lat": 48.3999522,
+      "lon": 2.5775151,
+      "ele": 127
+    },
+    {
+      "name": "Rocher Pierre-Margot",
+      "lat": 48.4586142,
+      "lon": 2.6820734,
+      "ele": 102
+    },
+    {
+      "name": "Butte Saint-Louis",
+      "lat": 48.4519951,
+      "lon": 2.6884269,
+      "ele": 122
+    },
+    {
+      "name": "Mont Saint-Germain",
+      "lat": 48.4455196,
+      "lon": 2.6796511,
+      "ele": 137
+    },
+    {
+      "name": "Monts de Truies",
+      "lat": 48.4487418,
+      "lon": 2.6741101,
+      "ele": 138
+    },
+    {
+      "name": "Petit Rocher",
+      "lat": 48.4580305,
+      "lon": 2.6893776,
+      "ele": 100
+    },
+    {
+      "name": "Mont Enflammé",
+      "lat": 48.3852496,
+      "lon": 2.651486,
+      "ele": 123
+    },
+    {
+      "name": "Petit Mont Chauvet",
+      "lat": 48.3871697,
+      "lon": 2.7043054,
+      "ele": null
+    },
+    {
+      "name": "Le Chapeau de Napoléon",
+      "lat": 48.4049394,
+      "lon": 2.5391183,
+      "ele": null
+    },
+    {
+      "name": "Mont Chauvet",
+      "lat": 48.4279515,
+      "lon": 2.6833978,
+      "ele": null
+    },
+    {
+      "name": "Mont Rouget",
+      "lat": 48.3779279,
+      "lon": 2.5562349,
+      "ele": null
+    },
+    {
+      "name": "Hauteurs de la Solle",
+      "lat": 48.4355382,
+      "lon": 2.6682613,
+      "ele": null
+    },
+    {
+      "name": "Mont Ussy",
+      "lat": 48.4269861,
+      "lon": 2.6964534,
+      "ele": null
+    },
+    {
+      "name": "Mont Merle",
+      "lat": 48.378311,
+      "lon": 2.7110321,
+      "ele": null
+    },
+    {
+      "name": "Monts Girards",
+      "lat": 48.4295809,
+      "lon": 2.6293989,
+      "ele": null
+    },
+    {
+      "name": "Rocher Couradin",
+      "lat": 48.447328,
+      "lon": 2.5776476,
+      "ele": null
+    },
+    {
+      "name": "Roches Moreau",
+      "lat": 48.4548388,
+      "lon": 2.5972252,
+      "ele": null
+    },
+    {
+      "name": "Monts de Fay",
+      "lat": 48.4514005,
+      "lon": 2.6506451,
+      "ele": null
+    },
+    {
+      "name": "Le Grand Rocher",
+      "lat": 48.4483898,
+      "lon": 2.5684353,
+      "ele": null
+    },
+    {
+      "name": "Rocher Cailleau",
+      "lat": 48.3610653,
+      "lon": 2.5390821,
+      "ele": null
+    },
+    {
+      "name": "La Grande Montagne Dalle",
+      "lat": 48.3722097,
+      "lon": 2.5400262,
+      "ele": null
+    }
+  ]
+}

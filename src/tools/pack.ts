@@ -7,7 +7,7 @@
 import type { PackInfo } from '../lib/contract';
 import type { GpsFix } from './location';
 
-const PACK_IDS = ['sandia', 'chamonix'] as const;
+const PACK_IDS = ['sandia', 'chamonix', 'fontainebleau'] as const;
 
 let activePack: string = 'sandia';
 
@@ -23,6 +23,7 @@ export function getPack(): string {
 const DEFAULT_FIX: Record<string, GpsFix> = {
   sandia: { lat: 35.1983, lon: -106.4439, accuracyM: 14, elevationM: 2926 }, // La Luz upper switchbacks
   chamonix: { lat: 45.97, lon: 6.885, accuracyM: 14, elevationM: 2352 }, // near the Lac Blanc trail
+  fontainebleau: { lat: 48.4058, lon: 2.6386, accuracyM: 14, elevationM: 130 }, // Gorges de Franchard
 };
 
 export function defaultFixFor(pack: string): GpsFix | undefined {
