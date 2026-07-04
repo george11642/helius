@@ -5,6 +5,7 @@
 
 import { parseGraph, buildRoutingGraph } from './graph-core.mjs';
 import type { RoutingGraph } from './graph-core.d.mts';
+import { PACK_BASE_URL } from './pack-base';
 
 export type {
   RoutingGraph,
@@ -20,9 +21,9 @@ export type {
 } from './graph-core.d.mts';
 export { nearestNode, haversineM } from './graph-core.mjs';
 
-/** Fetches and parses `/data/packs/<pack>/graph.bin` into a routable graph. */
+/** Fetches and parses `<PACK_BASE_URL>/<pack>/graph.bin` into a routable graph. */
 export async function loadGraph(pack: string): Promise<RoutingGraph> {
-  const res = await fetch(`/data/packs/${pack}/graph.bin`);
+  const res = await fetch(`${PACK_BASE_URL}/${pack}/graph.bin`);
   if (!res.ok) {
     throw new Error(`loadGraph: failed to fetch graph.bin for pack "${pack}" (${res.status} ${res.statusText})`);
   }

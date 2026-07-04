@@ -36,6 +36,7 @@ import type { StyleSpecification } from 'maplibre-gl';
 import { PMTiles, Protocol } from 'pmtiles';
 import mlcontour from 'maplibre-contour';
 import { buildStyle, poiLayers, PALETTE } from './style';
+import { PACK_BASE_URL } from './pack-base';
 
 // ---------- module-level singletons (shared across HeliusMap instances) ----------
 
@@ -456,7 +457,7 @@ export class HeliusMap {
 
   async init(container: HTMLElement, pack = 'sandia'): Promise<void> {
     this._pack = pack;
-    this.packBaseUrl = `/data/packs/${pack}`;
+    this.packBaseUrl = `${PACK_BASE_URL}/${pack}`;
 
     if (!isWebglSupported()) {
       container.innerHTML = '';

@@ -1,0 +1,9 @@
+# Cloudflare Pages asset upload ignore file (copied verbatim into dist/ by
+# Vite's publicDir copy, same mechanism as _headers next to it).
+#
+# Pack pmtiles (basemap.pmtiles, terrain.pmtiles) are served from R2 in
+# production (see src/map/pack-base.ts) — sandia's alone are ~29MB/~80MB,
+# both over Cloudflare Pages' 25MiB per-file cap, so they can't be uploaded
+# to Pages regardless. They're still built into dist/ (dev/preview read them
+# locally), just excluded from the actual Pages deploy here.
+data/packs/**/*.pmtiles

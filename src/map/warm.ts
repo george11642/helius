@@ -15,6 +15,8 @@
 // falls back to the sandia demo coordinates if that fetch fails — without
 // it warmed too, an offline pack switch to e.g. chamonix would render
 // centered on Albuquerque instead of the Alps.
+import { PACK_BASE_URL } from './pack-base';
+
 const PACK_ASSETS = ['manifest.json', 'basemap.pmtiles', 'terrain.pmtiles', 'graph.bin', 'pois.json'] as const;
 
 export interface WarmPackResult {
@@ -25,7 +27,7 @@ export interface WarmPackResult {
 }
 
 export async function warmPack(pack: string): Promise<WarmPackResult[]> {
-  const base = `/data/packs/${pack}`;
+  const base = `${PACK_BASE_URL}/${pack}`;
   const results: WarmPackResult[] = [];
 
   for (const asset of PACK_ASSETS) {
@@ -89,7 +91,7 @@ async function cacheHasEntries(cacheName: string): Promise<boolean> {
  * fetch() calls — stays well under the ~200ms budget.
  */
 export async function checkOfflineReady(pack: string): Promise<OfflineReadyResult> {
-  const base = `/data/packs/${pack}`;
+  const base = `${PACK_BASE_URL}/${pack}`;
 
   const hardChecks: Array<[string, Promise<boolean>]> = [
     [
