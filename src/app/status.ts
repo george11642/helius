@@ -11,6 +11,8 @@ export interface StatusOptions {
   /** Calls agent.setTier(tier) and resolves once it settles. */
   onSetTier(tier: ModelTier): Promise<void>;
   onMuteChange(muted: boolean): void;
+  /** Map-only boots: the LOAD AI chip calls this to start the model load. */
+  onLoadModel?(): void;
 }
 
 export interface StatusHandle {
@@ -37,12 +39,14 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
   container.innerHTML = `
     <button type="button" class="chip chip-offline" data-state="pending">&#9671; online (downloading ok)</button>
     <button type="button" class="chip chip-warm-offline" hidden>Download for offline</button>
+    <button type="button" class="chip chip-load-model" hidden>&#9650; LOAD AI</button>
     <button type="button" class="chip chip-tier" data-tier="E2B">GEMMA 4 &middot; &mdash;</button>
     <span class="chip chip-tps">-- tok/s</span>
     <button type="button" class="chip chip-mute" data-muted="false" aria-pressed="false">&#128266;</button>
   `;
 
   const offlineChip = container.querySelector<HTMLElement>('.chip-offline')!;
+  const loadChip = container.querySelector<HTMLButtonElement>('.chip-load-model')!;
   const warmChip = container.querySelector<HTMLButtonElement>('.chip-warm-offline')!;
   const tierChip = container.querySelector<HTMLButtonElement>('.chip-tier')!;
   const tpsChip = container.querySelector<HTMLElement>('.chip-tps')!;
@@ -138,12 +142,37 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
       currentTier = status.tier;
       switching = false;
       tierChip.dataset.switching = 'false';
+      loadChip.hidden = true;
       renderTierChip(status.tier, readTextOnlyDegrade(status));
       void refreshOfflineReady();
+    } else if (status.state === 'idle') {
+      // Map-only boot: the model never started loading — offer the explicit
+      // start affordance in the header (mirrors the onboarding button).
+      loadChip.hidden = false;
+      loadChip.disabled = false;
+      loadChip.innerHTML = '&#9650; LOAD AI';
+      render();
+    } else if (status.state === 'downloading' && !modelReady) {
+      // Load started from map-only mode: keep the chip as a live progress
+      // readout (the onboarding overlay is gone by then).
+      loadChip.hidden = false;
+      loadChip.disabled = true;
+      loadChip.textContent = status.stage === 'read' ? `AI · reading ${status.pct.toFixed(0)}%` : `AI · ${status.pct.toFixed(0)}%`;
+    } else if (status.state === 'compiling' && !modelReady) {
+      loadChip.hidden = false;
+      loadChip.disabled = true;
+      loadChip.textContent = 'AI · compiling…';
     } else {
       render();
     }
   }
+
+  loadChip.addEventListener('click', () => {
+    if (loadChip.disabled) return;
+    loadChip.disabled = true;
+    loadChip.textContent = 'AI · starting…';
+    opts.onLoadModel?.();
+  });
 
   function setStats(stats: { decodeTps: number; prefillMs: number } | null): void {
     tpsChip.textContent = stats ? `${stats.decodeTps.toFixed(1)} tok/s` : '-- tok/s';

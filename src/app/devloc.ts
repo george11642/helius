@@ -68,9 +68,12 @@ export function mountDevLoc(opts: DevLocOptions = {}): DevLocHandle {
   panel.dataset.open = 'false';
   panel.dataset.demo = 'false';
   panel.innerHTML = `
-    <button type="button" class="devloc-toggle" aria-label="Simulate GPS (demo mode)">&#9881;</button>
+    <button type="button" class="devloc-toggle" aria-label="Demo mode — simulated GPS">
+      <span class="devloc-toggle-glyph">&#8982;</span><span class="devloc-toggle-label">GPS</span>
+    </button>
     <div class="devloc-body">
-      <span class="devloc-label">SIMULATE GPS (demo mode)</span>
+      <span class="devloc-label">DEMO MODE &mdash; SIMULATED GPS</span>
+      <span class="devloc-hint">Explore any region without being there. Real GPS stays the default in the field.</span>
       <select class="devloc-select"></select>
       <div class="devloc-coords"></div>
     </div>

@@ -1,82 +1,82 @@
 {
-  "t0": 1783175764696,
-  "url": "http://localhost:4174/?prewarm=1",
-  "label": "dry",
+  "t0": 1783185420340,
+  "url": "http://localhost:4174/?prewarm=1&demo=1",
+  "label": "dry3",
   "ok": true,
   "failures": [],
-  "totalMs": 46148,
+  "totalMs": 48818,
   "traceChips": 10,
   "scenes": [
     {
       "n": 1,
       "label": "idle-ready",
-      "startMs": 1203,
-      "endMs": 1207,
-      "ms": 4,
+      "startMs": 1205,
+      "endMs": 1210,
+      "ms": 5,
       "failed": false
     },
     {
       "n": 2,
       "label": "hero-ask",
-      "startMs": 2651,
-      "endMs": 2723,
-      "ms": 72,
+      "startMs": 2610,
+      "endMs": 2694,
+      "ms": 84,
       "failed": false
     },
     {
       "n": 3,
       "label": "trace-chips",
-      "startMs": 4099,
-      "endMs": 12382,
-      "ms": 8283,
+      "startMs": 4071,
+      "endMs": 14364,
+      "ms": 10293,
       "failed": false
     },
     {
       "n": 4,
       "label": "route-draw",
-      "startMs": 13791,
-      "endMs": 17155,
-      "ms": 3364,
+      "startMs": 15848,
+      "endMs": 18662,
+      "ms": 2814,
       "failed": false
     },
     {
       "n": "2b",
       "label": "mic-pulse",
-      "startMs": 18494,
-      "endMs": 19498,
-      "ms": 1004,
+      "startMs": 20040,
+      "endMs": 21061,
+      "ms": 1021,
       "failed": false
     },
     {
       "n": 5,
       "label": "tier-swap",
-      "startMs": 20886,
-      "endMs": 22520,
-      "ms": 1634,
+      "startMs": 22446,
+      "endMs": 24063,
+      "ms": 1617,
       "failed": false
     },
     {
       "n": 6,
       "label": "read-sign",
-      "startMs": 23941,
-      "endMs": 28538,
-      "ms": 4597,
+      "startMs": 25456,
+      "endMs": 30058,
+      "ms": 4602,
       "failed": false
     },
     {
       "n": 7,
       "label": "beacon",
-      "startMs": 29862,
-      "endMs": 43647,
-      "ms": 13785,
+      "startMs": 31414,
+      "endMs": 46271,
+      "ms": 14857,
       "failed": false
     },
     {
       "n": 8,
       "label": "end-hold",
-      "startMs": 44988,
-      "endMs": 45999,
-      "ms": 1011,
+      "startMs": 47630,
+      "endMs": 48643,
+      "ms": 1013,
       "failed": false
     }
   ]

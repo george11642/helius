@@ -32,10 +32,17 @@ export function mountRoute(container: HTMLElement): RouteHandle {
 
   function handleEvent(e: AgentEvent): void {
     if (e.type !== 'route') return;
-    const km = (e.distanceM / 1000).toFixed(1);
     const eta = formatEta(e.etaMin);
     const arrival = formatClock(new Date(Date.now() + eta.minutes * 60000));
-    toast.textContent = `ROUTE READY — ${km}km · ${eta.text} · arrives ${arrival}`;
+    // Prefer the tool's own pre-formatted values (dest/display) — the numbers
+    // shown here must come from tool data, never re-derived or model prose.
+    if (e.display) {
+      // e.g. "Route to La Luz Trailhead: 3.87 km / 2.40 mi, about 1h42m."
+      toast.textContent = `${e.display.replace(/\.\s*$/, '')} · arrives ${arrival}`;
+    } else {
+      const km = (e.distanceM / 1000).toFixed(1);
+      toast.textContent = `ROUTE READY — ${km}km · ${eta.text} · arrives ${arrival}`;
+    }
     toast.hidden = false;
   }
 

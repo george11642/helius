@@ -14,6 +14,8 @@ export interface ShellRefs {
   chatInputRow: HTMLElement;
   mapRoot: HTMLElement;
   routeToastLayer: HTMLElement;
+  /** Overlay slot over the map for the position/coverage chip (poschip.ts). */
+  mapOverlaySlot: HTMLElement;
   toolTraceRail: HTMLElement;
   statusText: HTMLElement;
 }
@@ -40,6 +42,7 @@ export function renderShell(root: HTMLElement): ShellRefs {
           <p class="map-placeholder">OFFLINE MAP &mdash; loads with region pack</p>
         </div>
         <div class="route-toast-layer"></div>
+        <div class="map-overlay-slot"></div>
       </section>
     </main>
     <div class="tool-trace-rail" hidden></div>
@@ -55,6 +58,7 @@ export function renderShell(root: HTMLElement): ShellRefs {
     chatInputRow: root.querySelector('.chat-input-row')!,
     mapRoot: root.querySelector('#map-root')!,
     routeToastLayer: root.querySelector('.route-toast-layer')!,
+    mapOverlaySlot: root.querySelector('.map-overlay-slot')!,
     toolTraceRail: root.querySelector('.tool-trace-rail')!,
     statusText: root.querySelector('.shell-footer .status-text')!,
   };

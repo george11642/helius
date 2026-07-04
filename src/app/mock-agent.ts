@@ -14,6 +14,10 @@ export interface HeliusHandle {
   setTier(tier: ModelTier): Promise<void>;
   listPacks(): Promise<PackInfo[]>;
   switchPack(packId: string): Promise<void>;
+  /** Start the model load explicitly (map-only boots). The mock's scripted
+   *  boot already ran by the time createHelius resolves, so this is a no-op
+   *  here — the real façade (src/agent/index.ts) does the actual work. */
+  loadModel(): Promise<void>;
   abort(): void;
   getStats(): { decodeTps: number; prefillMs: number } | null;
 }
@@ -167,6 +171,9 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<HeliusHan
     },
     async listPacks() {
       return MOCK_PACKS;
+    },
+    async loadModel() {
+      /* scripted boot already completed */
     },
     async switchPack(packId: string) {
       const info = MOCK_PACKS.find((p) => p.id === packId);
