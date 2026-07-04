@@ -64,8 +64,11 @@ is **done and verified** unless a line says otherwise. Submission deadline:
   2. `./assemble.sh --rough --capture takes/<file>.mov` → review → final master.
   3. Upload **unlisted** via authed Chrome at studio.youtube.com (channel `bpapp`
      `UC0BaCe0TUTk55D3wRFX-Caw`, pre-authed; has 1 strike — George may swap).
-- **Captions status:** see the CURRENT-STATE line in the plan memory — transparent
-  (yuva420p) render was being finished by the engine agent at handoff.
+- **Captions:** DONE — transparent `captions.mov` (QTRLE/argb; vp8/vp9 alpha
+  encode is broken on this machine, proven, so .mov not .webm). Rebuild with
+  `video/captions/render.sh`. `assemble.sh` prefers `captions.mov` and overlays it.
+  The ONLY remaining video step is rolling a clean-content take + assemble +
+  upload — the kit itself is fully built and verified.
 
 ## George's open items (all optional / his-to-do)
 
