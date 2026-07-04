@@ -36,3 +36,13 @@ completed offline: `sun_clock()` chip → "You have 753 minutes… sunset 08:25 
 (correct NOAA math). `navigator.onLine === false` asserted throughout; Wi-Fi
 auto-restored by the harness trap. Scripts: video/wifi-proof.sh + wifi-offline-check.mjs;
 evidence: video/takes/wifi-proof-result.json + wifi-proof.png.
+
+## Judge URL end-to-end (deployed, real model — the definitive check)
+https://helius-9d0.pages.dev, fresh tab, NO mock: Gemma E2B loads from R2 in
+**82.2s**; map renders with basemap + hillshade + **contours from R2 terrain
+(the DEM-bridge-against-R2 risk — clean)** + trails + all POIs; a real typed
+turn runs actual Gemma inference (**22.3 tok/s**) → locate→sun_clock→route_back
+→ grounded answer; the **10.64km / 1584-pt route draws** on the offline map;
+**zero console warnings/errors** across the entire load+turn (onerror /
+unhandledrejection / console hooks from first paint). Scroll-zoom + drag-pan
+confirmed. This is the judge-facing URL and it is verified solid.
