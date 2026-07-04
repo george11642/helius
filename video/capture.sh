@@ -29,9 +29,9 @@ done
 
 # --- locate the screen-capture avfoundation device index ---
 echo "==> avfoundation devices:" >&2
-LIST=$(ffmpeg -hide_banner -f avfoundation -list_devices true -i "" 2>&1 || true)
-echo "$LIST" | grep -iE "capture screen|\bscreen\b|camera|microphone" >&2 || true
-IDX="${SCREEN_INDEX:-$(echo "$LIST" | grep -i "Capture screen" | head -1 | sed -E 's/.*\[([0-9]+)\] Capture screen.*/\1/')}"
+DEVLIST=$(ffmpeg -hide_banner -f avfoundation -list_devices true -i "" 2>&1 || true)
+echo "$DEVLIST" | grep -iE "capture screen|\bscreen\b|camera|microphone" >&2 || true
+IDX="${SCREEN_INDEX:-$(echo "$DEVLIST" | grep -i "Capture screen" | head -1 | sed -E 's/.*\[([0-9]+)\] Capture screen.*/\1/')}"
 if ! [[ "$IDX" =~ ^[0-9]+$ ]]; then
   echo "!! could not auto-detect the screen device index — set SCREEN_INDEX=N (from the list above)." >&2
   exit 1

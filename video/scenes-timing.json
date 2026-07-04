@@ -1,63 +1,83 @@
 {
-  "t0": 1783171747326,
+  "t0": 1783174484648,
   "url": "http://localhost:4174/?prewarm=1",
-  "label": "dry",
-  "totalMs": 201393,
+  "label": "warm2",
+  "ok": true,
+  "failures": [],
+  "totalMs": 49169,
   "traceChips": 10,
   "scenes": [
     {
       "n": 1,
       "label": "idle-ready",
-      "startMs": 1503,
-      "endMs": 1509
+      "startMs": 1204,
+      "endMs": 1210,
+      "ms": 6,
+      "failed": false
     },
     {
       "n": 2,
       "label": "hero-ask",
-      "startMs": 3194,
-      "endMs": 3237
+      "startMs": 2669,
+      "endMs": 2768,
+      "ms": 99,
+      "failed": false
     },
     {
       "n": 3,
       "label": "trace-chips",
-      "startMs": 4904,
-      "endMs": 12509
+      "startMs": 4142,
+      "endMs": 12546,
+      "ms": 8404,
+      "failed": false
     },
     {
       "n": 4,
       "label": "route-draw",
-      "startMs": 14205,
-      "endMs": 16794
+      "startMs": 13927,
+      "endMs": 16726,
+      "ms": 2799,
+      "failed": false
     },
     {
       "n": "2b",
       "label": "mic-pulse",
-      "startMs": 18532,
-      "endMs": 19557
+      "startMs": 18058,
+      "endMs": 19078,
+      "ms": 1020,
+      "failed": false
     },
     {
       "n": 5,
       "label": "tier-swap",
-      "startMs": 21238,
-      "endMs": 67797
+      "startMs": 20464,
+      "endMs": 22103,
+      "ms": 1639,
+      "failed": false
     },
     {
       "n": 6,
       "label": "read-sign",
-      "startMs": 69557,
-      "endMs": 75404
+      "startMs": 23544,
+      "endMs": 27637,
+      "ms": 4093,
+      "failed": false
     },
     {
       "n": 7,
       "label": "beacon",
-      "startMs": 77033,
-      "endMs": 198627
+      "startMs": 28960,
+      "endMs": 46675,
+      "ms": 17715,
+      "failed": false
     },
     {
       "n": 8,
       "label": "end-hold",
-      "startMs": 200257,
-      "endMs": 201262
+      "startMs": 48016,
+      "endMs": 49021,
+      "ms": 1005,
+      "failed": false
     }
   ]
 }

@@ -1,14 +1,15 @@
 // scenes.mjs — deterministic Playwright DRIVER for the Helius demo video.
-// It only DRIVES a real Chrome window (system Chrome via channel:'chrome', so
-// WebGPU/Gemma actually run); a separate ffmpeg (capture.sh) records the screen.
-// Never uses Playwright's own recorder (bitrate is hardcoded ~1Mbit/s).
+// Drives a real Chrome window (system Chrome via channel:'chrome', so WebGPU/Gemma
+// actually run); a separate ffmpeg (capture.sh) records the screen — never
+// Playwright's own recorder (bitrate hard-capped ~1Mbit/s).
 //
-//   node scenes.mjs                # dry run: real turn, screenshot每scene → takes/dry
+//   node scenes.mjs                # dry run: real turns, screenshot per scene → takes/dry
 //   DEMO_URL=… TAKE_LABEL=take1 node scenes.mjs
 //
-// Emits numbered SCENE:{...} + relays the app's TRACE:/PROBE: console lines, and
-// writes scenes-timing.json (t0 + per-scene offsets) for assemble.sh cut points.
-// A fake camera device fed sign.y4m drives the read_sign beat glare-free.
+// Pre-position WARMS both tiers (so the swap is instant) BEFORE t0, then runs the
+// scene sequence. Critical waits are HARD (bounded): a timeout marks the scene
+// failed in scenes-timing.json and makes the process exit non-zero. Any scene is
+// also flagged if it exceeds 30s. Emits SCENE:{…} + relays TRACE:/PROBE: lines.
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -20,7 +21,8 @@ const LABEL = process.env.TAKE_LABEL || 'dry';
 const OUTDIR = join(HERE, 'takes', LABEL);
 const SIGN = join(HERE, 'sign.y4m');
 const HERO = "I'm off the trail and I'm not sure where I am. Get me back to the trailhead before sunset.";
-const READY_MS = 240000; // R2 cold path is ~96s; allow generous headroom
+const READY_MS = 240000;
+const SCENE_CAP_MS = 30000;
 mkdirSync(OUTDIR, { recursive: true });
 
 const ctx = await chromium.launchPersistentContext(join(HERE, '.chrome-profile'), {
@@ -49,129 +51,145 @@ page.on('console', (m) => {
 });
 
 const scenes = [];
+const failures = [];
 let t0 = 0;
-const softWait = async (fn, ms, what) => {
-  try {
-    await fn();
-    return true;
-  } catch {
-    console.log(`  (soft-timeout waiting for ${what})`);
-    return false;
-  }
+let sceneFailed = false;
+
+// best-effort wait: a timeout is fine (returns false)
+const softWait = async (fn, what) => {
+  try { await fn(); return true; } catch { console.log(`  (soft: ${what} did not appear)`); return false; }
 };
+// critical wait: a timeout FAILS the scene (recorded + non-zero exit) and aborts the body
+const hardWait = async (fn, what) => {
+  try { await fn(); } catch { sceneFailed = true; console.log(`  !! HARD-FAIL: ${what}`); throw new Error(`hardWait:${what}`); }
+};
+const settled = (ms = 25000) => page.waitForSelector('textarea.chat-input:not([disabled])', { timeout: ms });
+
 async function scene(n, label, body) {
-  await page.waitForTimeout(1500); // cut-point pause between scenes
+  await page.waitForTimeout(1200); // cut-point pause between scenes
+  sceneFailed = false;
   const start = Date.now();
   console.log(`SCENE:${JSON.stringify({ n, label, phase: 'start', off: start - t0 })}`);
   try {
     await body();
   } catch (err) {
-    console.log(`  !! scene ${n} (${label}) body error: ${String(err).slice(0, 160)}`);
+    if (!String(err).startsWith('Error: hardWait:')) console.log(`  scene ${n} body error: ${String(err).slice(0, 140)}`);
   }
   const end = Date.now();
+  if (end - start > SCENE_CAP_MS) { sceneFailed = true; console.log(`  !! scene ${n} exceeded 30s cap (${end - start}ms)`); }
   await page.screenshot({ path: join(OUTDIR, `S${String(n).padStart(2, '0')}-${label}.png`) }).catch(() => {});
-  scenes.push({ n, label, startMs: start - t0, endMs: end - t0 });
-  console.log(`SCENE:${JSON.stringify({ n, label, phase: 'end', off: end - t0, ms: end - start })}`);
+  scenes.push({ n, label, startMs: start - t0, endMs: end - t0, ms: end - start, failed: sceneFailed });
+  if (sceneFailed) failures.push(`S${n}:${label}`);
+  console.log(`SCENE:${JSON.stringify({ n, label, phase: 'end', off: end - t0, ms: end - start, failed: sceneFailed })}`);
 }
-const turnSettled = () => page.waitForSelector('textarea.chat-input:not([disabled])', { timeout: 120000 });
 
 try {
   console.log(`==> ${DEMO_URL}`);
   await page.goto(DEMO_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-  // Wait for the engine to reach ready (boot overlay fades → chat input enabled).
   console.log('==> waiting for engine ready (model load)…');
   await page.waitForSelector('textarea.chat-input:not([disabled])', { timeout: READY_MS });
   console.log('==> engine ready.');
 
-  // Pre-position: warm for the green offline badge (best-effort).
+  // ---- pre-position (NOT recorded / before t0) ----
+  // 1. offline warm for the green badge
   await softWait(async () => {
     await page.click('.chip-warm-offline', { timeout: 3000 });
     await page.waitForSelector('.chip-offline[data-state="ready"]', { timeout: 45000 });
-  }, 45000, 'OFFLINE-READY badge');
+  }, 'OFFLINE-READY badge');
+  // 2. force-load E4B via a tier round-trip (setTier loads it directly — NO warm-up
+  //    turn, which would pollute the conversation and make the hero turn shortcut to
+  //    a single chip). Fresh conversation → full locate→sun_clock→route_back chain,
+  //    and E4B resident → the S5 swap is instant.
+  await softWait(async () => {
+    await page.click('.chip-tier');
+    await page.waitForSelector('.chip-tier[data-tier="E4B"]', { timeout: 60000 });
+    await page.click('.chip-tier');
+    await page.waitForSelector('.chip-tier[data-tier="E2B"]', { timeout: 60000 });
+  }, 'warm both tiers');
+  console.log('==> warmed (both tiers resident, conversation fresh). Rolling scenes.');
 
   t0 = Date.now();
 
   await scene(1, 'idle-ready', async () => {
-    await page.waitForSelector('.wordmark', { timeout: 5000 });
+    await hardWait(() => page.waitForSelector('.wordmark', { timeout: 5000 }), 'wordmark');
   });
 
   await scene(2, 'hero-ask', async () => {
     await page.fill('textarea.chat-input', HERO);
     await page.click('.chat-send-btn');
-    await page.waitForSelector('.msg-user', { timeout: 10000 });
+    await hardWait(() => page.waitForSelector('.msg-user', { timeout: 10000 }), 'user bubble');
   });
 
   await scene(3, 'trace-chips', async () => {
-    // the money shot — wait for the real tool chain to populate (locate→sun→route…)
-    await page.waitForFunction(() => document.querySelectorAll('.tool-trace-rail .trace-chip').length >= 3, null, { timeout: 90000 });
+    // the money shot — the real chain populates (locate→sun_clock→route_back…)
+    await hardWait(() => page.waitForFunction(() => document.querySelectorAll('.tool-trace-rail .trace-chip').length >= 3, null, { timeout: 25000 }), '≥3 trace chips');
     await page.waitForTimeout(600);
   });
 
   await scene(4, 'route-draw', async () => {
-    await softWait(() => page.waitForSelector('.route-toast:not([hidden])', { timeout: 60000 }), 60000, 'route toast');
-    await page.waitForTimeout(1800); // let the map flyTo settle
-    await softWait(() => turnSettled(), 120000, 'turn to finish');
+    await hardWait(() => page.waitForSelector('.route-toast:not([hidden])', { timeout: 25000 }), 'route-ready toast');
+    await page.waitForTimeout(1500); // flyTo settle
+    await hardWait(() => settled(20000), 'turn finished');
   });
 
   await scene('2b', 'mic-pulse', async () => {
-    const mic = await page.$('.mic-btn');
-    if (mic) {
-      const box = await mic.boundingBox();
-      if (box) {
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await page.mouse.down();
-        await softWait(() => page.waitForSelector('.mic-waveform:not([hidden])', { timeout: 4000 }), 4000, 'mic waveform');
-        await page.waitForTimeout(900);
-        await page.mouse.up();
-      }
+    const box = await (await page.$('.mic-btn'))?.boundingBox();
+    if (box) {
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await softWait(() => page.waitForSelector('.mic-waveform:not([hidden])', { timeout: 4000 }), 'mic waveform');
+      await page.waitForTimeout(900);
+      await page.mouse.up();
     }
-    await softWait(() => turnSettled(), 60000, 'mic turn settle');
+    await softWait(() => settled(25000), 'mic turn settle');
   });
 
   await scene(5, 'tier-swap', async () => {
+    // both tiers are warm (pre-position) → these are instant hot-swaps
     await page.click('.chip-tier');
-    await softWait(() => page.waitForSelector('.chip-tier[data-tier="E4B"]', { timeout: 45000 }), 45000, 'swap to E4B');
+    await hardWait(() => page.waitForSelector('.chip-tier[data-tier="E4B"]', { timeout: 12000 }), 'swap to E4B');
     await page.waitForTimeout(900);
     await page.click('.chip-tier');
-    await softWait(() => page.waitForSelector('.chip-tier[data-tier="E2B"]', { timeout: 45000 }), 45000, 'swap back to E2B');
+    await hardWait(() => page.waitForSelector('.chip-tier[data-tier="E2B"]', { timeout: 12000 }), 'swap back to E2B');
     await page.waitForTimeout(600);
   });
 
   await scene(6, 'read-sign', async () => {
     await page.click('.camera-btn');
-    await softWait(() => page.waitForSelector('.camera-overlay:not([hidden]) .camera-preview', { timeout: 8000 }), 8000, 'camera overlay');
+    await hardWait(() => page.waitForSelector('.camera-overlay:not([hidden]) .camera-preview', { timeout: 8000 }), 'camera overlay');
     await page.waitForTimeout(1200); // let the fake sign video start
     await page.click('.camera-overlay'); // tap-to-capture
-    await softWait(() => turnSettled(), 120000, 'read_sign turn');
-    await page.waitForTimeout(600);
+    await hardWait(() => settled(25000), 'read_sign turn');
+    await page.waitForTimeout(500);
   });
 
   await scene(7, 'beacon', async () => {
-    // Ask the agent to arm it (it may already have), then fire the strobe.
+    // Ask to ARM (not fire) so the tap-to-fire card appears (src/app/beacon.ts:
+    // 'arm' → .beacon-armed-card shown; clicking it → .beacon-strobe-overlay).
     if (!(await page.$('.beacon-armed-card:not([hidden])'))) {
-      await page.fill('textarea.chat-input', 'Arm the SOS beacon.');
+      await page.fill('textarea.chat-input', "Arm the morse beacon — don't fire it yet.");
       await page.click('.chat-send-btn');
-      await softWait(() => page.waitForSelector('.beacon-armed-card:not([hidden])', { timeout: 90000 }), 90000, 'beacon armed card');
-      await softWait(() => turnSettled(), 60000, 'beacon turn settle');
+      await hardWait(() => page.waitForSelector('.beacon-armed-card:not([hidden])', { timeout: 20000 }), 'armed card');
+      await softWait(() => settled(15000), 'arm turn settle');
     }
-    await softWait(async () => {
-      await page.click('.beacon-armed-card');
-      await page.waitForSelector('.beacon-strobe-overlay:not([hidden])', { timeout: 5000 });
-    }, 5000, 'strobe start');
-    await page.waitForTimeout(1500); // let a couple SOS cycles flash
+    await page.click('.beacon-armed-card'); // tap to fire
+    await hardWait(() => page.waitForSelector('.beacon-strobe-overlay:not([hidden])', { timeout: 5000 }), 'strobe overlay');
+    await page.waitForTimeout(3000); // a few SOS cycles
     await page.click('.beacon-strobe-overlay').catch(() => {}); // tap to stop
   });
 
   await scene(8, 'end-hold', async () => {
-    await page.waitForSelector('.wordmark', { timeout: 5000 });
+    await hardWait(() => page.waitForSelector('.wordmark', { timeout: 5000 }), 'wordmark');
     await page.waitForTimeout(1000);
   });
 
-  const timing = { t0, url: DEMO_URL, label: LABEL, totalMs: Date.now() - t0, traceChips: traceLines.length, scenes };
+  const ok = failures.length === 0;
+  const timing = { t0, url: DEMO_URL, label: LABEL, ok, failures, totalMs: Date.now() - t0, traceChips: traceLines.length, scenes };
   writeFileSync(join(HERE, 'scenes-timing.json'), JSON.stringify(timing, null, 2));
-  console.log(`\n==> wrote scenes-timing.json (${scenes.length} scenes, ${traceLines.length} TRACE chips, ${timing.totalMs}ms total)`);
+  console.log(`\n==> scenes-timing.json: ${scenes.length} scenes, ${traceLines.length} TRACE chips, ${((Date.now() - t0) / 1000).toFixed(1)}s total, ${ok ? 'ALL PASS ✓' : 'FAILURES: ' + failures.join(', ')}`);
   console.log(`==> screenshots → ${OUTDIR}`);
+  if (!ok) process.exitCode = 1;
 } catch (err) {
   console.error('scenes.mjs FAILED:', err);
   await page.screenshot({ path: join(OUTDIR, 'FAILURE.png') }).catch(() => {});

@@ -4,7 +4,7 @@
 // Reads narration from video/script.txt, resolves a voice by name at runtime,
 // generates TTS + alignment, writes video/vo.mp3 and video/alignment.json.
 
-import { writeFile, readFile } from 'node:fs/promises';
+import { writeFile, readFile, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
@@ -105,12 +105,12 @@ async function main() {
     );
   }
 
+  // Write to temp files, verify, then atomic-rename — so a partial/failed run
+  // never leaves a stale vo.mp3/alignment.json that later steps trust.
   const audioBuffer = Buffer.from(ttsJson.audio_base64, 'base64');
-  await writeFile(OUT_MP3, audioBuffer);
-  console.log(`Wrote ${OUT_MP3} (${audioBuffer.length} bytes)`);
-
+  await writeFile(`${OUT_MP3}.tmp`, audioBuffer);
   await writeFile(
-    OUT_ALIGNMENT,
+    `${OUT_ALIGNMENT}.tmp`,
     JSON.stringify(
       {
         voiceId,
@@ -122,19 +122,19 @@ async function main() {
       2
     )
   );
-  console.log(`Wrote ${OUT_ALIGNMENT}`);
 
-  try {
-    const { stdout } = await execFileAsync('ffprobe', [
-      '-v', 'error',
-      '-show_entries', 'format=duration',
-      '-of', 'default=noprint_wrappers=1:nokey=1',
-      OUT_MP3,
-    ]);
-    console.log(`ffprobe duration: ${stdout.trim()}s`);
-  } catch (e) {
-    console.error(`ffprobe failed: ${e.message}`);
-  }
+  const { stdout } = await execFileAsync('ffprobe', [
+    '-v', 'error',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    `${OUT_MP3}.tmp`,
+  ]);
+  const seconds = parseFloat(stdout.trim());
+  if (!Number.isFinite(seconds) || seconds < 1) throw new Error(`vo.mp3 verify failed (duration ${stdout.trim()})`);
+
+  await rename(`${OUT_MP3}.tmp`, OUT_MP3);
+  await rename(`${OUT_ALIGNMENT}.tmp`, OUT_ALIGNMENT);
+  console.log(`Wrote ${OUT_MP3} (${audioBuffer.length} bytes, ${seconds.toFixed(1)}s) + ${OUT_ALIGNMENT}`);
 }
 
 main().catch((err) => {

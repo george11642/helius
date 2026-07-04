@@ -43,7 +43,10 @@ try {
   );
   verdict.chip = 'sun_clock';
   // wait for the assistant bubble (turn done ⇒ input re-enabled)
-  await page.waitForFunction(() => !document.querySelector('textarea.chat-input')?.disabled && document.body.innerText.includes('sunset') || /minutes/.test(document.body.innerText), null, { timeout: 180000 });
+  await page.waitForFunction(() => {
+    const el = document.querySelector('textarea.chat-input');
+    return !!el && !el.disabled && (document.body.innerText.includes('sunset') || /minutes/.test(document.body.innerText));
+  }, null, { timeout: 180000 });
   verdict.turnCompleted = true;
   verdict.answer = (await page.evaluate(() => document.body.innerText.split('\n').filter(l => /minute|sunset|light/i.test(l)).slice(-2).join(' | '))).slice(0, 200);
   await page.screenshot({ path: join(HERE, 'takes', 'wifi-proof.png'), fullPage: false });

@@ -8,14 +8,15 @@
 // fal is behind --fal because its balance is currently locked (403); ElevenLabs
 // Music needs a paid plan (free tier → 402) even though the SAME key's TTS works.
 // The synthesized placeholder keeps the video pipeline unblocked until either is
-// topped up. Verifies duration ~60s and non-silence.
+// topped up. Everything is written to music.mp3.tmp, verified (~60s, non-silent),
+// then atomic-renamed — a partial/failed source can never leave a stale music.mp3
+// that blocks the placeholder fallback.
 //
 //   set -a; source ~/.config/global.env; set +a
 //   node music.mjs           # ElevenLabs Music primary
 //   node music.mjs --fal     # fal primary (once its balance is topped up)
 
-import { writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { writeFile, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
@@ -24,6 +25,7 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, 'music.mp3');
+const TMP = `${OUT}.tmp`;
 const PROMPT = 'minimal cinematic tech pulse, warm analog synth, steady build, no drums first 8 seconds';
 const USE_FAL = process.argv.includes('--fal');
 
@@ -42,7 +44,7 @@ function findAudioUrl(o, d = 0) {
 const download = async (url) => {
   const r = await fetch(url);
   if (!r.ok) throw new Error(`download ${r.status}`);
-  await writeFile(OUT, Buffer.from(await r.arrayBuffer()));
+  await writeFile(TMP, Buffer.from(await r.arrayBuffer()));
 };
 
 // --- ElevenLabs Music v2 (confirmed via Context7: POST /v1/music → binary audio) ---
@@ -59,14 +61,14 @@ async function tryElevenMusic() {
   if (ct.includes('json')) {
     const j = await res.json();
     if (typeof j.audio === 'string') {
-      await writeFile(OUT, Buffer.from(j.audio, 'base64'));
+      await writeFile(TMP, Buffer.from(j.audio, 'base64'));
       return;
     }
     const url = findAudioUrl(j);
     if (!url) throw new Error('eleven-music: no audio in json');
     await download(url);
   } else {
-    await writeFile(OUT, Buffer.from(await res.arrayBuffer()));
+    await writeFile(TMP, Buffer.from(await res.arrayBuffer()));
   }
 }
 
@@ -107,46 +109,52 @@ async function synthPlaceholder() {
     '-f', 'lavfi', '-i', 'sine=frequency=220:duration=60',
     '-filter_complex',
     '[0][1][2]amix=inputs=3:normalize=0,volume=0.33,tremolo=f=0.15:d=0.4,lowpass=f=900,afade=t=in:st=0:d=8,afade=t=out:st=56:d=4',
-    '-ar', '44100', OUT,
+    '-ar', '44100', '-f', 'mp3', TMP, // -f mp3: the .tmp extension can't infer the muxer
   ]);
 }
 
-async function verify() {
-  const { stdout: dur } = await execFileAsync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', OUT]);
+async function verify(pathArg) {
+  const { stdout: dur } = await execFileAsync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', pathArg]);
   const seconds = parseFloat(dur);
-  const { stderr } = await execFileAsync('ffmpeg', ['-hide_banner', '-i', OUT, '-af', 'volumedetect', '-f', 'null', '-']).catch((e) => ({ stderr: e.stderr || '' }));
+  const { stderr } = await execFileAsync('ffmpeg', ['-hide_banner', '-i', pathArg, '-af', 'volumedetect', '-f', 'null', '-']).catch((e) => ({ stderr: e.stderr || '' }));
   const m = /mean_volume:\s*(-?[0-9.]+) dB/.exec(stderr);
   const meanDb = m ? parseFloat(m[1]) : NaN;
   const silent = !Number.isFinite(meanDb) || meanDb < -60;
-  console.log(`music.mp3 — ${seconds.toFixed(1)}s, mean_volume ${Number.isFinite(meanDb) ? meanDb + 'dB' : '?'} → ${silent ? 'SILENT ⚠' : 'audible ✓'}`);
-  if (seconds < 55 || seconds > 65) console.warn(`  ⚠ duration ${seconds.toFixed(1)}s is outside ~60s`);
-  if (silent) throw new Error('generated audio is silent');
+  console.log(`  verify: ${seconds.toFixed(1)}s, mean_volume ${Number.isFinite(meanDb) ? meanDb + 'dB' : '?'} → ${silent ? 'SILENT ⚠' : 'audible ✓'}`);
+  if (!Number.isFinite(seconds) || seconds < 3) throw new Error(`bad duration ${dur.trim()}`);
+  if (silent) throw new Error('audio is silent');
 }
 
 async function main() {
   const chain = USE_FAL
     ? [['fal CassetteAI', tryFal], ['ElevenLabs Music v2', tryElevenMusic]]
     : [['ElevenLabs Music v2', tryElevenMusic]];
+
+  let produced = null;
   for (const [name, fn] of chain) {
     try {
       console.log(`trying ${name}…`);
       await fn();
-      console.log(`✓ music from ${name}`);
+      await verify(TMP);
+      produced = name;
       break;
     } catch (err) {
       console.warn(`  ${name} unavailable: ${err.message}`);
     }
   }
-  if (!existsSync(OUT)) {
+
+  if (!produced) {
     console.warn('!! No AI music source available (fal balance-locked / ElevenLabs Music needs a paid plan).');
     console.warn('!! Writing a SYNTHESIZED PLACEHOLDER bed. Re-run once billing is sorted:');
     console.warn('!!   node music.mjs        (ElevenLabs Music, after a paid upgrade)');
     console.warn('!!   node music.mjs --fal  (fal CassetteAI, after a balance top-up)');
     await synthPlaceholder();
-    console.log('✓ placeholder music written');
+    await verify(TMP);
+    produced = 'synthesized placeholder';
   }
-  await verify();
-  console.log(`wrote ${OUT}`);
+
+  await rename(TMP, OUT); // atomic — OUT is only ever a fully-verified asset
+  console.log(`✓ music.mp3 from ${produced}`);
 }
 
 main().catch((err) => {

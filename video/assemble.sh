@@ -82,40 +82,90 @@ else
   fi
 fi
 
-# ---------- VIDEO: normalize capture, overlay captions, optional broll bookends ----------
+# ---------- VIDEO: trim per-scene clips (scenes-timing.json), concat, overlay captions, guard ≤62s ----------
 # ProRes mezzanine for the real path; software for --smoke (avoids the hw
 # videotoolbox encoder stalling when the GPU is busy with model tabs).
 if [ "$SMOKE" = "1" ]; then MEZZ=(-c:v libx264 -preset ultrafast -crf 12); else MEZZ=(-c:v prores_videotoolbox -profile:v 3); fi
 XF=0.6
-CAPDUR=$(dur "$CAPTURE")
-# base demo stream: force clean 1920x1080p60, then overlay captions if present
+CAPTURE_LEAD="${CAPTURE_LEAD:-0}"  # seconds the capture ran before scenes.mjs t0 (manual sync knob)
+
+TIMING="scenes-timing.json"
+if [ "$SMOKE" = "1" ]; then
+  TIMING="$WORK/timing.json"
+  printf '%s' '{"scenes":[{"label":"a","startMs":200,"ms":1500},{"label":"b","startMs":2200,"ms":1500},{"label":"c","startMs":4200,"ms":1400}]}' > "$TIMING"
+fi
+[ -f "$TIMING" ] || { echo "!! no $TIMING — run scenes.mjs first (or use --smoke)." >&2; exit 1; }
+
+# Plan: per-scene trimmed window (label startSec durSec) from the timings + a beat
+# budget. The helper totals it and EXITS NONZERO if the budget already exceeds 62s.
+PLAN=$(node - "$TIMING" "$CAPTURE_LEAD" <<'NODE'
+const fs = require('fs');
+const [, , tp, lead] = process.argv;
+const L = parseFloat(lead) || 0;
+const T = JSON.parse(fs.readFileSync(tp, 'utf8'));
+// beat budget (seconds): hook ~5, demo ~30, tech ~8, close ~8
+const BUD = { 'idle-ready': 2, 'hero-ask': 3, 'trace-chips': 12, 'route-draw': 6, 'mic-pulse': 2, 'tier-swap': 8, 'read-sign': 9, 'beacon': 5, 'end-hold': 3, a: 1.5, b: 1.5, c: 1.4 };
+let total = 0; const rows = [];
+for (const s of (T.scenes || [])) {
+  const cap = BUD[s.label] ?? 6;
+  const dur = Math.max(0.4, Math.min((s.ms || cap * 1000) / 1000, cap));
+  rows.push(`${s.label} ${(L + (s.startMs || 0) / 1000).toFixed(3)} ${dur.toFixed(3)}`);
+  total += dur;
+}
+if (!rows.length) { console.error('no scenes in timing'); process.exit(2); }
+if (total > 62) { console.error(`plan budget ${total.toFixed(1)}s exceeds the 62s limit`); process.exit(3); }
+console.error(`==> plan: ${rows.length} scenes, ${total.toFixed(1)}s trimmed total`);
+process.stdout.write(rows.join('\n'));
+NODE
+) || { echo "!! FAIL: scene plan exceeds the 62s limit (or timing parse failed)." >&2; exit 1; }
+
+# Extract each trimmed scene clip, letterboxed to a clean 1920x1080p60.
+i=0; CONCATLIST="$WORK/concat.txt"; : > "$CONCATLIST"
+while read -r label st du; do
+  [ -z "$label" ] && continue
+  clip="$WORK/clip_$(printf '%02d' "$i").mp4"
+  ffmpeg -hide_banner -loglevel error -y -ss "$st" -t "$du" -i "$CAPTURE" \
+    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=60,format=yuv420p,setpts=PTS-STARTPTS" \
+    -an "${MEZZ[@]}" "$clip"
+  echo "file '$clip'" >> "$CONCATLIST"; i=$((i + 1))
+done <<< "$PLAN"
+[ "$i" -gt 0 ] || { echo "!! no clips extracted" >&2; exit 1; }
+
+DEMO="$WORK/demo.mp4"
+ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i "$CONCATLIST" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMO"
+
+# Overlay captions onto the trimmed demo.
+DEMOCAP="$DEMO"
 if [ -n "$CAPS" ]; then
-  VOVL="[0:v]scale=1920:1080,fps=60,format=yuv420p[base];[1:v]scale=1920:1080,fps=60[cap];[base][cap]overlay=shortest=0:format=auto[demo]"
-  VIN=(-i "$CAPTURE" -i "$CAPS")
-else
-  VOVL="[0:v]scale=1920:1080,fps=60,format=yuv420p[demo]"
-  VIN=(-i "$CAPTURE")
+  DEMOCAP="$WORK/democap.mp4"
+  ffmpeg -hide_banner -loglevel error -y -i "$DEMO" -i "$CAPS" \
+    -filter_complex "[0:v]format=yuv420p[b];[1:v]scale=1920:1080,fps=60[c];[b][c]overlay=shortest=1[v]" \
+    -map "[v]" "${MEZZ[@]}" -pix_fmt yuv420p "$DEMOCAP"
 fi
 
-VISUALS="$WORK/visuals.mp4"
+# Optional broll bookends (xfade); shift the audio to start at the demo.
+VISUALS="$WORK/visuals.mp4"; DEMODUR=$(dur "$DEMOCAP")
 if [ -n "$INTRO" ] && [ -f "$INTRO" ] && [ -n "$OUTRO" ] && [ -f "$OUTRO" ]; then
-  # bookends: intro xfade demo xfade outro; audio delayed to start at the demo.
-  ID=$(dur "$INTRO"); OD=$(dur "$OUTRO")
+  ID=$(dur "$INTRO")
   OFF1=$(node -e "console.log((${ID}-${XF}).toFixed(3))")
-  OFF2=$(node -e "console.log((${ID}-${XF}+${CAPDUR}-${XF}).toFixed(3))")
-  ffmpeg -hide_banner -loglevel error -y "${VIN[@]}" -i "$INTRO" -i "$OUTRO" -filter_complex "
-    ${VOVL};
-    [2:v]scale=1920:1080,fps=60,format=yuv420p,minterpolate=fps=60[intro];
-    [3:v]scale=1920:1080,fps=60,format=yuv420p[outro];
-    [intro][demo]xfade=transition=fade:duration=${XF}:offset=${OFF1}[a];
+  OFF2=$(node -e "console.log((${ID}-${XF}+${DEMODUR}-${XF}).toFixed(3))")
+  ffmpeg -hide_banner -loglevel error -y -i "$DEMOCAP" -i "$INTRO" -i "$OUTRO" -filter_complex "
+    [1:v]scale=1920:1080,fps=60,format=yuv420p[intro];
+    [2:v]scale=1920:1080,fps=60,format=yuv420p[outro];
+    [intro][0:v]xfade=transition=fade:duration=${XF}:offset=${OFF1}[a];
     [a][outro]xfade=transition=fade:duration=${XF}:offset=${OFF2}[v]
   " -map "[v]" "${MEZZ[@]}" -pix_fmt yuv420p "$VISUALS"
   ADELAY=$(node -e "console.log(Math.round((${ID}-${XF})*1000))")
   ffmpeg -hide_banner -loglevel error -y -i "$AUDIO" -af "adelay=${ADELAY}|${ADELAY}" -ar 48000 "$WORK/audio_shift.wav"
   AUDIO="$WORK/audio_shift.wav"
 else
-  ffmpeg -hide_banner -loglevel error -y "${VIN[@]}" -filter_complex "${VOVL}" -map "[demo]" "${MEZZ[@]}" -pix_fmt yuv420p "$VISUALS"
+  cp "$DEMOCAP" "$VISUALS"
 fi
+
+# HARD runtime guard — FAIL LOUDLY if the assembled visuals exceed 62s.
+VDUR=$(dur "$VISUALS")
+echo "==> assembled visuals: ${VDUR}s" >&2
+node -e "process.exit(parseFloat('${VDUR}') > 62 ? 1 : 0)" || { echo "!! FAIL: assembled runtime ${VDUR}s exceeds the 62s limit." >&2; exit 1; }
 
 # ---------- final encode ----------
 echo "==> encoding → $OUT" >&2
