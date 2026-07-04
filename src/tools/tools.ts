@@ -8,3 +8,6 @@ export type { GpsFix } from './location';
 export { setPendingFrame, takePendingFrame, hasPendingFrame } from './camera';
 export { toMorse, morseTiming, morseDurationMs } from './morse';
 export type { MorseStep } from './morse';
+export { setPack, getPack } from './pack';
+export { runRouteBack, takePendingRoute } from './route';
+export type { PendingRoute } from './route';

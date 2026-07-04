@@ -9,6 +9,7 @@ import { daylightLeft } from '../lib/sun';
 import { getFix } from './location';
 import { morseTiming, morseDurationMs, toMorse } from './morse';
 import { takePendingFrame } from './camera';
+import { runRouteBack } from './route';
 
 /** Minimal engine surface the tools need (read_sign vision). */
 export interface EngineForTools {
@@ -32,11 +33,6 @@ export const READ_SIGN_PROMPT =
   'Then give ONE short, actionable instruction for a hiker based on it. Keep the whole reply under 40 words.';
 
 const UNIT_MS = 200;
-const ROUTE_DESTS: Record<string, string> = {
-  trailhead: 'La Luz Trailhead',
-  crest: 'Sandia Crest',
-  tram_station: 'Tram Upper Station',
-};
 
 const hhmm = (d: Date): string => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const round = (n: number): number => Math.round(n);
@@ -69,7 +65,7 @@ const SPECS: Record<string, ToolSpec> = {
   ),
   route_back: spec(
     'route_back',
-    'Compute a walking route from the current position back to a known safe destination over the offline trail graph. Returns distance, climb, ETA, and waypoint count.',
+    'Compute a walking route from the current position back to a known safe destination over the offline trail graph. Returns distance, ETA, and waypoint count.',
     {
       destination: {
         type: 'string',
@@ -155,24 +151,8 @@ function paceEta(args: Record<string, unknown>): ToolResult {
   };
 }
 
-// TODO(H6-12): replace this stub with the real A* route over the ngraph trail
-// graph (distance/ascent/waypoints/geojson from the offline PMTiles network).
-function routeBack(args: Record<string, unknown>): ToolResult {
-  const key = asString(args.destination, 'trailhead');
-  const dest = ROUTE_DESTS[key] ?? ROUTE_DESTS.trailhead;
-  return {
-    data: {
-      status: 'ready',
-      dest,
-      distance_m: 3870,
-      ascent_m: -680,
-      eta_min: 62,
-      waypoints: 14,
-      stub: true,
-    },
-    summary: `route to ${dest}: 3.87 km, -680 m, ~62 min, 14 waypoints`,
-  };
-}
+// route_back is implemented in ./route.ts (real A* over the pack graph) and
+// wired into the registry below via runRouteBack.
 
 function morseBeacon(args: Record<string, unknown>, ctx: ToolContext): ToolResult {
   const mode = asString(args.mode, 'arm') as 'arm' | 'start' | 'stop';
@@ -263,7 +243,7 @@ export function createTools(ctx: ToolContext): ToolRegistry {
     { spec: SPECS.locate, run: guard('locate', () => locate()) },
     { spec: SPECS.sun_clock, run: guard('sun_clock', () => sunClock()) },
     { spec: SPECS.pace_eta, run: guard('pace_eta', (a) => paceEta(a)) },
-    { spec: SPECS.route_back, run: guard('route_back', (a) => routeBack(a)) },
+    { spec: SPECS.route_back, run: guard('route_back', (a) => runRouteBack(a)) },
     { spec: SPECS.morse_beacon, run: guard('morse_beacon', (a) => morseBeacon(a, ctx)) },
     { spec: SPECS.safety_plan, run: guard('safety_plan', (a) => safetyPlan(a, ctx)) },
     { spec: SPECS.read_sign, run: guard('read_sign', (a) => readSign(a, ctx)) },

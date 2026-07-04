@@ -8,6 +8,7 @@ import { createDisplayFilter, parseToolCalls, toAssistantToolCalls } from '../li
 import type { Engine } from '../llm/engine';
 import type { RawFrame } from '../llm/protocol';
 import { READ_SIGN_PROMPT, type ToolRegistry } from '../tools/registry';
+import { takePendingRoute } from '../tools/route';
 
 const MAX_STEPS = 6;
 const MAX_NEW_TOKENS = 512;
@@ -106,6 +107,17 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
           emit({ type: 'tool-error', name: call.name, message: res.data.error, step });
         } else {
           emit({ type: 'tool-done', name: call.name, summary: res.summary, ms, step });
+          // route_back stashes its (bulky) geometry out-of-band so it never
+          // enters the model's context; surface it to the map here.
+          const pendingRoute = takePendingRoute();
+          if (pendingRoute) {
+            emit({
+              type: 'route',
+              geojson: pendingRoute.geojson,
+              distanceM: pendingRoute.distanceM,
+              etaMin: pendingRoute.etaMin,
+            });
+          }
         }
         // Tool content MUST be a JSON string (jinja mapping branch is broken).
         history.push({ role: 'tool', name: call.name, content: JSON.stringify(res.data) });

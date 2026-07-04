@@ -122,6 +122,38 @@ function loadTier(tier: ModelTier, emitStatus: boolean): Promise<Instance> {
   return promise;
 }
 
+/**
+ * Purge just the small config/template entries (JSON + jinja) under the current
+ * remoteHost from transformers.js's Cache Storage. A poisoned entry there — e.g.
+ * a truncated config.json written during a flaky first load — otherwise bricks
+ * loading permanently ("reading 'tokenizer_class'" on every reload). The big
+ * weights (.onnx / .onnx_data) are left intact, so the retry only re-fetches a
+ * few KB. Returns how many entries were deleted.
+ */
+async function purgeConfigCache(): Promise<number> {
+  if (typeof caches === 'undefined') return 0;
+  const host = env.remoteHost ?? '';
+  const cacheKey = (env as { cacheKey?: string }).cacheKey ?? 'transformers-cache';
+  try {
+    const cache = await caches.open(cacheKey);
+    const keys = await cache.keys();
+    let deleted = 0;
+    for (const req of keys) {
+      if (host && !req.url.startsWith(host)) continue;
+      let path = req.url;
+      try {
+        path = new URL(req.url).pathname;
+      } catch {
+        // non-URL cache key — match against the raw string instead
+      }
+      if (/\.(json|jinja)$/.test(path) && (await cache.delete(req))) deleted++;
+    }
+    return deleted;
+  } catch {
+    return 0;
+  }
+}
+
 /** Primary load: bring up `tier`, report ready, then silently pre-warm the other tier. */
 async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
   activeTier = tier;
@@ -129,9 +161,23 @@ async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
   const t0 = performance.now();
   try {
     await loadTier(tier, true);
-  } catch (err) {
-    post({ type: 'status', status: { state: 'error', message: String(err).slice(0, 300) } });
-    return;
+  } catch {
+    // A poisoned config/template cache entry bricks loading permanently. Purge
+    // just those small JSON/jinja entries (weights stay cached) and retry ONCE
+    // before giving up.
+    const purged = await purgeConfigCache();
+    try {
+      await loadTier(tier, true);
+    } catch (err2) {
+      post({
+        type: 'status',
+        status: {
+          state: 'error',
+          message: `${String(err2).slice(0, 220)} (retried after purging ${purged} cached config files)`,
+        },
+      });
+      return;
+    }
   }
   post({ type: 'status', status: { state: 'ready', tier, loadMs: Math.round(performance.now() - t0) } });
 

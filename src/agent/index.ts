@@ -5,6 +5,7 @@
 import type { AgentEventHandler, ModelTier } from '../lib/contract';
 import { createEngine, frameFromImage } from '../llm/engine';
 import { createTools } from '../tools/registry';
+import { setPack } from '../tools/pack';
 import { createAgentLoop } from './loop';
 import { SYSTEM_PROMPT } from './prompt';
 
@@ -22,9 +23,13 @@ export interface CreateHeliusOptions {
   modelBaseUrl: string;
   /** Single sink for every AgentEvent (engine status, tokens, tool trace, speak, ...). */
   onEvent: AgentEventHandler;
+  /** Region pack for the map + routing graph (default 'sandia'). */
+  pack?: string;
 }
 
 export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
+  setPack(opts.pack ?? 'sandia');
+
   const engine = createEngine(opts.modelBaseUrl, (status) => opts.onEvent({ type: 'engine-status', status }));
 
   const registry = createTools({
