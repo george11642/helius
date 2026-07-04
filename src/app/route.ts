@@ -1,5 +1,7 @@
-// 'route' AgentEvent handling: a toast over the map area + an animated
-// dashed placeholder line, standing in until a real MapLibre polyline lands.
+// 'route' AgentEvent handling: a toast over the map area. Used to also draw
+// an animated dashed placeholder line standing in for a real polyline — now
+// that src/map/render.ts's HeliusMap draws the real thing (wired in
+// main.ts), that placeholder was retired; this is toast-only.
 
 import type { AgentEvent } from '../lib/contract';
 import { formatClock } from './dom';
@@ -9,14 +11,8 @@ export interface RouteHandle {
 }
 
 export function mountRoute(container: HTMLElement): RouteHandle {
-  container.innerHTML = `
-    <div class="route-toast" hidden></div>
-    <svg class="route-line-layer" hidden viewBox="0 0 100 100" preserveAspectRatio="none">
-      <line x1="12" y1="88" x2="88" y2="16" />
-    </svg>
-  `;
+  container.innerHTML = `<div class="route-toast" hidden></div>`;
   const toast = container.querySelector<HTMLElement>('.route-toast')!;
-  const lineLayer = container.querySelector<SVGElement>('.route-line-layer')!;
 
   function handleEvent(e: AgentEvent): void {
     if (e.type !== 'route') return;
@@ -24,10 +20,6 @@ export function mountRoute(container: HTMLElement): RouteHandle {
     const arrival = formatClock(new Date(Date.now() + e.etaMin * 60000));
     toast.textContent = `ROUTE READY — ${km}km · ${e.etaMin}min · arrives ${arrival}`;
     toast.hidden = false;
-    // SVGElement doesn't carry the `.hidden` IDL property in lib.dom.d.ts (only
-    // HTMLElement does), but the `hidden` content attribute's UA styling
-    // (display:none) applies to any element — toggle it as an attribute instead.
-    lineLayer.removeAttribute('hidden');
   }
 
   return { handleEvent };

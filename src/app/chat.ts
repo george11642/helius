@@ -5,11 +5,13 @@
 
 import type { AgentEvent } from '../lib/contract';
 import { mountMic } from './voice';
+import { mountCamera } from './camera';
 import { escapeHtml } from './dom';
 
 export interface ChatOptions {
   onSend(text: string): void;
   onAudio(samples: Float32Array): void;
+  onReadSign(image: HTMLCanvasElement): void;
 }
 
 export interface ChatHandle {
@@ -61,11 +63,13 @@ function renderMarkdownLite(rawText: string): string {
 export function mountChat(messagesEl: HTMLElement, inputRowEl: HTMLElement, opts: ChatOptions): ChatHandle {
   inputRowEl.innerHTML = `
     <textarea class="chat-input" rows="1" placeholder="Ask Helius…" disabled></textarea>
+    <div class="camera-slot"></div>
     <div class="mic-slot"></div>
     <button type="button" class="chat-send-btn" disabled>Send</button>
   `;
   const textarea = inputRowEl.querySelector<HTMLTextAreaElement>('.chat-input')!;
   const sendBtn = inputRowEl.querySelector<HTMLButtonElement>('.chat-send-btn')!;
+  const cameraSlot = inputRowEl.querySelector<HTMLElement>('.camera-slot')!;
   const micSlot = inputRowEl.querySelector<HTMLElement>('.mic-slot')!;
 
   const jumpPill = document.createElement('button');
@@ -79,6 +83,13 @@ export function mountChat(messagesEl: HTMLElement, inputRowEl: HTMLElement, opts
 
   let pinnedToBottom = true;
   let lastInputWasVoice = false;
+  // The real agent loop only emits 'user-message' for voice transcripts (the
+  // UI has no other way to learn what was transcribed) — NOT for typed text,
+  // since the loop already has that text directly from sendText(). Typed
+  // messages are rendered optimistically on submit instead; this holds the
+  // most recently submitted typed text so a 'user-message' echo (if one ever
+  // does arrive for text, e.g. from the mock) doesn't double-render it.
+  let pendingTypedEcho: string | null = null;
   let streamingBubble: HTMLElement | null = null;
   let streamingTextEl: HTMLElement | null = null;
   let thinkingEl: HTMLElement | null = null;
@@ -181,6 +192,12 @@ export function mountChat(messagesEl: HTMLElement, inputRowEl: HTMLElement, opts
       case 'user-message': {
         const viaVoice = lastInputWasVoice;
         lastInputWasVoice = false;
+        if (!viaVoice && e.text === pendingTypedEcho) {
+          // Already rendered optimistically in submit() — this is just an
+          // echo of it, not a new message. Consume the guard and skip.
+          pendingTypedEcho = null;
+          break;
+        }
         appendUserMessage(e.text, viaVoice);
         break;
       }
@@ -208,6 +225,8 @@ export function mountChat(messagesEl: HTMLElement, inputRowEl: HTMLElement, opts
     textarea.value = '';
     textarea.style.height = 'auto';
     lastInputWasVoice = false;
+    pendingTypedEcho = text;
+    appendUserMessage(text, false);
     opts.onSend(text);
   }
 
@@ -230,10 +249,15 @@ export function mountChat(messagesEl: HTMLElement, inputRowEl: HTMLElement, opts
     },
   });
 
+  const cameraHandle = mountCamera(cameraSlot, {
+    onCapture: (image) => opts.onReadSign(image),
+  });
+
   function setEnabled(enabled: boolean): void {
     textarea.disabled = !enabled;
     sendBtn.disabled = !enabled;
     micHandle.setEnabled(enabled);
+    cameraHandle.setEnabled(enabled);
   }
 
   return { handleEvent, setEnabled };
