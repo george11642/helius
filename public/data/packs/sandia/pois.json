@@ -3,17 +3,20 @@
     {
       "name": "La Luz Trailhead",
       "lat": 35.2286,
-      "lon": -106.4818
+      "lon": -106.4818,
+      "role": "trailhead"
     },
     {
       "name": "Sandia Crest House",
       "lat": 35.2103,
-      "lon": -106.4485
+      "lon": -106.4485,
+      "role": "crest"
     },
     {
       "name": "Tram Top Station",
       "lat": 35.1899,
-      "lon": -106.4059
+      "lon": -106.4059,
+      "role": "tram_station"
     },
     {
       "name": "Elena Gallegos / Pino Trailhead",
@@ -203,13 +206,13 @@
       "ele": 2317
     },
     {
-      "name": "Rincón Peak",
+      "name": "Rinc\u00f3n Peak",
       "lat": 35.2473386,
       "lon": -106.4936972,
       "ele": 2488
     },
     {
-      "name": "Rincón High Point",
+      "name": "Rinc\u00f3n High Point",
       "lat": 35.245733,
       "lon": -106.4867235,
       "ele": 2523

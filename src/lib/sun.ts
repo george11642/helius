@@ -22,8 +22,11 @@ const julianCycle = (d: number, lw: number) => Math.round(d - 0.0009 - lw / (2 *
 const approxTransit = (Ht: number, lw: number, n: number) => 0.0009 + (Ht + lw) / (2 * Math.PI) + n;
 const solarTransitJ = (ds: number, M: number, L: number) =>
   J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+// cos is clamped to [-1,1]: at polar day/night the raw value leaves the acos
+// domain and would yield NaN → Invalid Date → sun_clock throws on toISOString.
+// Clamping degrades gracefully (sunset pinned to solar noon/midnight extremes).
 const hourAngle = (h: number, phi: number, dec: number) =>
-  Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  Math.acos(Math.max(-1, Math.min(1, (Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)))));
 
 export interface SunTimes {
   sunrise: Date;

@@ -28,9 +28,9 @@ const OUT_DIR = join(ROOT, 'public/data/packs', PACK);
 const TRAILHEADS = process.env.HELIUS_TRAILHEADS
   ? JSON.parse(readFileSync(process.env.HELIUS_TRAILHEADS, 'utf8'))
   : [
-      { name: 'La Luz Trailhead', lat: 35.2286, lon: -106.4818 },
-      { name: 'Sandia Crest House', lat: 35.2103, lon: -106.4485 },
-      { name: 'Tram Top Station', lat: 35.1899, lon: -106.4059 },
+      { name: 'La Luz Trailhead', lat: 35.2286, lon: -106.4818, role: 'trailhead' },
+      { name: 'Sandia Crest House', lat: 35.2103, lon: -106.4485, role: 'crest' },
+      { name: 'Tram Top Station', lat: 35.1899, lon: -106.4059, role: 'tram_station' },
       { name: 'Elena Gallegos / Pino Trailhead', lat: 35.1624, lon: -106.4682 },
     ];
 

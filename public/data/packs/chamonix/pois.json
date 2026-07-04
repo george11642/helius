@@ -3,15 +3,23 @@
     {
       "name": "Chamonix Centre (Place du Triangle)",
       "lat": 45.9237,
-      "lon": 6.8694
+      "lon": 6.8694,
+      "role": "trailhead"
     },
     {
-      "name": "Les Praz — Flégère lift base",
+      "name": "Refuge du Lac Blanc",
+      "lat": 45.9807,
+      "lon": 6.8885,
+      "role": "crest"
+    },
+    {
+      "name": "Les Praz \u2014 Fl\u00e9g\u00e8re lift base",
       "lat": 45.9482,
-      "lon": 6.8862
+      "lon": 6.8862,
+      "role": "tram_station"
     },
     {
-      "name": "Argentière village",
+      "name": "Argenti\u00e8re village",
       "lat": 45.9847,
       "lon": 6.927
     },
@@ -19,11 +27,6 @@
       "name": "Les Houches centre",
       "lat": 45.8908,
       "lon": 6.7987
-    },
-    {
-      "name": "Refuge du Lac Blanc",
-      "lat": 45.9807,
-      "lon": 6.8885
     }
   ],
   "peaks": [
@@ -82,7 +85,7 @@
       "ele": 3824
     },
     {
-      "name": "Aiguille d'Argentière",
+      "name": "Aiguille d'Argenti\u00e8re",
       "lat": 45.959721,
       "lon": 7.020211,
       "ele": 3901
@@ -94,7 +97,7 @@
       "ele": 3509
     },
     {
-      "name": "Pointe Hélène / Punta Elena",
+      "name": "Pointe H\u00e9l\u00e8ne / Punta Elena",
       "lat": 45.8687569,
       "lon": 6.9793403,
       "ele": 4045
@@ -112,13 +115,13 @@
       "ele": 3759
     },
     {
-      "name": "Aiguille de l'Éboulement",
+      "name": "Aiguille de l'\u00c9boulement",
       "lat": 45.8931672,
       "lon": 7.0030077,
       "ele": 3599
     },
     {
-      "name": "Aiguille de Talèfre",
+      "name": "Aiguille de Tal\u00e8fre",
       "lat": 45.899499,
       "lon": 7.0037821,
       "ele": 3730
@@ -148,13 +151,13 @@
       "ele": 2497
     },
     {
-      "name": "Pointe de Chardonnière",
+      "name": "Pointe de Chardonni\u00e8re",
       "lat": 45.9970136,
       "lon": 6.7752629,
       "ele": 2723
     },
     {
-      "name": "Tête à l'Âne",
+      "name": "T\u00eate \u00e0 l'\u00c2ne",
       "lat": 45.9872912,
       "lon": 6.7793139,
       "ele": 2804
@@ -166,13 +169,13 @@
       "ele": 2733
     },
     {
-      "name": "Pointe d'Ayères Sud",
+      "name": "Pointe d'Ay\u00e8res Sud",
       "lat": 45.9695824,
       "lon": 6.772712,
       "ele": 2610
     },
     {
-      "name": "Brèche du Dérochoir",
+      "name": "Br\u00e8che du D\u00e9rochoir",
       "lat": 45.9668784,
       "lon": 6.7546088,
       "ele": 2171
@@ -190,13 +193,13 @@
       "ele": 3673
     },
     {
-      "name": "Aiguille de Blaitière",
+      "name": "Aiguille de Blaiti\u00e8re",
       "lat": 45.8989201,
       "lon": 6.9133265,
       "ele": 3522
     },
     {
-      "name": "Aiguille du Belvédère",
+      "name": "Aiguille du Belv\u00e9d\u00e8re",
       "lat": 45.9875937,
       "lon": 6.8738199,
       "ele": 2965
@@ -226,7 +229,7 @@
       "ele": 2201
     },
     {
-      "name": "Pointe du Génévrier",
+      "name": "Pointe du G\u00e9n\u00e9vrier",
       "lat": 46.0375611,
       "lon": 6.8555151,
       "ele": 2870
@@ -262,7 +265,7 @@
       "ele": 3422
     },
     {
-      "name": "Les Périades",
+      "name": "Les P\u00e9riades",
       "lat": 45.8809491,
       "lon": 6.9621884,
       "ele": 3503
@@ -304,7 +307,7 @@
       "ele": 3772
     },
     {
-      "name": "Dômes de Miage",
+      "name": "D\u00f4mes de Miage",
       "lat": 45.8152681,
       "lon": 6.8002767,
       "ele": 3673
@@ -316,13 +319,13 @@
       "ele": 3353
     },
     {
-      "name": "Tête Carrée",
+      "name": "T\u00eate Carr\u00e9e",
       "lat": 45.8017236,
       "lon": 6.811815,
       "ele": 3752
     },
     {
-      "name": "Aiguille de la Bérangère",
+      "name": "Aiguille de la B\u00e9rang\u00e8re",
       "lat": 45.8027724,
       "lon": 6.7787895,
       "ele": 3425
@@ -346,7 +349,7 @@
       "ele": 3638
     },
     {
-      "name": "L'Évêque",
+      "name": "L'\u00c9v\u00eaque",
       "lat": 45.9242299,
       "lon": 6.9620173,
       "ele": 3469
@@ -364,19 +367,19 @@
       "ele": 2343
     },
     {
-      "name": "Le Brévent",
+      "name": "Le Br\u00e9vent",
       "lat": 45.9339121,
       "lon": 6.8378343,
       "ele": 2525
     },
     {
-      "name": "Aiguille de la Tête Plate",
+      "name": "Aiguille de la T\u00eate Plate",
       "lat": 45.9903533,
       "lon": 6.8804252,
       "ele": 2944
     },
     {
-      "name": "Arête Plate",
+      "name": "Ar\u00eate Plate",
       "lat": 45.9925685,
       "lon": 6.8845299,
       "ele": 2870
@@ -388,7 +391,7 @@
       "ele": 2902
     },
     {
-      "name": "Aiguille de la Perséverance",
+      "name": "Aiguille de la Pers\u00e9verance",
       "lat": 45.9944448,
       "lon": 6.8936248,
       "ele": 2901
@@ -412,7 +415,7 @@
       "ele": 2788
     },
     {
-      "name": "Aiguille de Bérard",
+      "name": "Aiguille de B\u00e9rard",
       "lat": 45.9940683,
       "lon": 6.8529279,
       "ele": 2663
@@ -460,25 +463,25 @@
       "ele": 2888
     },
     {
-      "name": "Index de la Glière",
+      "name": "Index de la Gli\u00e8re",
       "lat": 45.9678109,
       "lon": 6.8702027,
       "ele": 2595
     },
     {
-      "name": "Aiguille de la Glière Sud",
+      "name": "Aiguille de la Gli\u00e8re Sud",
       "lat": 45.9697327,
       "lon": 6.8638452,
       "ele": 2836
     },
     {
-      "name": "Aiguille Inférieure de la Floria",
+      "name": "Aiguille Inf\u00e9rieure de la Floria",
       "lat": 45.9711055,
       "lon": 6.8651595,
       "ele": 2850
     },
     {
-      "name": "Aiguille Nord de la Glière",
+      "name": "Aiguille Nord de la Gli\u00e8re",
       "lat": 45.9713896,
       "lon": 6.8643229,
       "ele": 2846
@@ -490,7 +493,7 @@
       "ele": 2873
     },
     {
-      "name": "Chapelle de la Glière",
+      "name": "Chapelle de la Gli\u00e8re",
       "lat": 45.9661689,
       "lon": 6.8660415,
       "ele": 2663
@@ -514,13 +517,13 @@
       "ele": 2323
     },
     {
-      "name": "Pointes d'Ayères Nord",
+      "name": "Pointes d'Ay\u00e8res Nord",
       "lat": 45.972191,
       "lon": 6.776263,
       "ele": 2644
     },
     {
-      "name": "Pointe de la Ratelière",
+      "name": "Pointe de la Rateli\u00e8re",
       "lat": 45.9773089,
       "lon": 6.783442,
       "ele": 2708
@@ -538,7 +541,7 @@
       "ele": 2459
     },
     {
-      "name": "Tête Blanche",
+      "name": "T\u00eate Blanche",
       "lat": 45.9839082,
       "lon": 7.0199001,
       "ele": 3421
@@ -568,7 +571,7 @@
       "ele": 3724
     },
     {
-      "name": "Pointe de Pré de Bar Est",
+      "name": "Pointe de Pr\u00e9 de Bar Est",
       "lat": 45.9212942,
       "lon": 7.03817,
       "ele": 3658
@@ -598,7 +601,7 @@
       "ele": 2850
     },
     {
-      "name": "Pointe de Frébouze - Antoldi",
+      "name": "Pointe de Fr\u00e9bouze - Antoldi",
       "lat": 45.8786167,
       "lon": 6.9984471,
       "ele": 3530
@@ -616,7 +619,7 @@
       "ele": 3560
     },
     {
-      "name": "Aiguilles Marbrées Nord",
+      "name": "Aiguilles Marbr\u00e9es Nord",
       "lat": 45.8513736,
       "lon": 6.9409793,
       "ele": 3535
@@ -694,19 +697,19 @@
       "ele": 2115
     },
     {
-      "name": "Dômes de Miage (5ème dôme)",
+      "name": "D\u00f4mes de Miage (5\u00e8me d\u00f4me)",
       "lat": 45.8158975,
       "lon": 6.8032859,
       "ele": 3672
     },
     {
-      "name": "Dômes de Miage (2nd dôme)",
+      "name": "D\u00f4mes de Miage (2nd d\u00f4me)",
       "lat": 45.813531,
       "lon": 6.7939263,
       "ele": 3633
     },
     {
-      "name": "Dômes de Miage - Pointe Sud-Ouest",
+      "name": "D\u00f4mes de Miage - Pointe Sud-Ouest",
       "lat": 45.8104261,
       "lon": 6.7897905,
       "ele": 3670
@@ -730,7 +733,7 @@
       "ele": 3409
     },
     {
-      "name": "Dent du Caïman",
+      "name": "Dent du Ca\u00efman",
       "lat": 45.8942123,
       "lon": 6.9088879,
       "ele": 3554
@@ -748,19 +751,19 @@
       "ele": 3479
     },
     {
-      "name": "Aiguille du Grépon",
+      "name": "Aiguille du Gr\u00e9pon",
       "lat": 45.9028436,
       "lon": 6.9190588,
       "ele": 3482
     },
     {
-      "name": "Aiguille de la République",
+      "name": "Aiguille de la R\u00e9publique",
       "lat": 45.9056685,
       "lon": 6.9212635,
       "ele": 3305
     },
     {
-      "name": "Pointe Lépiney",
+      "name": "Pointe L\u00e9piney",
       "lat": 45.895855,
       "lon": 6.9114628,
       "ele": 3429
@@ -790,7 +793,7 @@
       "ele": 2692
     },
     {
-      "name": "Flèche Rousse",
+      "name": "Fl\u00e8che Rousse",
       "lat": 45.9582209,
       "lon": 7.0227325,
       "ele": 3879
@@ -802,25 +805,25 @@
       "ele": 2330
     },
     {
-      "name": "Tête de Balme",
+      "name": "T\u00eate de Balme",
       "lat": 46.031172,
       "lon": 6.9665201,
       "ele": 2321
     },
     {
-      "name": "Aiguille du Goûter",
+      "name": "Aiguille du Go\u00fbter",
       "lat": 45.8509504,
       "lon": 6.8312381,
       "ele": 3863
     },
     {
-      "name": "Tête entre deux Sauts",
+      "name": "T\u00eate entre deux Sauts",
       "lat": 45.8311705,
       "lon": 7.0400497,
       "ele": 2727.7
     },
     {
-      "name": "Tête de la Tronche",
+      "name": "T\u00eate de la Tronche",
       "lat": 45.8220098,
       "lon": 7.0196915,
       "ele": 2584
@@ -838,7 +841,7 @@
       "ele": 2533
     },
     {
-      "name": "Tête du Curru",
+      "name": "T\u00eate du Curru",
       "lat": 45.8110386,
       "lon": 7.03215,
       "ele": 2990
@@ -862,7 +865,7 @@
       "ele": 1893
     },
     {
-      "name": "Tête de la Fontaine",
+      "name": "T\u00eate de la Fontaine",
       "lat": 45.9351733,
       "lon": 6.7787646,
       "ele": 1206
@@ -892,7 +895,7 @@
       "ele": 4064
     },
     {
-      "name": "L'Isolée",
+      "name": "L'Isol\u00e9e",
       "lat": 45.8545834,
       "lon": 6.8909713,
       "ele": 4114
@@ -940,7 +943,7 @@
       "ele": 3613
     },
     {
-      "name": "Pointe Médiane",
+      "name": "Pointe M\u00e9diane",
       "lat": 45.854535,
       "lon": 6.8920627,
       "ele": 4097
@@ -982,7 +985,7 @@
       "ele": 3970
     },
     {
-      "name": "Pointe à Corbeaux",
+      "name": "Pointe \u00e0 Corbeaux",
       "lat": 46.0466804,
       "lon": 6.8776332,
       "ele": 2687
@@ -1000,25 +1003,25 @@
       "ele": 1801
     },
     {
-      "name": "Tête de la Charme",
+      "name": "T\u00eate de la Charme",
       "lat": 45.8810601,
       "lon": 6.7502492,
       "ele": 1870
     },
     {
-      "name": "Tête du Petit Prarion",
+      "name": "T\u00eate du Petit Prarion",
       "lat": 45.8890737,
       "lon": 6.7538674,
       "ele": 1896
     },
     {
-      "name": "Le Génépi",
+      "name": "Le G\u00e9n\u00e9pi",
       "lat": 46.0248317,
       "lon": 7.0442262,
       "ele": 2884
     },
     {
-      "name": "Pointe des Écandies",
+      "name": "Pointe des \u00c9candies",
       "lat": 46.0150905,
       "lon": 7.0390772,
       "ele": 2873
@@ -1030,13 +1033,13 @@
       "ele": 1811
     },
     {
-      "name": "Aiguille de L'Amône",
+      "name": "Aiguille de L'Am\u00f4ne",
       "lat": 45.9302495,
       "lon": 7.0417358,
       "ele": 3584
     },
     {
-      "name": "Pointe de Pré de Bar Est",
+      "name": "Pointe de Pr\u00e9 de Bar Est",
       "lat": 45.9212068,
       "lon": 7.0346514,
       "ele": 3608
@@ -1054,31 +1057,31 @@
       "ele": null
     },
     {
-      "name": "Aiguille des Pèlerins - Secteur du Plan",
+      "name": "Aiguille des P\u00e8lerins - Secteur du Plan",
       "lat": 45.8949457,
       "lon": 6.9014862,
       "ele": 3318
     },
     {
-      "name": "Caïman - Pointe de l\"Épiney",
+      "name": "Ca\u00efman - Pointe de l\"\u00c9piney",
       "lat": 45.89528,
       "lon": 6.91,
       "ele": null
     },
     {
-      "name": "L'Enfant de Chœur",
+      "name": "L'Enfant de Ch\u0153ur",
       "lat": 45.9261209,
       "lon": 6.9641385,
       "ele": 3477
     },
     {
-      "name": "Tête de Moëde",
+      "name": "T\u00eate de Mo\u00ebde",
       "lat": 45.9819012,
       "lon": 6.8069565,
       "ele": 2459
     },
     {
-      "name": "La Cathédrale",
+      "name": "La Cath\u00e9drale",
       "lat": 46.0409486,
       "lon": 6.8217204,
       "ele": 2531
@@ -1090,19 +1093,19 @@
       "ele": 2800
     },
     {
-      "name": "Tête du Couvercle",
+      "name": "T\u00eate du Couvercle",
       "lat": 45.9091154,
       "lon": 6.958822,
       "ele": 2735
     },
     {
-      "name": "Le Gros Béchard",
+      "name": "Le Gros B\u00e9chard",
       "lat": 45.8742451,
       "lon": 6.8404241,
       "ele": 2582
     },
     {
-      "name": "Le Petit Béchard",
+      "name": "Le Petit B\u00e9chard",
       "lat": 45.8794532,
       "lon": 6.8355069,
       "ele": 2150
@@ -1114,7 +1117,7 @@
       "ele": 2644
     },
     {
-      "name": "Tête de Villy",
+      "name": "T\u00eate de Villy",
       "lat": 46.001716,
       "lon": 6.8213178,
       "ele": 2481
@@ -1150,7 +1153,7 @@
       "ele": 2752
     },
     {
-      "name": "Dôme du Goûter",
+      "name": "D\u00f4me du Go\u00fbter",
       "lat": 45.8425807,
       "lon": 6.8434727,
       "ele": 4304
@@ -1168,7 +1171,7 @@
       "ele": 2511
     },
     {
-      "name": "Tête des Prapators",
+      "name": "T\u00eate des Prapators",
       "lat": 45.9521464,
       "lon": 6.9181174,
       "ele": 1844
@@ -1252,7 +1255,7 @@
       "ele": 3495
     },
     {
-      "name": "Aiguille de l'Évêque",
+      "name": "Aiguille de l'\u00c9v\u00eaque",
       "lat": 45.8613073,
       "lon": 7.0045012,
       "ele": 3258
@@ -1366,7 +1369,7 @@
       "ele": 3665
     },
     {
-      "name": "Pointe Supérieure",
+      "name": "Pointe Sup\u00e9rieure",
       "lat": 45.8406461,
       "lon": 6.7986761,
       "ele": 3221
@@ -1378,7 +1381,7 @@
       "ele": 3061
     },
     {
-      "name": "Pointe Inférieure",
+      "name": "Pointe Inf\u00e9rieure",
       "lat": 45.8458342,
       "lon": 6.7821452,
       "ele": 2830
@@ -1420,7 +1423,7 @@
       "ele": 3792
     },
     {
-      "name": "Aiguille d'Entrèves",
+      "name": "Aiguille d'Entr\u00e8ves",
       "lat": 45.8448332,
       "lon": 6.9170955,
       "ele": 3604
@@ -1432,13 +1435,13 @@
       "ele": 3462
     },
     {
-      "name": "Dent du Géant / Pointe Graham",
+      "name": "Dent du G\u00e9ant / Pointe Graham",
       "lat": 45.861898,
       "lon": 6.9518989,
       "ele": 4013
     },
     {
-      "name": "Dôme de Rochefort",
+      "name": "D\u00f4me de Rochefort",
       "lat": 45.8643541,
       "lon": 6.9676762,
       "ele": 4015
@@ -1510,7 +1513,7 @@
       "ele": 3701
     },
     {
-      "name": "Aiguille du Père Éternel",
+      "name": "Aiguille du P\u00e8re \u00c9ternel",
       "lat": 45.8355421,
       "lon": 6.9188869,
       "ele": 3224
@@ -1528,13 +1531,13 @@
       "ele": 3096
     },
     {
-      "name": "Brèche d'Entrèves",
+      "name": "Br\u00e8che d'Entr\u00e8ves",
       "lat": 45.8382555,
       "lon": 6.9231838,
       "ele": 3070
     },
     {
-      "name": "Tour d'Entrèves",
+      "name": "Tour d'Entr\u00e8ves",
       "lat": 45.8376075,
       "lon": 6.9239053,
       "ele": 3118
@@ -1564,13 +1567,13 @@
       "ele": 3489
     },
     {
-      "name": "Pointe de Frébouze - Borgna",
+      "name": "Pointe de Fr\u00e9bouze - Borgna",
       "lat": 45.8791892,
       "lon": 6.9995597,
       "ele": 3526
     },
     {
-      "name": "Pointe de Frébouze - Alberico",
+      "name": "Pointe de Fr\u00e9bouze - Alberico",
       "lat": 45.8769139,
       "lon": 6.9986799,
       "ele": 3473
@@ -1636,13 +1639,13 @@
       "ele": 2941
     },
     {
-      "name": "Tête de Jeubon",
+      "name": "T\u00eate de Jeubon",
       "lat": 45.9666522,
       "lon": 6.8229792,
       "ele": 1710
     },
     {
-      "name": "Aiguille à Bochard",
+      "name": "Aiguille \u00e0 Bochard",
       "lat": 45.9473407,
       "lon": 6.933939,
       "ele": 2655
@@ -1660,19 +1663,19 @@
       "ele": 4023
     },
     {
-      "name": "Dent de Jétoula",
+      "name": "Dent de J\u00e9toula",
       "lat": 45.8448888,
       "lon": 6.9458163,
       "ele": 3303.9
     },
     {
-      "name": "Tour de Jétoula",
+      "name": "Tour de J\u00e9toula",
       "lat": 45.8457221,
       "lon": 6.9453174,
       "ele": 3339.3
     },
     {
-      "name": "Tête de Sécheron",
+      "name": "T\u00eate de S\u00e9cheron",
       "lat": 45.8212182,
       "lon": 7.0467532,
       "ele": 2902.4
@@ -1702,7 +1705,7 @@
       "ele": 3302
     },
     {
-      "name": "Aiguille du Génépi",
+      "name": "Aiguille du G\u00e9n\u00e9pi",
       "lat": 45.9995559,
       "lon": 7.0024836,
       "ele": 3265
@@ -1720,13 +1723,13 @@
       "ele": 3836
     },
     {
-      "name": "Pointe Supérieure des Améthystes",
+      "name": "Pointe Sup\u00e9rieure des Am\u00e9thystes",
       "lat": 45.9489461,
       "lon": 7.030649,
       "ele": 3586
     },
     {
-      "name": "Pointe Inférieure des Améthystes",
+      "name": "Pointe Inf\u00e9rieure des Am\u00e9thystes",
       "lat": 45.9470746,
       "lon": 7.0209785,
       "ele": 3273
@@ -1762,25 +1765,25 @@
       "ele": 2775
     },
     {
-      "name": "Tête de Porte",
+      "name": "T\u00eate de Porte",
       "lat": 46.0466152,
       "lon": 6.7526402,
       "ele": 1526
     },
     {
-      "name": "Tête de Bellachat",
+      "name": "T\u00eate de Bellachat",
       "lat": 45.9250075,
       "lon": 6.8300536,
       "ele": 2276
     },
     {
-      "name": "Aiguillette du Brévent",
+      "name": "Aiguillette du Br\u00e9vent",
       "lat": 45.9195959,
       "lon": 6.8175058,
       "ele": 2310
     },
     {
-      "name": "Le Béchar",
+      "name": "Le B\u00e9char",
       "lat": 45.9865277,
       "lon": 6.9181856,
       "ele": 1720
@@ -1792,7 +1795,7 @@
       "ele": 2803
     },
     {
-      "name": "Tête de la Raverettaz",
+      "name": "T\u00eate de la Raverettaz",
       "lat": 45.9625064,
       "lon": 6.8910486,
       "ele": 1823
@@ -1822,13 +1825,13 @@
       "ele": 3101
     },
     {
-      "name": "Bec Rouge Inférieur",
+      "name": "Bec Rouge Inf\u00e9rieur",
       "lat": 45.9838251,
       "lon": 6.9711684,
       "ele": 2844
     },
     {
-      "name": "Bec Rouge Supérieur",
+      "name": "Bec Rouge Sup\u00e9rieur",
       "lat": 45.9766097,
       "lon": 6.9812048,
       "ele": 3047
@@ -1840,7 +1843,7 @@
       "ele": 2725
     },
     {
-      "name": "Tête du Ret",
+      "name": "T\u00eate du Ret",
       "lat": 46.0103914,
       "lon": 6.8739894,
       "ele": 2160
@@ -1882,13 +1885,13 @@
       "ele": 2655
     },
     {
-      "name": "Croix de Prélayes",
+      "name": "Croix de Pr\u00e9layes",
       "lat": 46.0474526,
       "lon": 7.0160271,
       "ele": 2365
     },
     {
-      "name": "Tête sur les Lacs",
+      "name": "T\u00eate sur les Lacs",
       "lat": 45.9867285,
       "lon": 6.8887016,
       "ele": 2506
@@ -1912,7 +1915,7 @@
       "ele": 3488
     },
     {
-      "name": "Tête Biselx",
+      "name": "T\u00eate Biselx",
       "lat": 45.9842458,
       "lon": 7.0381352,
       "ele": 3508
@@ -1924,7 +1927,7 @@
       "ele": 3518
     },
     {
-      "name": "Tête d'Armancette",
+      "name": "T\u00eate d'Armancette",
       "lat": 45.8230732,
       "lon": 6.7549742,
       "ele": 2069
@@ -1984,7 +1987,7 @@
       "ele": 2656
     },
     {
-      "name": "La Tête de la Motte",
+      "name": "La T\u00eate de la Motte",
       "lat": 46.0038193,
       "lon": 6.7619089,
       "ele": 2244
@@ -2008,13 +2011,13 @@
       "ele": 3057
     },
     {
-      "name": "Tête de Trélaporte",
+      "name": "T\u00eate de Tr\u00e9laporte",
       "lat": 45.9081159,
       "lon": 6.9308257,
       "ele": 2552
     },
     {
-      "name": "Épaule Ouest",
+      "name": "\u00c9paule Ouest",
       "lat": 45.9278729,
       "lon": 7.0012228,
       "ele": 3838
@@ -2026,7 +2029,7 @@
       "ele": 2663
     },
     {
-      "name": "Aiguille Carrée",
+      "name": "Aiguille Carr\u00e9e",
       "lat": 45.94023,
       "lon": 6.967422,
       "ele": 3716
@@ -2098,7 +2101,7 @@
       "ele": 3355
     },
     {
-      "name": "Aiguilles Marbrées Sud",
+      "name": "Aiguilles Marbr\u00e9es Sud",
       "lat": 45.8484409,
       "lon": 6.9422275,
       "ele": 3455
