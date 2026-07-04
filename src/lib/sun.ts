@@ -39,7 +39,6 @@ export function sunTimes(date: Date, lat: number, lon: number): SunTimes {
   const M = solarMeanAnomaly(approxTransit(0, lw, n));
   const L = eclipticLongitude(M);
   const dec = declination(L);
-  const Jnoon = solarTransitJ(approxTransit(0, lw, n), M, L);
 
   const timeAt = (angleDeg: number, rising: boolean) => {
     const w = hourAngle(RAD * angleDeg, phi, dec);

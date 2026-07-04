@@ -1,0 +1,21 @@
+{
+  "id": "chamonix",
+  "name": "Chamonix \u2014 Mont Blanc",
+  "bbox": [
+    6.75,
+    45.8,
+    7.05,
+    46.05
+  ],
+  "center": [
+    6.9,
+    45.925
+  ],
+  "files": {
+    "basemap.pmtiles": 8318371,
+    "pois.json": 40750,
+    "graph.bin": 1725117,
+    "terrain.pmtiles": 20253678
+  },
+  "totalBytes": 30337916
+}

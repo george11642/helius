@@ -3,3 +3,8 @@ allowBuilds:
   protobufjs: true
   sharp: true
   tesseract.js: true
+
+# Force a single transformers copy: kokoro-js pins 3.8.1, which would bundle a
+# second onnxruntime-web (+~23MB wasm) and fight our 4.2.0 for the WebGPU adapter.
+overrides:
+  "@huggingface/transformers": 4.2.0

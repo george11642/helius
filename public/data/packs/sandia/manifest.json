@@ -1,0 +1,22 @@
+{
+  "id": "sandia",
+  "name": "Sandia Mountains \u2014 Albuquerque",
+  "bbox": [
+    -107.15,
+    34.65,
+    -106.15,
+    35.55
+  ],
+  "center": [
+    -106.65,
+    35.1
+  ],
+  "files": {
+    "peaks.json": 8746,
+    "basemap.pmtiles": 29666266,
+    "pois.json": 5069,
+    "graph.bin": 3122662,
+    "terrain.pmtiles": 81973044
+  },
+  "totalBytes": 114775787
+}

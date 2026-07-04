@@ -1,0 +1,272 @@
+{
+  "trailheads": [
+    {
+      "name": "La Luz Trailhead",
+      "lat": 35.2286,
+      "lon": -106.4818
+    },
+    {
+      "name": "Sandia Crest House",
+      "lat": 35.2103,
+      "lon": -106.4485
+    },
+    {
+      "name": "Tram Top Station",
+      "lat": 35.1899,
+      "lon": -106.4059
+    },
+    {
+      "name": "Elena Gallegos / Pino Trailhead",
+      "lat": 35.1624,
+      "lon": -106.4682
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Manzano Mountain",
+      "lat": 35.0400067,
+      "lon": -106.4238847,
+      "ele": 2317
+    },
+    {
+      "name": "Picuda Peak",
+      "lat": 35.3484725,
+      "lon": -106.6980536,
+      "ele": 1809
+    },
+    {
+      "name": "Cerro Columbo",
+      "lat": 35.2558751,
+      "lon": -106.2061349,
+      "ele": 2290
+    },
+    {
+      "name": "Loma Machete",
+      "lat": 35.3550373,
+      "lon": -106.6647515,
+      "ele": 1782
+    },
+    {
+      "name": "Loma Colorado de Abajo",
+      "lat": 35.2714293,
+      "lon": -106.6653055,
+      "ele": 1701
+    },
+    {
+      "name": "Loma Barbon",
+      "lat": 35.3597596,
+      "lon": -106.6289174,
+      "ele": 1748
+    },
+    {
+      "name": "Canjilon Hill",
+      "lat": 35.3580936,
+      "lon": -106.5403043,
+      "ele": 1616
+    },
+    {
+      "name": "Capulin Peak",
+      "lat": 35.2191045,
+      "lon": -106.409034,
+      "ele": 2723
+    },
+    {
+      "name": "Cedro Peak",
+      "lat": 35.0531029,
+      "lon": -106.3516913,
+      "ele": 2369
+    },
+    {
+      "name": "Cerro Pelon",
+      "lat": 35.0309058,
+      "lon": -106.4376981,
+      "ele": 2274
+    },
+    {
+      "name": "Lomos Altos",
+      "lat": 35.31004,
+      "lon": -106.4489135,
+      "ele": 1867
+    },
+    {
+      "name": "Monte Largo",
+      "lat": 35.1955988,
+      "lon": -106.2705802,
+      "ele": 2298
+    },
+    {
+      "name": "Palomas Peak",
+      "lat": 35.2339313,
+      "lon": -106.4047462,
+      "ele": 2647
+    },
+    {
+      "name": "North Sandia Peak",
+      "lat": 35.2351313,
+      "lon": -106.4567155,
+      "ele": 3184
+    },
+    {
+      "name": "Sol se Mete Peak",
+      "lat": 34.9722723,
+      "lon": -106.4144676,
+      "ele": 2285
+    },
+    {
+      "name": "South Sandia Peak",
+      "lat": 35.1205889,
+      "lon": -106.4306973,
+      "ele": 2982
+    },
+    {
+      "name": "South Mountain",
+      "lat": 35.1842103,
+      "lon": -106.2197468,
+      "ele": 2665
+    },
+    {
+      "name": "Mount Washington",
+      "lat": 34.9611894,
+      "lon": -106.4130002,
+      "ele": 2347
+    },
+    {
+      "name": "Tecolote Peak",
+      "lat": 35.198099,
+      "lon": -106.3994684,
+      "ele": 2684
+    },
+    {
+      "name": "U Mound",
+      "lat": 35.0812851,
+      "lon": -106.4807918,
+      "ele": 1922
+    },
+    {
+      "name": "Hail Peak",
+      "lat": 35.1976286,
+      "lon": -106.4451254,
+      "ele": 2947
+    },
+    {
+      "name": "Dragons Tooth",
+      "lat": 35.1963645,
+      "lon": -106.4435451,
+      "ele": null
+    },
+    {
+      "name": "The Needle",
+      "lat": 35.2275021,
+      "lon": -106.4588683,
+      "ele": 3127
+    },
+    {
+      "name": "Sandia Crest",
+      "lat": 35.2100245,
+      "lon": -106.4496247,
+      "ele": 3255
+    },
+    {
+      "name": "Twin Peaks North",
+      "lat": 35.0493321,
+      "lon": -106.4644068,
+      "ele": null
+    },
+    {
+      "name": "Twin Peaks South",
+      "lat": 35.0448174,
+      "lon": -106.4630336,
+      "ele": null
+    },
+    {
+      "name": "The Prow",
+      "lat": 35.231148,
+      "lon": -106.4662801,
+      "ele": 2733
+    },
+    {
+      "name": "Tombstone",
+      "lat": 35.220364,
+      "lon": -106.4533077,
+      "ele": 3048
+    },
+    {
+      "name": "Jawbone",
+      "lat": 35.1892501,
+      "lon": -106.4360113,
+      "ele": 3014
+    },
+    {
+      "name": "Crest of Montezuma",
+      "lat": 35.3084927,
+      "lon": -106.396475,
+      "ele": 2317
+    },
+    {
+      "name": "Rincón Peak",
+      "lat": 35.2473386,
+      "lon": -106.4936972,
+      "ele": 2488
+    },
+    {
+      "name": "Rincón High Point",
+      "lat": 35.245733,
+      "lon": -106.4867235,
+      "ele": 2523
+    },
+    {
+      "name": "Juan Tabo Peak",
+      "lat": 35.2398096,
+      "lon": -106.4986969,
+      "ele": 2499
+    },
+    {
+      "name": "The Thumb",
+      "lat": 35.204383,
+      "lon": -106.4542794,
+      "ele": 3081
+    },
+    {
+      "name": "Whiskey Peak",
+      "lat": 35.201325,
+      "lon": -106.4568791,
+      "ele": 2926
+    },
+    {
+      "name": "The Monarch",
+      "lat": 35.3746136,
+      "lon": -106.6715502,
+      "ele": null
+    },
+    {
+      "name": "Manzano Saddle",
+      "lat": 35.0073623,
+      "lon": -106.4908723,
+      "ele": null
+    },
+    {
+      "name": "The Chimney",
+      "lat": 35.2129929,
+      "lon": -106.4540119,
+      "ele": 3051
+    },
+    {
+      "name": "The Sentinel",
+      "lat": 35.2116534,
+      "lon": -106.4533313,
+      "ele": null
+    },
+    {
+      "name": "Alioth",
+      "lat": 35.1988995,
+      "lon": -106.4426978,
+      "ele": null
+    },
+    {
+      "name": "Loma Coyote",
+      "lat": 35.316153,
+      "lon": -106.6659667,
+      "ele": null
+    }
+  ]
+}
