@@ -58,7 +58,13 @@ const SPRITE_PNG_URL = '/vendor/sprites/v4/dark.png';
 
 /** True if `url` is servable from any Cache Storage bucket right now — never touches the network. */
 async function isCached(url: string): Promise<boolean> {
-  const match = await caches.match(new URL(url, location.origin).toString());
+  // ignoreSearch: verified live that Workbox's precache stores unhashed
+  // filenames (icons, sprite PNGs — anything without a content hash in its
+  // own name) under a `?__WB_REVISION__=<hash>` cache key, not the plain
+  // URL. Without this, every precached-by-revision asset (as opposed to
+  // runtime-cached ones, which DO use the plain URL) reads as "missing"
+  // even though it's genuinely there and would serve fine offline.
+  const match = await caches.match(new URL(url, location.origin).toString(), { ignoreSearch: true });
   return !!match && match.ok;
 }
 
