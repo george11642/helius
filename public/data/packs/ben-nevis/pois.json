@@ -1,0 +1,234 @@
+{
+  "trailheads": [
+    {
+      "name": "Ben Nevis Visitor Centre",
+      "lat": 56.796,
+      "lon": -5.103,
+      "role": "trailhead"
+    },
+    {
+      "name": "Glen Nevis Youth Hostel",
+      "lat": 56.7891,
+      "lon": -5.0793,
+      "role": "trailhead"
+    },
+    {
+      "name": "Fort William",
+      "lat": 56.8198,
+      "lon": -5.1052,
+      "role": "hub"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Ben Nevis",
+      "lat": 56.7968582,
+      "lon": -5.003526,
+      "ele": 1345
+    },
+    {
+      "name": "Càrn Mòr Dearg",
+      "lat": 56.8052539,
+      "lon": -4.9866573,
+      "ele": 1220
+    },
+    {
+      "name": "Càrn Dearg Meadhonach",
+      "lat": 56.8097631,
+      "lon": -4.9893613,
+      "ele": 1180
+    },
+    {
+      "name": "Aonach Mòr",
+      "lat": 56.8129504,
+      "lon": -4.9617416,
+      "ele": 1221
+    },
+    {
+      "name": "Aonach Beag",
+      "lat": 56.7999773,
+      "lon": -4.9541724,
+      "ele": 1234
+    },
+    {
+      "name": "Stob Bàn",
+      "lat": 56.7440062,
+      "lon": -5.0305154,
+      "ele": 999
+    },
+    {
+      "name": "Am Bodach",
+      "lat": 56.7417441,
+      "lon": -4.9833493,
+      "ele": 1032
+    },
+    {
+      "name": "An Gearanach",
+      "lat": 56.7591747,
+      "lon": -4.9662336,
+      "ele": 982
+    },
+    {
+      "name": "Meall an t-Suidhe",
+      "lat": 56.8111236,
+      "lon": -5.0494987,
+      "ele": 711
+    },
+    {
+      "name": "Cow Hill",
+      "lat": 56.8140556,
+      "lon": -5.094233,
+      "ele": 287
+    },
+    {
+      "name": "Sgor an Iubhair",
+      "lat": 56.7450138,
+      "lon": -5.0019259,
+      "ele": 1001
+    },
+    {
+      "name": "Càrn Beag Dearg",
+      "lat": 56.8178443,
+      "lon": -4.9973601,
+      "ele": 1006
+    },
+    {
+      "name": "Meall Cumhann",
+      "lat": 56.7823784,
+      "lon": -4.9839339,
+      "ele": 699
+    },
+    {
+      "name": "Càrn Dearg",
+      "lat": 56.7859542,
+      "lon": -5.0207509,
+      "ele": 1020
+    },
+    {
+      "name": "Sgùrr a' Mhàim",
+      "lat": 56.7559403,
+      "lon": -5.0036478,
+      "ele": 1099
+    },
+    {
+      "name": "Stob Coire na h-Eirghe",
+      "lat": 56.7351187,
+      "lon": -5.006118,
+      "ele": 738
+    },
+    {
+      "name": "Beinn Bhan",
+      "lat": 56.7523283,
+      "lon": -5.1747502,
+      "ele": 397
+    },
+    {
+      "name": "Meall nan Cleireach",
+      "lat": 56.7587445,
+      "lon": -5.1391127,
+      "ele": 535
+    },
+    {
+      "name": "Meall Ruadh",
+      "lat": 56.7955996,
+      "lon": -5.1840265,
+      "ele": 310
+    },
+    {
+      "name": "Beinn na Gucaig",
+      "lat": 56.7392916,
+      "lon": -5.1688746,
+      "ele": 616
+    },
+    {
+      "name": "Doire Ban",
+      "lat": 56.7321928,
+      "lon": -5.1225094,
+      "ele": 566
+    },
+    {
+      "name": "Meall a' Chaorainn",
+      "lat": 56.7447212,
+      "lon": -5.0842661,
+      "ele": 896
+    },
+    {
+      "name": "Stob Coire a' Chairn",
+      "lat": 56.7507525,
+      "lon": -4.9690937,
+      "ele": 981
+    },
+    {
+      "name": "Bidein Bad na h-Iolaire",
+      "lat": 56.7904397,
+      "lon": -5.0877789,
+      "ele": 528
+    },
+    {
+      "name": "Mullach nan Coirean",
+      "lat": 56.7498534,
+      "lon": -5.0724176,
+      "ele": 939
+    },
+    {
+      "name": "Sgor Chalum",
+      "lat": 56.7746878,
+      "lon": -5.0654904,
+      "ele": 556
+    },
+    {
+      "name": "Meall an t-Slamain",
+      "lat": 56.8170376,
+      "lon": -5.1624658,
+      "ele": 467
+    },
+    {
+      "name": "Druim na h-Earba",
+      "lat": 56.7940101,
+      "lon": -5.1290822,
+      "ele": 288
+    },
+    {
+      "name": "Tom Giubhais",
+      "lat": 56.845523,
+      "lon": -5.1238338,
+      "ele": null
+    },
+    {
+      "name": "Tom Dubh",
+      "lat": 56.8469929,
+      "lon": -5.1151089,
+      "ele": null
+    },
+    {
+      "name": "Meall Bhanbhaidh",
+      "lat": 56.8639123,
+      "lon": -5.0929608,
+      "ele": null
+    },
+    {
+      "name": "Tom Allt Fine",
+      "lat": 56.8535515,
+      "lon": -5.1038922,
+      "ele": null
+    },
+    {
+      "name": "Stob Choire a' Mhail",
+      "lat": 56.7492866,
+      "lon": -5.0054494,
+      "ele": null
+    },
+    {
+      "name": "Point 909",
+      "lat": 56.7471572,
+      "lon": -4.9754392,
+      "ele": 909
+    },
+    {
+      "name": "An Garbhanach",
+      "lat": 56.7553865,
+      "lon": -4.9651963,
+      "ele": null
+    }
+  ]
+}

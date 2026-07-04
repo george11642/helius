@@ -40,6 +40,12 @@ const PACK_META: Record<string, { region: string; terrain: string }> = {
   sandia: { region: 'New Mexico, USA', terrain: 'granite crest · 3,255 m' },
   chamonix: { region: 'Haute-Savoie, France', terrain: 'alpine valley · 4,809 m' },
   fontainebleau: { region: 'Île-de-France, France', terrain: 'forest & boulders · 130 m' },
+  yosemite: { region: 'California, USA', terrain: 'granite domes · 2,694 m' },
+  zermatt: { region: 'Valais, Switzerland', terrain: 'alpine peaks · 4,478 m' },
+  'grand-canyon': { region: 'Arizona, USA', terrain: 'canyon corridor · 2,210 m' },
+  fuji: { region: 'Yamanashi, Japan', terrain: 'volcanic cone · 3,776 m' },
+  'ben-nevis': { region: 'Highlands, Scotland', terrain: 'munro & glen · 1,345 m' },
+  pecos: { region: 'New Mexico, USA', terrain: 'alpine wilderness · 3,844 m' },
 };
 
 // Auto-continue threshold vs. caps.modelResidentMB — which the pre-flight now

@@ -1,0 +1,21 @@
+{
+  "id": "grand-canyon",
+  "name": "Grand Canyon \u2014 South Rim",
+  "bbox": [
+    -112.2,
+    36.0,
+    -111.95,
+    36.2
+  ],
+  "center": [
+    -112.075,
+    36.1
+  ],
+  "files": {
+    "basemap.pmtiles": 3009039,
+    "pois.json": 4939,
+    "graph.bin": 285899,
+    "terrain.pmtiles": 15563704
+  },
+  "totalBytes": 18863581
+}

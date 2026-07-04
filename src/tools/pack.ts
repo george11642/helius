@@ -7,7 +7,17 @@
 import type { PackInfo } from '../lib/contract';
 import type { GpsFix } from './location';
 
-const PACK_IDS = ['sandia', 'chamonix', 'fontainebleau'] as const;
+const PACK_IDS = [
+  'sandia',
+  'chamonix',
+  'fontainebleau',
+  'yosemite',
+  'zermatt',
+  'grand-canyon',
+  'fuji',
+  'ben-nevis',
+  'pecos',
+] as const;
 
 let activePack: string = 'sandia';
 
@@ -24,6 +34,12 @@ const DEFAULT_FIX: Record<string, GpsFix> = {
   sandia: { lat: 35.1983, lon: -106.4439, accuracyM: 14, elevationM: 2926 }, // La Luz upper switchbacks
   chamonix: { lat: 45.97, lon: 6.885, accuracyM: 14, elevationM: 2352 }, // near the Lac Blanc trail
   fontainebleau: { lat: 48.4058, lon: 2.6386, accuracyM: 14, elevationM: 130 }, // Gorges de Franchard
+  yosemite: { lat: 37.727, lon: -119.541, accuracyM: 14, elevationM: 1500 }, // Mist Trail above Vernal Fall
+  zermatt: { lat: 46.005, lon: 7.755, accuracyM: 14, elevationM: 2600 }, // Riffelberg trail
+  'grand-canyon': { lat: 36.0761, lon: -112.1279, accuracyM: 14, elevationM: 1160 }, // Bright Angel Trail near Havasupai Gardens
+  fuji: { lat: 35.42, lon: 138.755, accuracyM: 14, elevationM: 1400 }, // Yoshida forest trail
+  'ben-nevis': { lat: 56.8021, lon: -5.0588, accuracyM: 14, elevationM: 700 }, // Ben Nevis Mountain Path
+  pecos: { lat: 35.805, lon: -105.785, accuracyM: 14, elevationM: 3100 }, // Winsor Trail above the Ski Basin
 };
 
 export function defaultFixFor(pack: string): GpsFix | undefined {

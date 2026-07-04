@@ -1,0 +1,21 @@
+{
+  "id": "pecos",
+  "name": "Pecos Wilderness \u2014 Santa Fe",
+  "bbox": [
+    -106.05,
+    35.58,
+    -105.55,
+    35.92
+  ],
+  "center": [
+    -105.8,
+    35.75
+  ],
+  "files": {
+    "basemap.pmtiles": 7756359,
+    "pois.json": 4615,
+    "graph.bin": 3137293,
+    "terrain.pmtiles": 26133813
+  },
+  "totalBytes": 37032080
+}

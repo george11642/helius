@@ -1,0 +1,21 @@
+{
+  "id": "yosemite",
+  "name": "Yosemite Valley \u2014 High Sierra",
+  "bbox": [
+    -119.75,
+    37.65,
+    -119.3,
+    37.95
+  ],
+  "center": [
+    -119.525,
+    37.8
+  ],
+  "files": {
+    "basemap.pmtiles": 7056854,
+    "pois.json": 14851,
+    "graph.bin": 571743,
+    "terrain.pmtiles": 23474051
+  },
+  "totalBytes": 31117499
+}

@@ -1,0 +1,21 @@
+{
+  "id": "fuji",
+  "name": "Mount Fuji \u2014 Fujiyoshida",
+  "bbox": [
+    138.68,
+    35.32,
+    138.85,
+    35.52
+  ],
+  "center": [
+    138.765,
+    35.42
+  ],
+  "files": {
+    "basemap.pmtiles": 3929943,
+    "pois.json": 2811,
+    "graph.bin": 810331,
+    "terrain.pmtiles": 8810377
+  },
+  "totalBytes": 13553462
+}

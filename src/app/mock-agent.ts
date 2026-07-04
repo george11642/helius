@@ -34,6 +34,12 @@ const MOCK_PACKS: PackInfo[] = [
   { id: 'sandia', name: 'Sandia', bbox: [-106.7, 34.9, -106.2, 35.4], center: [-106.4439, 35.1983], totalBytes: 42_000_000 },
   { id: 'chamonix', name: 'Chamonix', bbox: [6.7, 45.8, 7.1, 46.0], center: [6.885, 45.97], totalBytes: 38_000_000 },
   { id: 'fontainebleau', name: 'Fontainebleau', bbox: [2.55, 48.38, 2.7, 48.48], center: [2.6386, 48.4058], totalBytes: 21_000_000 },
+  { id: 'yosemite', name: 'Yosemite Valley — High Sierra', bbox: [-119.75, 37.65, -119.3, 37.95], center: [-119.525, 37.8], totalBytes: 31_117_499 },
+  { id: 'zermatt', name: 'Zermatt — Matterhorn', bbox: [7.6, 45.9, 7.85, 46.1], center: [7.725, 46.0], totalBytes: 22_045_126 },
+  { id: 'grand-canyon', name: 'Grand Canyon — South Rim', bbox: [-112.2, 36.0, -111.95, 36.2], center: [-112.075, 36.1], totalBytes: 18_863_581 },
+  { id: 'fuji', name: 'Mount Fuji — Fujiyoshida', bbox: [138.68, 35.32, 138.85, 35.52], center: [138.765, 35.42], totalBytes: 13_553_462 },
+  { id: 'ben-nevis', name: 'Ben Nevis — Fort William', bbox: [-5.2, 56.72, -4.95, 56.87], center: [-5.075, 56.795], totalBytes: 12_730_896 },
+  { id: 'pecos', name: 'Pecos Wilderness — Santa Fe', bbox: [-106.05, 35.58, -105.55, 35.92], center: [-105.8, 35.75], totalBytes: 37_032_080 },
 ];
 
 function createTimerBag() {

@@ -1,0 +1,21 @@
+{
+  "id": "zermatt",
+  "name": "Zermatt \u2014 Matterhorn",
+  "bbox": [
+    7.6,
+    45.9,
+    7.85,
+    46.1
+  ],
+  "center": [
+    7.725,
+    46.0
+  ],
+  "files": {
+    "basemap.pmtiles": 4486004,
+    "pois.json": 12848,
+    "graph.bin": 639781,
+    "terrain.pmtiles": 16906493
+  },
+  "totalBytes": 22045126
+}

@@ -1,0 +1,264 @@
+{
+  "trailheads": [
+    {
+      "name": "Bright Angel Trailhead",
+      "lat": 36.0575,
+      "lon": -112.1436,
+      "role": "trailhead"
+    },
+    {
+      "name": "South Kaibab Trailhead",
+      "lat": 36.053,
+      "lon": -112.0838,
+      "role": "trailhead"
+    },
+    {
+      "name": "Grand Canyon Village",
+      "lat": 36.0544,
+      "lon": -112.1401,
+      "role": "hub"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Angels Gate",
+      "lat": 36.091928,
+      "lon": -111.989332,
+      "ele": 1957
+    },
+    {
+      "name": "Brahma Temple",
+      "lat": 36.1302609,
+      "lon": -112.0387786,
+      "ele": 2275
+    },
+    {
+      "name": "Buddha Temple",
+      "lat": 36.1524825,
+      "lon": -112.099336,
+      "ele": 2175
+    },
+    {
+      "name": "Cheops Pyramid",
+      "lat": 36.1202394,
+      "lon": -112.1199468,
+      "ele": 1646
+    },
+    {
+      "name": "Clement Powell Butte",
+      "lat": 36.1497048,
+      "lon": -112.0837801,
+      "ele": 1938
+    },
+    {
+      "name": "Cope Butte",
+      "lat": 36.0876727,
+      "lon": -112.1973721,
+      "ele": 1374
+    },
+    {
+      "name": "Dana Butte",
+      "lat": 36.0913715,
+      "lon": -112.1504478,
+      "ele": 1513
+    },
+    {
+      "name": "Deva Temple",
+      "lat": 36.1519275,
+      "lon": -112.032112,
+      "ele": 2224
+    },
+    {
+      "name": "Dragon Head",
+      "lat": 36.1974814,
+      "lon": -112.1807274,
+      "ele": 2362
+    },
+    {
+      "name": "Dunn Butte",
+      "lat": 36.0838724,
+      "lon": -111.9929432,
+      "ele": 1657
+    },
+    {
+      "name": "Grandeur Point",
+      "lat": 36.0644273,
+      "lon": -112.1210023,
+      "ele": 2145
+    },
+    {
+      "name": "Hall Butte",
+      "lat": 36.0802616,
+      "lon": -111.9771091,
+      "ele": 1650
+    },
+    {
+      "name": "Hattan Butte",
+      "lat": 36.1355385,
+      "lon": -112.0526678,
+      "ele": 1785
+    },
+    {
+      "name": "Hawkins Butte",
+      "lat": 36.0788723,
+      "lon": -112.0015546,
+      "ele": 1579
+    },
+    {
+      "name": "Hillers Butte",
+      "lat": 36.1422612,
+      "lon": -112.0889026,
+      "ele": 1735
+    },
+    {
+      "name": "Horseshoe Mesa",
+      "lat": 36.0241027,
+      "lon": -111.9756837,
+      "ele": 1552
+    },
+    {
+      "name": "Horus Temple",
+      "lat": 36.1322042,
+      "lon": -112.1798935,
+      "ele": 1862
+    },
+    {
+      "name": "Isis Temple",
+      "lat": 36.1410495,
+      "lon": -112.137374,
+      "ele": 2037
+    },
+    {
+      "name": "Lyell Butte",
+      "lat": 36.0460945,
+      "lon": -112.0293327,
+      "ele": 1608
+    },
+    {
+      "name": "Manu Temple",
+      "lat": 36.1666492,
+      "lon": -112.0846136,
+      "ele": 2110
+    },
+    {
+      "name": "Newberry Butte",
+      "lat": 36.0622061,
+      "lon": -111.9726642,
+      "ele": 1552
+    },
+    {
+      "name": "Newton Butte",
+      "lat": 36.060261,
+      "lon": -112.0529447,
+      "ele": 1781
+    },
+    {
+      "name": "O'Neill Butte",
+      "lat": 36.0713719,
+      "lon": -112.0904459,
+      "ele": 1775
+    },
+    {
+      "name": "Osiris Temple",
+      "lat": 36.1449818,
+      "lon": -112.1876715,
+      "ele": 1958
+    },
+    {
+      "name": "Oza Butte",
+      "lat": 36.1827604,
+      "lon": -112.0673911,
+      "ele": 2346
+    },
+    {
+      "name": "Pattie Butte",
+      "lat": 36.0713721,
+      "lon": -112.0560005,
+      "ele": 1563
+    },
+    {
+      "name": "Shiva Temple",
+      "lat": 36.1644263,
+      "lon": -112.1610044,
+      "ele": 2321
+    },
+    {
+      "name": "Sumner Point",
+      "lat": 36.1124829,
+      "lon": -112.0765571,
+      "ele": 1560
+    },
+    {
+      "name": "The Alligator",
+      "lat": 36.0797123,
+      "lon": -112.169262,
+      "ele": 1760
+    },
+    {
+      "name": "The Battleship",
+      "lat": 36.0755384,
+      "lon": -112.1385029,
+      "ele": 1779
+    },
+    {
+      "name": "The Colonnade",
+      "lat": 36.1633155,
+      "lon": -112.1235034,
+      "ele": 2162
+    },
+    {
+      "name": "The Howlands Butte",
+      "lat": 36.0955389,
+      "lon": -112.0096106,
+      "ele": 1664
+    },
+    {
+      "name": "The Tipoff",
+      "lat": 36.0915769,
+      "lon": -112.089782,
+      "ele": 1203
+    },
+    {
+      "name": "Thor Temple",
+      "lat": 36.1305393,
+      "lon": -111.9807211,
+      "ele": 2050
+    },
+    {
+      "name": "Tower of Set",
+      "lat": 36.1208154,
+      "lon": -112.1785045,
+      "ele": 1823
+    },
+    {
+      "name": "Wotans Throne",
+      "lat": 36.1048317,
+      "lon": -111.9602795,
+      "ele": 2360
+    },
+    {
+      "name": "Zoroaster Temple",
+      "lat": 36.1185942,
+      "lon": -112.0454452,
+      "ele": 2172
+    },
+    {
+      "name": "Schellbach Butte",
+      "lat": 36.1477602,
+      "lon": -112.1118363,
+      "ele": 1809
+    },
+    {
+      "name": "Sumner Butte",
+      "lat": 36.1133162,
+      "lon": -112.0757238,
+      "ele": 1562
+    },
+    {
+      "name": "Berry Butte",
+      "lat": 36.0205391,
+      "lon": -112.0023871,
+      "ele": 1729
+    }
+  ]
+}

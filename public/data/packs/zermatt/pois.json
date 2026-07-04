@@ -1,0 +1,702 @@
+{
+  "trailheads": [
+    {
+      "name": "Schwarzsee",
+      "lat": 45.9876,
+      "lon": 7.7085,
+      "role": "trailhead"
+    },
+    {
+      "name": "Gornergrat",
+      "lat": 45.9836,
+      "lon": 7.7869,
+      "role": "station"
+    },
+    {
+      "name": "Zermatt Bahnhof",
+      "lat": 46.0236,
+      "lon": 7.7474,
+      "role": "hub"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Dent d'Hérens",
+      "lat": 45.9699788,
+      "lon": 7.6050349,
+      "ele": 4171
+    },
+    {
+      "name": "Matterhorn",
+      "lat": 45.9764263,
+      "lon": 7.6586024,
+      "ele": 4478
+    },
+    {
+      "name": "Hohtälli",
+      "lat": 45.9890139,
+      "lon": 7.8022288,
+      "ele": 3286
+    },
+    {
+      "name": "Klein Matterhorn",
+      "lat": 45.9383601,
+      "lon": 7.7298888,
+      "ele": 3883
+    },
+    {
+      "name": "Gobba di Rollin",
+      "lat": 45.9239722,
+      "lon": 7.7350929,
+      "ele": 3899
+    },
+    {
+      "name": "Castor",
+      "lat": 45.9208491,
+      "lon": 7.7932734,
+      "ele": 4228
+    },
+    {
+      "name": "Pollux",
+      "lat": 45.9278079,
+      "lon": 7.7853104,
+      "ele": 4092
+    },
+    {
+      "name": "Zinalrothorn",
+      "lat": 46.0648271,
+      "lon": 7.6901238,
+      "ele": 4221
+    },
+    {
+      "name": "Breithorn Occidentale / Westgipfel",
+      "lat": 45.941013,
+      "lon": 7.747732,
+      "ele": 4164
+    },
+    {
+      "name": "Riffelhorn",
+      "lat": 45.9811426,
+      "lon": 7.757785,
+      "ele": 2927
+    },
+    {
+      "name": "Gugle",
+      "lat": 45.9980302,
+      "lon": 7.7680179,
+      "ele": 2721
+    },
+    {
+      "name": "Mettelhorn",
+      "lat": 46.0556475,
+      "lon": 7.7416565,
+      "ele": 3410
+    },
+    {
+      "name": "Trifthorn",
+      "lat": 46.0514575,
+      "lon": 7.6782953,
+      "ele": 3737
+    },
+    {
+      "name": "Ober Gabelhorn",
+      "lat": 46.0385988,
+      "lon": 7.6680403,
+      "ele": 4073
+    },
+    {
+      "name": "Mont Durand",
+      "lat": 46.0337197,
+      "lon": 7.6505095,
+      "ele": 3712
+    },
+    {
+      "name": "Pointe de Zinal",
+      "lat": 46.0272094,
+      "lon": 7.6304632,
+      "ele": 3790
+    },
+    {
+      "name": "Stockje",
+      "lat": 45.9943975,
+      "lon": 7.6104401,
+      "ele": 3097
+    },
+    {
+      "name": "Liskamm Westgipfel",
+      "lat": 45.926495,
+      "lon": 7.8232338,
+      "ele": 4479
+    },
+    {
+      "name": "Grand Cornier",
+      "lat": 46.0521309,
+      "lon": 7.6115672,
+      "ele": 3969
+    },
+    {
+      "name": "Unter Gabelhorn",
+      "lat": 46.026192,
+      "lon": 7.6967811,
+      "ele": 3398
+    },
+    {
+      "name": "Oberrothorn",
+      "lat": 46.0275389,
+      "lon": 7.8127956,
+      "ele": 3413
+    },
+    {
+      "name": "Bösentrift",
+      "lat": 46.0382802,
+      "lon": 7.8029684,
+      "ele": 3253
+    },
+    {
+      "name": "Theodulhorn",
+      "lat": 45.9493099,
+      "lon": 7.708395,
+      "ele": 3472
+    },
+    {
+      "name": "Blattje",
+      "lat": 45.9497663,
+      "lon": 7.8304021,
+      "ele": 3361
+    },
+    {
+      "name": "Stockhorn",
+      "lat": 45.9856544,
+      "lon": 7.8378157,
+      "ele": 3532
+    },
+    {
+      "name": "Platthorn",
+      "lat": 46.053706,
+      "lon": 7.736399,
+      "ele": 3345
+    },
+    {
+      "name": "Testa Grigia",
+      "lat": 45.9341356,
+      "lon": 7.708073,
+      "ele": 3480
+    },
+    {
+      "name": "Grabenhorn",
+      "lat": 46.093522,
+      "lon": 7.8203901,
+      "ele": 3372
+    },
+    {
+      "name": "Rote Nase",
+      "lat": 45.9871412,
+      "lon": 7.8124531,
+      "ele": 3247
+    },
+    {
+      "name": "Stockhorn",
+      "lat": 45.9866428,
+      "lon": 7.8234036,
+      "ele": 3405
+    },
+    {
+      "name": "Cima di Scoperta",
+      "lat": 45.9217384,
+      "lon": 7.8436885,
+      "ele": 4335
+    },
+    {
+      "name": "Liskamm Ostgipfel",
+      "lat": 45.922478,
+      "lon": 7.835588,
+      "ele": 4527
+    },
+    {
+      "name": "Breithorn Centrale",
+      "lat": 45.9387743,
+      "lon": 7.7567727,
+      "ele": 4159
+    },
+    {
+      "name": "Breithorn Orientale / Ostgipfel",
+      "lat": 45.9374994,
+      "lon": 7.76711,
+      "ele": 4139
+    },
+    {
+      "name": "Roccia Nera",
+      "lat": 45.9327037,
+      "lon": 7.7751313,
+      "ele": 4075
+    },
+    {
+      "name": "Gemello del Breithorn",
+      "lat": 45.9358378,
+      "lon": 7.7703575,
+      "ele": 4106
+    },
+    {
+      "name": "Castor Nordgipfel",
+      "lat": 45.9220053,
+      "lon": 7.7932862,
+      "ele": 4205
+    },
+    {
+      "name": "Liskamm westlicher Vorgipfel",
+      "lat": 45.92701,
+      "lon": 7.8204265,
+      "ele": 4447
+    },
+    {
+      "name": "Leiterspitzen",
+      "lat": 46.073284,
+      "lon": 7.820592,
+      "ele": 3409
+    },
+    {
+      "name": "Kinhorn",
+      "lat": 46.07719,
+      "lon": 7.83401,
+      "ele": 3750
+    },
+    {
+      "name": "Schalihorn",
+      "lat": 46.0843466,
+      "lon": 7.7049449,
+      "ele": 3974
+    },
+    {
+      "name": "Dent Blanche",
+      "lat": 46.0341763,
+      "lon": 7.6119305,
+      "ele": 4358
+    },
+    {
+      "name": "Grand Gendarme",
+      "lat": 46.0297672,
+      "lon": 7.6106444,
+      "ele": 4097
+    },
+    {
+      "name": "Furggen",
+      "lat": 45.9568184,
+      "lon": 7.6812583,
+      "ele": 3492
+    },
+    {
+      "name": "Motta di Pleté Orientale",
+      "lat": 45.9165158,
+      "lon": 7.6664815,
+      "ele": 3018
+    },
+    {
+      "name": "Pigne de la Lé",
+      "lat": 46.082937,
+      "lon": 7.610763,
+      "ele": 3396
+    },
+    {
+      "name": "Punta Perazzi - Perazzispétz",
+      "lat": 45.9116347,
+      "lon": 7.7936795,
+      "ele": 3906
+    },
+    {
+      "name": "Fluehorn",
+      "lat": 46.0232862,
+      "lon": 7.8283108,
+      "ele": 3317
+    },
+    {
+      "name": "Pfulwe",
+      "lat": 46.0164906,
+      "lon": 7.8476781,
+      "ele": 3314
+    },
+    {
+      "name": "Wissgrat",
+      "lat": 46.0590668,
+      "lon": 7.8423126,
+      "ele": 3195
+    },
+    {
+      "name": "Sattelspitz",
+      "lat": 46.0463535,
+      "lon": 7.8038481,
+      "ele": 3162
+    },
+    {
+      "name": "Spitzi Flue",
+      "lat": 46.0178231,
+      "lon": 7.8408456,
+      "ele": 3260
+    },
+    {
+      "name": "Sattelkuppe",
+      "lat": 45.9254027,
+      "lon": 7.8289804,
+      "ele": 4430
+    },
+    {
+      "name": "Naso del Liskamm",
+      "lat": 45.9167093,
+      "lon": 7.8350674,
+      "ele": 4272
+    },
+    {
+      "name": "Gran Sometta",
+      "lat": 45.9143461,
+      "lon": 7.6770428,
+      "ele": 3166
+    },
+    {
+      "name": "Besso",
+      "lat": 46.0777578,
+      "lon": 7.6587807,
+      "ele": 3667
+    },
+    {
+      "name": "Wellenkuppe",
+      "lat": 46.0419912,
+      "lon": 7.6778635,
+      "ele": 3903
+    },
+    {
+      "name": "Bec Pio Merlo",
+      "lat": 45.919593,
+      "lon": 7.6405866,
+      "ele": 2620
+    },
+    {
+      "name": "Motta di Plété Occidentale",
+      "lat": 45.9124569,
+      "lon": 7.6487425,
+      "ele": 2840
+    },
+    {
+      "name": "Chli Haupt",
+      "lat": 46.0984316,
+      "lon": 7.8197691,
+      "ele": 3098
+    },
+    {
+      "name": "Gross Haupt",
+      "lat": 46.0987171,
+      "lon": 7.8150895,
+      "ele": 2872
+    },
+    {
+      "name": "Horn",
+      "lat": 46.0733835,
+      "lon": 7.8130033,
+      "ele": 3214
+    },
+    {
+      "name": "Troäre",
+      "lat": 46.0833888,
+      "lon": 7.7985021,
+      "ele": 2396
+    },
+    {
+      "name": "Hirli",
+      "lat": 45.9902385,
+      "lon": 7.69688,
+      "ele": 2890
+    },
+    {
+      "name": "Pic Tyndall",
+      "lat": 45.974293,
+      "lon": 7.653724,
+      "ele": 4241
+    },
+    {
+      "name": "Bielti",
+      "lat": 46.0028228,
+      "lon": 7.726527,
+      "ele": null
+    },
+    {
+      "name": "Motta di Pleté Centrale",
+      "lat": 45.9182265,
+      "lon": 7.6538477,
+      "ele": 2870
+    },
+    {
+      "name": "Kleiner Pollux",
+      "lat": 45.9485116,
+      "lon": 7.7946745,
+      "ele": null
+    },
+    {
+      "name": "Rocca di Verra",
+      "lat": 45.9052596,
+      "lon": 7.7384003,
+      "ele": 3321
+    },
+    {
+      "name": "Äbihorn",
+      "lat": 46.0207199,
+      "lon": 7.6535813,
+      "ele": 3472
+    },
+    {
+      "name": "Bec Carre'",
+      "lat": 45.9070192,
+      "lon": 7.6785394,
+      "ele": 3003
+    },
+    {
+      "name": "Pointe Sud",
+      "lat": 45.903226,
+      "lon": 7.6792647,
+      "ele": 2973
+    },
+    {
+      "name": "Punta di Rollin",
+      "lat": 45.9146399,
+      "lon": 7.7086075,
+      "ele": 3296
+    },
+    {
+      "name": "Gemsspitz",
+      "lat": 46.0075145,
+      "lon": 7.6344895,
+      "ele": 3182
+    },
+    {
+      "name": "Wisshorn",
+      "lat": 46.036951,
+      "lon": 7.7345039,
+      "ele": 2936
+    },
+    {
+      "name": "Le Mammouth",
+      "lat": 46.0637207,
+      "lon": 7.6535545,
+      "ele": 3100
+    },
+    {
+      "name": "Dôme",
+      "lat": 46.0716538,
+      "lon": 7.6669557,
+      "ele": 3650
+    },
+    {
+      "name": "Blanc de Moming",
+      "lat": 46.0737036,
+      "lon": 7.6644955,
+      "ele": 3660
+    },
+    {
+      "name": "L'Epaule du Rothorn",
+      "lat": 46.0693947,
+      "lon": 7.6875983,
+      "ele": 4016
+    },
+    {
+      "name": "Crête Nord de Moming",
+      "lat": 46.0776281,
+      "lon": 7.6997414,
+      "ele": 3862
+    },
+    {
+      "name": "Furgghorn",
+      "lat": 45.954152,
+      "lon": 7.6995036,
+      "ele": 3451
+    },
+    {
+      "name": "Punta Bianca",
+      "lat": 45.9705782,
+      "lon": 7.6132196,
+      "ele": 3918
+    },
+    {
+      "name": "Punta Carrel",
+      "lat": 45.9713388,
+      "lon": 7.6159716,
+      "ele": 3841
+    },
+    {
+      "name": "Punta Maria Cristina",
+      "lat": 45.9722224,
+      "lon": 7.620369,
+      "ele": 3704
+    },
+    {
+      "name": "Testa del Leone",
+      "lat": 45.9713082,
+      "lon": 7.6436597,
+      "ele": 3715
+    },
+    {
+      "name": "Punta Maquignaz",
+      "lat": 45.9713005,
+      "lon": 7.6170015,
+      "ele": 3801
+    },
+    {
+      "name": "Punta dei Cors",
+      "lat": 45.9499512,
+      "lon": 7.601439,
+      "ele": 3849
+    },
+    {
+      "name": "Gornergrat",
+      "lat": 45.9836051,
+      "lon": 7.784337,
+      "ele": 3100
+    },
+    {
+      "name": "Unter Äschhorn",
+      "lat": 46.0583125,
+      "lon": 7.7148699,
+      "ele": 3617
+    },
+    {
+      "name": "Ober Äschhorn",
+      "lat": 46.0605569,
+      "lon": 7.7076746,
+      "ele": 3668
+    },
+    {
+      "name": "Furgghorn",
+      "lat": 46.0539815,
+      "lon": 7.7222056,
+      "ele": 3391
+    },
+    {
+      "name": "Unterrothorn",
+      "lat": 46.020826,
+      "lon": 7.7975443,
+      "ele": 3103
+    },
+    {
+      "name": "Bösentrift",
+      "lat": 46.0425305,
+      "lon": 7.80279,
+      "ele": 3248
+    },
+    {
+      "name": "Wisse Schijen",
+      "lat": 46.093837,
+      "lon": 7.7431297,
+      "ele": 3369
+    },
+    {
+      "name": "Wandfluehorn",
+      "lat": 46.0019307,
+      "lon": 7.6018986,
+      "ele": 3589
+    },
+    {
+      "name": "Hohwänghorn",
+      "lat": 46.0287604,
+      "lon": 7.6499048,
+      "ele": 3671
+    },
+    {
+      "name": "Mittler Gabelhorn",
+      "lat": 46.0333265,
+      "lon": 7.6765096,
+      "ele": 3685
+    },
+    {
+      "name": "Pointe du Mountet",
+      "lat": 46.0573115,
+      "lon": 7.684578,
+      "ele": 3839
+    },
+    {
+      "name": "Crête Sud de Moming",
+      "lat": 46.0727608,
+      "lon": 7.695203,
+      "ele": 3963
+    },
+    {
+      "name": "Stockchnubel",
+      "lat": 45.9793783,
+      "lon": 7.8318831,
+      "ele": 3047
+    },
+    {
+      "name": "Gagenhaupt",
+      "lat": 45.9859014,
+      "lon": 7.7443874,
+      "ele": 2568
+    },
+    {
+      "name": "Getschung",
+      "lat": 46.0651602,
+      "lon": 7.7512788,
+      "ele": 2863
+    },
+    {
+      "name": "Unterer Blausatz",
+      "lat": 46.0069027,
+      "lon": 7.6370488,
+      "ele": 3066
+    },
+    {
+      "name": "Eseltschuggen",
+      "lat": 46.0504731,
+      "lon": 7.6968039,
+      "ele": 3359
+    },
+    {
+      "name": "Dossen",
+      "lat": 45.9965629,
+      "lon": 7.7335794,
+      "ele": 1954
+    },
+    {
+      "name": "Schwarzhörnli",
+      "lat": 46.0925147,
+      "lon": 7.7516549,
+      "ele": 2963
+    },
+    {
+      "name": "Wisse Schijen Südgipfel",
+      "lat": 46.090343,
+      "lon": 7.7437584,
+      "ele": 3264
+    },
+    {
+      "name": "Grand Gendarme",
+      "lat": 46.0406931,
+      "lon": 7.6732358,
+      "ele": 3868
+    },
+    {
+      "name": "Felikhorn",
+      "lat": 45.9167263,
+      "lon": 7.8039134,
+      "ele": 4087
+    },
+    {
+      "name": "Zmuttzähne",
+      "lat": 45.9804941,
+      "lon": 7.6538747,
+      "ele": 3894
+    },
+    {
+      "name": "Picco Muzio",
+      "lat": 45.9754055,
+      "lon": 7.6610174,
+      "ele": 4187
+    },
+    {
+      "name": "Épaule de Furggen",
+      "lat": 45.9756926,
+      "lon": 7.6603308,
+      "ele": 4243
+    },
+    {
+      "name": "Mettelhorn",
+      "lat": 46.055649,
+      "lon": 7.741656,
+      "ele": 3410
+    }
+  ]
+}

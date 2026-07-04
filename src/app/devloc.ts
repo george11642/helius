@@ -38,6 +38,37 @@ const PRESETS_BY_PACK: Record<string, LocationPreset[]> = {
     { label: 'Barbizon village', lat: 48.4462, lon: 2.6108, elevationM: 80 },
     { label: 'Apremont boulders', lat: 48.43, lon: 2.628, elevationM: 120 },
   ],
+  yosemite: [
+    // Matches src/tools/pack.ts's own default fix for this pack exactly.
+    { label: 'Mist Trail — Vernal Fall (default)', lat: 37.727, lon: -119.541, elevationM: 1500 },
+    { label: 'Happy Isles Trailhead', lat: 37.7327, lon: -119.558, elevationM: 1230 },
+    { label: 'Glacier Point', lat: 37.7274, lon: -119.5734, elevationM: 2199 },
+  ],
+  zermatt: [
+    { label: 'Riffelberg trail (default)', lat: 46.005, lon: 7.755, elevationM: 2600 },
+    { label: 'Schwarzsee', lat: 45.9876, lon: 7.7085, elevationM: 2583 },
+    { label: 'Gornergrat', lat: 45.9836, lon: 7.7869, elevationM: 3089 },
+  ],
+  'grand-canyon': [
+    { label: 'Bright Angel Trail — Havasupai Gardens (default)', lat: 36.0761, lon: -112.1279, elevationM: 1160 },
+    { label: 'Bright Angel Trailhead', lat: 36.0575, lon: -112.1436, elevationM: 2093 },
+    { label: 'South Kaibab Trailhead', lat: 36.053, lon: -112.0838, elevationM: 2210 },
+  ],
+  fuji: [
+    { label: 'Yoshida forest trail (default)', lat: 35.42, lon: 138.755, elevationM: 1400 },
+    { label: 'Umagaeshi Trailhead', lat: 35.4285, lon: 138.7562, elevationM: 1450 },
+    { label: 'Fuji Subaru Line 5th Station', lat: 35.3958, lon: 138.7335, elevationM: 2305 },
+  ],
+  'ben-nevis': [
+    { label: 'Ben Nevis Mountain Path (default)', lat: 56.8021, lon: -5.0588, elevationM: 700 },
+    { label: 'Ben Nevis Visitor Centre', lat: 56.796, lon: -5.103, elevationM: 20 },
+    { label: 'Fort William', lat: 56.8198, lon: -5.1052, elevationM: 15 },
+  ],
+  pecos: [
+    { label: 'Winsor Trail — above the Ski Basin (default)', lat: 35.805, lon: -105.785, elevationM: 3100 },
+    { label: 'Winsor Trailhead (Ski Basin)', lat: 35.7975, lon: -105.801, elevationM: 3050 },
+    { label: 'Aspen Vista Trailhead', lat: 35.7776, lon: -105.8073, elevationM: 3050 },
+  ],
 };
 
 // Simulated fixes don't have a real accuracy reading; a nominal handheld-GPS

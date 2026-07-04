@@ -18,6 +18,12 @@ export const PACK_COVERAGE: Record<string, PackCoverage> = {
   sandia: { id: 'sandia', name: 'Sandia Mountains — Albuquerque', bbox: [-107.15, 34.65, -106.15, 35.55] },
   chamonix: { id: 'chamonix', name: 'Chamonix — Mont Blanc', bbox: [6.75, 45.8, 7.05, 46.05] },
   fontainebleau: { id: 'fontainebleau', name: 'Forêt de Fontainebleau', bbox: [2.53, 48.36, 2.72, 48.47] },
+  yosemite: { id: 'yosemite', name: 'Yosemite Valley — High Sierra', bbox: [-119.75, 37.65, -119.3, 37.95] },
+  zermatt: { id: 'zermatt', name: 'Zermatt — Matterhorn', bbox: [7.6, 45.9, 7.85, 46.1] },
+  'grand-canyon': { id: 'grand-canyon', name: 'Grand Canyon — South Rim', bbox: [-112.2, 36.0, -111.95, 36.2] },
+  fuji: { id: 'fuji', name: 'Mount Fuji — Fujiyoshida', bbox: [138.68, 35.32, 138.85, 35.52] },
+  'ben-nevis': { id: 'ben-nevis', name: 'Ben Nevis — Fort William', bbox: [-5.2, 56.72, -4.95, 56.87] },
+  pecos: { id: 'pecos', name: 'Pecos Wilderness — Santa Fe', bbox: [-106.05, 35.58, -105.55, 35.92] },
 };
 
 // Same great-circle math as src/map/graph-core.mjs::haversineM — duplicated

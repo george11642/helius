@@ -1,0 +1,246 @@
+{
+  "trailheads": [
+    {
+      "name": "Winsor Trailhead (Ski Basin)",
+      "lat": 35.7975,
+      "lon": -105.801,
+      "role": "trailhead"
+    },
+    {
+      "name": "Aspen Vista Trailhead",
+      "lat": 35.7776,
+      "lon": -105.8073,
+      "role": "viewpoint"
+    },
+    {
+      "name": "Big Tesuque Trailhead",
+      "lat": 35.762,
+      "lon": -105.81,
+      "role": "hub"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Peña Oscura Hill",
+      "lat": 35.791695,
+      "lon": -105.9264102,
+      "ele": 2102
+    },
+    {
+      "name": "Aspen Peak",
+      "lat": 35.8022514,
+      "lon": -105.8077968,
+      "ele": 3384
+    },
+    {
+      "name": "Chaperito Knob",
+      "lat": 35.7172553,
+      "lon": -105.6402944,
+      "ele": 3096
+    },
+    {
+      "name": "Elk Mountain",
+      "lat": 35.7666999,
+      "lon": -105.5539046,
+      "ele": 3550
+    },
+    {
+      "name": "Grass Mountain",
+      "lat": 35.8183643,
+      "lon": -105.6322389,
+      "ele": 3002
+    },
+    {
+      "name": "Hamilton Mesa",
+      "lat": 35.8972522,
+      "lon": -105.5833494,
+      "ele": 3197
+    },
+    {
+      "name": "Pecos Baldy",
+      "lat": 35.9089177,
+      "lon": -105.666128,
+      "ele": 3806
+    },
+    {
+      "name": "Penitente Peak",
+      "lat": 35.7953075,
+      "lon": -105.7639071,
+      "ele": 3720
+    },
+    {
+      "name": "Rosilla Peak",
+      "lat": 35.7322552,
+      "lon": -105.6258499,
+      "ele": 3231
+    },
+    {
+      "name": "Round Mountain",
+      "lat": 35.8728077,
+      "lon": -105.6347388,
+      "ele": 3292
+    },
+    {
+      "name": "Shaggy Peak",
+      "lat": 35.6136971,
+      "lon": -105.8254072,
+      "ele": 2657
+    },
+    {
+      "name": "Sun Mountain",
+      "lat": 35.6592262,
+      "lon": -105.9123079,
+      "ele": 2424
+    },
+    {
+      "name": "Thompson Peak",
+      "lat": 35.6722544,
+      "lon": -105.8064076,
+      "ele": 3215
+    },
+    {
+      "name": "Viveash Mesa",
+      "lat": 35.6975334,
+      "lon": -105.6547389,
+      "ele": 3001
+    },
+    {
+      "name": "Redondo Peak",
+      "lat": 35.8619311,
+      "lon": -105.745217,
+      "ele": 3766
+    },
+    {
+      "name": "Tesuque Peak",
+      "lat": 35.7850297,
+      "lon": -105.7816853,
+      "ele": 3656
+    },
+    {
+      "name": "Cerro Gordo",
+      "lat": 35.6872532,
+      "lon": -105.9066873,
+      "ele": 2321
+    },
+    {
+      "name": "Cerro Piñon",
+      "lat": 35.8987268,
+      "lon": -105.8980971,
+      "ele": 2416
+    },
+    {
+      "name": "Glorieta Baldy",
+      "lat": 35.6519773,
+      "lon": -105.7997407,
+      "ele": 3116
+    },
+    {
+      "name": "Granite Point",
+      "lat": 35.6989199,
+      "lon": -105.8694645,
+      "ele": 2527
+    },
+    {
+      "name": "Sierra Mosca",
+      "lat": 35.9136126,
+      "lon": -105.7638435,
+      "ele": 3603
+    },
+    {
+      "name": "Sally's Hill",
+      "lat": 35.6733494,
+      "lon": -105.9166874,
+      "ele": 2263
+    },
+    {
+      "name": "Tano Point",
+      "lat": 35.7278074,
+      "lon": -105.9402993,
+      "ele": 2252
+    },
+    {
+      "name": "Atalaya Mountain",
+      "lat": 35.6677519,
+      "lon": -105.8763779,
+      "ele": 2779
+    },
+    {
+      "name": "Lake Peak",
+      "lat": 35.7964185,
+      "lon": -105.7711295,
+      "ele": 3771
+    },
+    {
+      "name": "Santa Fe Baldy",
+      "lat": 35.8322357,
+      "lon": -105.7581171,
+      "ele": 3847
+    },
+    {
+      "name": "Mount Barker",
+      "lat": 35.7633664,
+      "lon": -105.5697382,
+      "ele": 3490
+    },
+    {
+      "name": "East Pecos Baldy",
+      "lat": 35.9129408,
+      "lon": -105.653978,
+      "ele": null
+    },
+    {
+      "name": "Picacho Peak",
+      "lat": 35.6785593,
+      "lon": -105.886688,
+      "ele": 2590
+    },
+    {
+      "name": "Talaya Hill",
+      "lat": 35.6783655,
+      "lon": -105.893544,
+      "ele": 2395
+    },
+    {
+      "name": "Moon Mountain",
+      "lat": 35.655038,
+      "lon": -105.9071437,
+      "ele": 2464
+    },
+    {
+      "name": "Atalaya Mountain",
+      "lat": 35.6678285,
+      "lon": -105.8759584,
+      "ele": 2780
+    },
+    {
+      "name": "Deception Peak",
+      "lat": 35.7943435,
+      "lon": -105.7733489,
+      "ele": null
+    },
+    {
+      "name": "Valle de la Piedra",
+      "lat": 35.7257265,
+      "lon": -105.5534016,
+      "ele": 3340
+    },
+    {
+      "name": "Sierra Pelada",
+      "lat": 35.6411376,
+      "lon": -105.8681675,
+      "ele": 2962
+    },
+    {
+      "name": "Monument Rock",
+      "lat": 35.6965022,
+      "lon": -105.815595,
+      "ele": 2830
+    },
+    {
+      "name": "Pulpit Point",
+      "lat": 35.6066406,
+      "lon": -105.7483846,
+      "ele": null
+    }
+  ]
+}

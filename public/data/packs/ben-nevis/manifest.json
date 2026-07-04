@@ -1,0 +1,21 @@
+{
+  "id": "ben-nevis",
+  "name": "Ben Nevis \u2014 Fort William",
+  "bbox": [
+    -5.2,
+    56.72,
+    -4.95,
+    56.87
+  ],
+  "center": [
+    -5.075,
+    56.795
+  ],
+  "files": {
+    "basemap.pmtiles": 2611885,
+    "pois.json": 4334,
+    "graph.bin": 357175,
+    "terrain.pmtiles": 9757502
+  },
+  "totalBytes": 12730896
+}

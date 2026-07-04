@@ -1,0 +1,786 @@
+{
+  "trailheads": [
+    {
+      "name": "Happy Isles Trailhead",
+      "lat": 37.7327,
+      "lon": -119.558,
+      "role": "trailhead"
+    },
+    {
+      "name": "Glacier Point",
+      "lat": 37.7274,
+      "lon": -119.5734,
+      "role": "viewpoint"
+    },
+    {
+      "name": "Tuolumne Meadows Trailhead",
+      "lat": 37.873,
+      "lon": -119.3527,
+      "role": "trailhead"
+    },
+    {
+      "name": "Yosemite Village",
+      "lat": 37.7456,
+      "lon": -119.5936,
+      "role": "hub"
+    }
+  ],
+  "peaks": [
+    {
+      "name": "Lembert Dome",
+      "lat": 37.8819863,
+      "lon": -119.3469716,
+      "ele": 2871
+    },
+    {
+      "name": "Pothole Dome",
+      "lat": 37.8805792,
+      "lon": -119.3938817,
+      "ele": 2683.2
+    },
+    {
+      "name": "Puppy Dome",
+      "lat": 37.8752975,
+      "lon": -119.3456212,
+      "ele": 2682.1
+    },
+    {
+      "name": "Devils Dance Floor",
+      "lat": 37.7393703,
+      "lon": -119.7360061,
+      "ele": 2078
+    },
+    {
+      "name": "Fairview Dome",
+      "lat": 37.8714304,
+      "lon": -119.4040044,
+      "ele": 2965.2
+    },
+    {
+      "name": "Fletcher Peak",
+      "lat": 37.7917992,
+      "lon": -119.3352216,
+      "ele": 3477
+    },
+    {
+      "name": "Grand Mountain",
+      "lat": 37.9115887,
+      "lon": -119.5187765,
+      "ele": 2877
+    },
+    {
+      "name": "Gray Peak",
+      "lat": 37.6737737,
+      "lon": -119.4186697,
+      "ele": 3525.5
+    },
+    {
+      "name": "Mount Hoffmann",
+      "lat": 37.8467094,
+      "lon": -119.5106161,
+      "ele": 3308
+    },
+    {
+      "name": "Double Rock",
+      "lat": 37.8999222,
+      "lon": -119.572111,
+      "ele": 2982
+    },
+    {
+      "name": "Polly Dome",
+      "lat": 37.8545043,
+      "lon": -119.4497695,
+      "ele": 2987.7
+    },
+    {
+      "name": "East Quarter Dome",
+      "lat": 37.7606628,
+      "lon": -119.5073566,
+      "ele": 2535
+    },
+    {
+      "name": "Quartzite Peak",
+      "lat": 37.7157618,
+      "lon": -119.425153,
+      "ele": 3182
+    },
+    {
+      "name": "Sentinel Dome",
+      "lat": 37.7229821,
+      "lon": -119.58433,
+      "ele": 2475
+    },
+    {
+      "name": "Smith Peak",
+      "lat": 37.9268018,
+      "lon": -119.7350676,
+      "ele": 2356
+    },
+    {
+      "name": "Mount Starr King",
+      "lat": 37.702943,
+      "lon": -119.517551,
+      "ele": 2767
+    },
+    {
+      "name": "Sunrise Mountain",
+      "lat": 37.7935364,
+      "lon": -119.4501589,
+      "ele": 3026
+    },
+    {
+      "name": "Basket Dome",
+      "lat": 37.7635359,
+      "lon": -119.550719,
+      "ele": 2315
+    },
+    {
+      "name": "Mount Broderick",
+      "lat": 37.733263,
+      "lon": -119.5352435,
+      "ele": 2048.6
+    },
+    {
+      "name": "Bunnell Point",
+      "lat": 37.7391206,
+      "lon": -119.4673372,
+      "ele": 2491
+    },
+    {
+      "name": "Cathedral Peak",
+      "lat": 37.8478275,
+      "lon": -119.4055286,
+      "ele": 3308
+    },
+    {
+      "name": "Mount Clark",
+      "lat": 37.6965443,
+      "lon": -119.428622,
+      "ele": 3512
+    },
+    {
+      "name": "Clouds Rest",
+      "lat": 37.7678448,
+      "lon": -119.4892506,
+      "ele": 3028
+    },
+    {
+      "name": "Colby Mountain",
+      "lat": 37.9110331,
+      "lon": -119.5393329,
+      "ele": 2938
+    },
+    {
+      "name": "Indian Rock",
+      "lat": 37.7824245,
+      "lon": -119.5512751,
+      "ele": 2592
+    },
+    {
+      "name": "Johnson Peak",
+      "lat": 37.8355708,
+      "lon": -119.3488377,
+      "ele": 3369
+    },
+    {
+      "name": "LeConte Point",
+      "lat": 37.9463099,
+      "lon": -119.7073962,
+      "ele": 1936
+    },
+    {
+      "name": "Liberty Cap",
+      "lat": 37.7287652,
+      "lon": -119.532496,
+      "ele": 2157.1
+    },
+    {
+      "name": "Moraine Dome",
+      "lat": 37.7429982,
+      "lon": -119.490497,
+      "ele": 2440
+    },
+    {
+      "name": "North Dome",
+      "lat": 37.7568694,
+      "lon": -119.5598861,
+      "ele": 2299
+    },
+    {
+      "name": "Ostrander Rocks",
+      "lat": 37.6896505,
+      "lon": -119.593495,
+      "ele": 2482
+    },
+    {
+      "name": "Ragged Peak",
+      "lat": 37.9329515,
+      "lon": -119.3533179,
+      "ele": 3326.3
+    },
+    {
+      "name": "Red Peak",
+      "lat": 37.6538896,
+      "lon": -119.4094769,
+      "ele": 3566.6
+    },
+    {
+      "name": "Tenaya Peak",
+      "lat": 37.8285358,
+      "lon": -119.443215,
+      "ele": 3129
+    },
+    {
+      "name": "Tuolumne Peak",
+      "lat": 37.8751839,
+      "lon": -119.4848058,
+      "ele": 3309
+    },
+    {
+      "name": "Vogelsang Peak",
+      "lat": 37.7774187,
+      "lon": -119.3495327,
+      "ele": 3488
+    },
+    {
+      "name": "Mount Watkins",
+      "lat": 37.7827022,
+      "lon": -119.5176622,
+      "ele": 2590
+    },
+    {
+      "name": "Wildcat Point",
+      "lat": 37.9284506,
+      "lon": -119.4428392,
+      "ele": 2881.9
+    },
+    {
+      "name": "Crocker Point",
+      "lat": 37.7044908,
+      "lon": -119.6591532,
+      "ele": 2165
+    },
+    {
+      "name": "Dewey Point",
+      "lat": 37.7045527,
+      "lon": -119.6501514,
+      "ele": 2236
+    },
+    {
+      "name": "Mount Florence",
+      "lat": 37.739882,
+      "lon": -119.3162217,
+      "ele": 3822.9
+    },
+    {
+      "name": "Isberg Peak",
+      "lat": 37.6509184,
+      "lon": -119.323956,
+      "ele": 3352
+    },
+    {
+      "name": "Leaning Tower",
+      "lat": 37.7128228,
+      "lon": -119.6476886,
+      "ele": 1810
+    },
+    {
+      "name": "Stanford Point",
+      "lat": 37.7061137,
+      "lon": -119.6664923,
+      "ele": 1599
+    },
+    {
+      "name": "Old Inspiration Point",
+      "lat": 37.7050765,
+      "lon": -119.6754083,
+      "ele": 2024
+    },
+    {
+      "name": "Turtleback Dome",
+      "lat": 37.7124272,
+      "lon": -119.7051697,
+      "ele": 1605
+    },
+    {
+      "name": "Ahwiyah Point",
+      "lat": 37.7507583,
+      "lon": -119.536551,
+      "ele": 2103
+    },
+    {
+      "name": "Boundary Hill",
+      "lat": 37.7640916,
+      "lon": -119.628501,
+      "ele": 2575
+    },
+    {
+      "name": "Columbia Finger",
+      "lat": 37.819515,
+      "lon": -119.42319,
+      "ele": 3158
+    },
+    {
+      "name": "Grizzly Peak",
+      "lat": 37.7300058,
+      "lon": -119.5506434,
+      "ele": 1846
+    },
+    {
+      "name": "Moran Point",
+      "lat": 37.7354385,
+      "lon": -119.584367,
+      "ele": 1915
+    },
+    {
+      "name": "Parsons Peak",
+      "lat": 37.7769992,
+      "lon": -119.3076896,
+      "ele": 3699
+    },
+    {
+      "name": "Pywiack Dome",
+      "lat": 37.8465379,
+      "lon": -119.4425707,
+      "ele": 2695.4
+    },
+    {
+      "name": "Rafferty Peak",
+      "lat": 37.815157,
+      "lon": -119.355809,
+      "ele": 3382
+    },
+    {
+      "name": "Taft Point",
+      "lat": 37.7131098,
+      "lon": -119.6046055,
+      "ele": 2286
+    },
+    {
+      "name": "Tresidder Peak",
+      "lat": 37.831126,
+      "lon": -119.4226017,
+      "ele": 3231
+    },
+    {
+      "name": "Unicorn Peak",
+      "lat": 37.845707,
+      "lon": -119.38196,
+      "ele": 3299
+    },
+    {
+      "name": "Union Point",
+      "lat": 37.734847,
+      "lon": -119.5877031,
+      "ele": 1930
+    },
+    {
+      "name": "White Mountain",
+      "lat": 37.9468686,
+      "lon": -119.3096005,
+      "ele": 3674
+    },
+    {
+      "name": "Medlicott Dome",
+      "lat": 37.85615,
+      "lon": -119.4239,
+      "ele": 3011
+    },
+    {
+      "name": "The Pinnacles",
+      "lat": 37.7622786,
+      "lon": -119.4945632,
+      "ele": 2885
+    },
+    {
+      "name": "Higher Cathedral Rock",
+      "lat": 37.7145358,
+      "lon": -119.636555,
+      "ele": 2025
+    },
+    {
+      "name": "Lost Arrow Spire",
+      "lat": 37.7564846,
+      "lon": -119.5952034,
+      "ele": 2042.4
+    },
+    {
+      "name": "Dozier Dome",
+      "lat": 37.8480195,
+      "lon": -119.4290122,
+      "ele": 2847
+    },
+    {
+      "name": "Stately Pleasure Dome",
+      "lat": 37.8385924,
+      "lon": -119.4576093,
+      "ele": 2756.6
+    },
+    {
+      "name": "Washington Column",
+      "lat": 37.748525,
+      "lon": -119.5600465,
+      "ele": 1812.6
+    },
+    {
+      "name": "Higher Cathedral Spire",
+      "lat": 37.713585,
+      "lon": -119.63255,
+      "ele": 1828
+    },
+    {
+      "name": "Lower Cathedral Spire",
+      "lat": 37.71433,
+      "lon": -119.63142,
+      "ele": 1792
+    },
+    {
+      "name": "Mariuolumne Dome",
+      "lat": 37.8614969,
+      "lon": -119.4219093,
+      "ele": 3039.5
+    },
+    {
+      "name": "Drug Dome",
+      "lat": 37.864324,
+      "lon": -119.4219518,
+      "ele": 2847.5
+    },
+    {
+      "name": "Lamb Dome",
+      "lat": 37.8697675,
+      "lon": -119.4240476,
+      "ele": 2807.1
+    },
+    {
+      "name": "Eichorn Pinnacle",
+      "lat": 37.8476973,
+      "lon": -119.4070798,
+      "ele": 3267
+    },
+    {
+      "name": "Dark Side Dome",
+      "lat": 37.8834516,
+      "lon": -119.4306383,
+      "ele": 2668.3
+    },
+    {
+      "name": "Split Pinnacle",
+      "lat": 37.73415,
+      "lon": -119.61929,
+      "ele": 1539
+    },
+    {
+      "name": "Half Dome",
+      "lat": 37.7460015,
+      "lon": -119.5332525,
+      "ele": 2694
+    },
+    {
+      "name": "Dog Dome",
+      "lat": 37.8844943,
+      "lon": -119.3453019,
+      "ele": 2866
+    },
+    {
+      "name": "Daff Dome",
+      "lat": 37.8807116,
+      "lon": -119.4128809,
+      "ele": 2791
+    },
+    {
+      "name": "Echo Peak #8",
+      "lat": 37.8336698,
+      "lon": -119.4001124,
+      "ele": 3318
+    },
+    {
+      "name": "Echo Peak #9",
+      "lat": 37.8333666,
+      "lon": -119.40029,
+      "ele": 3306
+    },
+    {
+      "name": "Echo Peak #7",
+      "lat": 37.8336799,
+      "lon": -119.4013512,
+      "ele": 3306
+    },
+    {
+      "name": "Echo Peak #6",
+      "lat": 37.8330599,
+      "lon": -119.4020223,
+      "ele": 3292
+    },
+    {
+      "name": "El Capitan",
+      "lat": 37.7342192,
+      "lon": -119.6376142,
+      "ele": 2307
+    },
+    {
+      "name": "Cony Crags",
+      "lat": 37.7295375,
+      "lon": -119.3555278,
+      "ele": 3212.3
+    },
+    {
+      "name": "Echo Peak #4",
+      "lat": 37.83157,
+      "lon": -119.40371,
+      "ele": 3306
+    },
+    {
+      "name": "Echo Peak #0",
+      "lat": 37.83369,
+      "lon": -119.40253,
+      "ele": 3367
+    },
+    {
+      "name": "Echo Peak #1",
+      "lat": 37.83374,
+      "lon": -119.40288,
+      "ele": 3330
+    },
+    {
+      "name": "Echo Peak #2",
+      "lat": 37.83323,
+      "lon": -119.403,
+      "ele": 3318
+    },
+    {
+      "name": "Echo Peak #2.5",
+      "lat": 37.83279,
+      "lon": -119.40317,
+      "ele": 3328
+    },
+    {
+      "name": "Echo Peak #3",
+      "lat": 37.83264,
+      "lon": -119.40338,
+      "ele": 3343
+    },
+    {
+      "name": "Echo Peak #5",
+      "lat": 37.8339,
+      "lon": -119.40207,
+      "ele": 3330
+    },
+    {
+      "name": "South Whizz Dome",
+      "lat": 37.8700292,
+      "lon": -119.4400985,
+      "ele": 2712.9
+    },
+    {
+      "name": "North Whizz Dome",
+      "lat": 37.8714299,
+      "lon": -119.4407424,
+      "ele": 2715.7
+    },
+    {
+      "name": "The Bowmaiden",
+      "lat": 37.86388,
+      "lon": -119.49465,
+      "ele": 3241
+    },
+    {
+      "name": "Middle Brother",
+      "lat": 37.74187,
+      "lon": -119.6140551,
+      "ele": 2153
+    },
+    {
+      "name": "Lower Brother",
+      "lat": 37.7361559,
+      "lon": -119.6143448,
+      "ele": 1791
+    },
+    {
+      "name": "Middle Cathedral Rock",
+      "lat": 37.7157515,
+      "lon": -119.637599,
+      "ele": 1990
+    },
+    {
+      "name": "Lower Cathedral Rock",
+      "lat": 37.7185479,
+      "lon": -119.643334,
+      "ele": 1700
+    },
+    {
+      "name": "Church Tower",
+      "lat": 37.7150164,
+      "lon": -119.629677,
+      "ele": 1670
+    },
+    {
+      "name": "Elephant Rock",
+      "lat": 37.7140837,
+      "lon": -119.7142089,
+      "ele": 1435
+    },
+    {
+      "name": "Sentinel Rock",
+      "lat": 37.72886,
+      "lon": -119.59446,
+      "ele": 2134
+    },
+    {
+      "name": "West Quarter Dome",
+      "lat": 37.7579458,
+      "lon": -119.5106426,
+      "ele": 2490
+    },
+    {
+      "name": "K-P Pinnacle",
+      "lat": 37.7370067,
+      "lon": -119.6399996,
+      "ele": 2052.85
+    },
+    {
+      "name": "Choo-Choo Mountain",
+      "lat": 37.8021083,
+      "lon": -119.3639445,
+      "ele": 3451.97
+    },
+    {
+      "name": "Sugarloaf Dome",
+      "lat": 37.7410514,
+      "lon": -119.4794726,
+      "ele": 2346
+    },
+    {
+      "name": "West Cottage Dome",
+      "lat": 37.8823036,
+      "lon": -119.4117317,
+      "ele": 2764
+    },
+    {
+      "name": "East Cottage Dome",
+      "lat": 37.8853447,
+      "lon": -119.4063229,
+      "ele": 2782.8
+    },
+    {
+      "name": "Doda Dome",
+      "lat": 37.8848178,
+      "lon": -119.4215782,
+      "ele": 2720.3
+    },
+    {
+      "name": "Hammer Dome",
+      "lat": 37.8833104,
+      "lon": -119.4353292,
+      "ele": 2667.6
+    },
+    {
+      "name": "V-Tree Dome",
+      "lat": 37.927713,
+      "lon": -119.488978,
+      "ele": 2559
+    },
+    {
+      "name": "Scary Dome",
+      "lat": 37.9103437,
+      "lon": -119.441109,
+      "ele": 2688.8
+    },
+    {
+      "name": "Scar Dome",
+      "lat": 37.9107944,
+      "lon": -119.4434027,
+      "ele": 2696.5
+    },
+    {
+      "name": "SAR Dome",
+      "lat": 37.9102762,
+      "lon": -119.4578104,
+      "ele": 2692.6
+    },
+    {
+      "name": "Marmot Dome",
+      "lat": 37.8741934,
+      "lon": -119.3977142,
+      "ele": 2832
+    },
+    {
+      "name": "Harlequin Dome",
+      "lat": 37.8393952,
+      "lon": -119.4542659,
+      "ele": 2622.9
+    },
+    {
+      "name": "Olmsted Point",
+      "lat": 37.8092839,
+      "lon": -119.4844347,
+      "ele": 2566
+    },
+    {
+      "name": "Eagle Tower",
+      "lat": 37.7544828,
+      "lon": -119.6032861,
+      "ele": 2220
+    },
+    {
+      "name": "Yosemite Point",
+      "lat": 37.7564677,
+      "lon": -119.5929006,
+      "ele": 2115
+    },
+    {
+      "name": "Arrowhead Spire",
+      "lat": 37.7574581,
+      "lon": -119.588306,
+      "ele": 1944
+    },
+    {
+      "name": "Watkins Pinnacles",
+      "lat": 37.7677718,
+      "lon": -119.5242763,
+      "ele": 2154.8
+    },
+    {
+      "name": "Cockscomb",
+      "lat": 37.83549,
+      "lon": -119.38468,
+      "ele": 3369
+    },
+    {
+      "name": "Tempo Dome",
+      "lat": 37.6510912,
+      "lon": -119.6512591,
+      "ele": 2393.1
+    },
+    {
+      "name": "Telemark Dome",
+      "lat": 37.9034715,
+      "lon": -119.4001557,
+      "ele": 2720.8
+    },
+    {
+      "name": "Eagle Peak",
+      "lat": 37.745995,
+      "lon": -119.61471,
+      "ele": 2362
+    },
+    {
+      "name": "Emeric Dome",
+      "lat": 37.77425,
+      "lon": -119.38573,
+      "ele": 2948
+    },
+    {
+      "name": "Obelisk Lake Peak",
+      "lat": 37.7014714,
+      "lon": -119.4133567,
+      "ele": 3206
+    },
+    {
+      "name": "Subdome",
+      "lat": 37.7466921,
+      "lon": -119.5299035,
+      "ele": 2564
+    }
+  ]
+}
