@@ -68,6 +68,16 @@ export interface Tool {
   run(args: Record<string, unknown>): Promise<ToolResult>;
 }
 
+// ---------- Region packs ----------
+
+export interface PackInfo {
+  id: string;
+  name: string;
+  bbox: [number, number, number, number]; // [west, south, east, north]
+  center: [number, number];               // [lon, lat]
+  totalBytes: number;
+}
+
 // ---------- Agent events (UI subscribes; agent loop emits) ----------
 
 export type AgentEvent =
@@ -82,6 +92,7 @@ export type AgentEvent =
   | { type: 'agent-turn-done' }
   | { type: 'speak'; text: string }                              // TTS layer picks this up
   | { type: 'route'; geojson: unknown; distanceM: number; etaMin: number } // map layer draws
-  | { type: 'beacon'; action: 'arm' | 'start' | 'stop'; pattern?: string };
+  | { type: 'beacon'; action: 'arm' | 'start' | 'stop'; pattern?: string }
+  | { type: 'pack-changed'; pack: PackInfo; fix: { lat: number; lon: number } }; // region switch
 
 export type AgentEventHandler = (e: AgentEvent) => void;

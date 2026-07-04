@@ -75,6 +75,14 @@ export function takePendingRoute(): PendingRoute | null {
   return r;
 }
 
+/** Drop cached graph + POIs (and any pending route) so the next route_back
+ *  lazy-loads whatever pack is now active. Called by the façade on switchPack. */
+export function clearPackCache(): void {
+  graphCache.clear();
+  poisCache.clear();
+  pendingRoute = null;
+}
+
 const asString = (v: unknown, fb: string): string => (typeof v === 'string' && v.trim() ? v : fb);
 
 export async function runRouteBack(args: Record<string, unknown>): Promise<ToolResult> {

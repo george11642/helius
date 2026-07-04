@@ -2,10 +2,12 @@
 // (plus types from ../lib/contract). createHelius wires the worker engine, the
 // tool registry, and the agent loop together and hands back a small surface.
 
-import type { AgentEventHandler, ModelTier } from '../lib/contract';
+import type { AgentEventHandler, ModelTier, PackInfo } from '../lib/contract';
 import { createEngine, frameFromImage } from '../llm/engine';
 import { createTools } from '../tools/registry';
-import { setPack } from '../tools/pack';
+import { setPack, listPacks, defaultFixFor } from '../tools/pack';
+import { clearPackCache } from '../tools/route';
+import { setSimulatedFix } from '../tools/location';
 import { createAgentLoop } from './loop';
 import { SYSTEM_PROMPT } from './prompt';
 
@@ -14,6 +16,11 @@ export interface Helius {
   sendVoice(audio: Float32Array): Promise<void>; // 16kHz mono
   readSign(image: ImageBitmap | HTMLCanvasElement | OffscreenCanvas): Promise<void>;
   setTier(tier: ModelTier): Promise<void>;
+  /** Available region packs (id/name/bbox/center/size), for a picker. */
+  listPacks(): Promise<PackInfo[]>;
+  /** Switch region: swaps the active pack, invalidates the route cache, moves
+   *  the demo fix to the pack's default, and emits a 'pack-changed' event. */
+  switchPack(packId: string): Promise<void>;
   abort(): void;
   getStats(): { decodeTps: number; prefillMs: number } | null;
 }
@@ -68,6 +75,20 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
     sendVoice: (audio) => loop.runVoice(audio),
     readSign: (image) => loop.readSign(frameFromImage(image)),
     setTier: (tier) => engine.setTier(tier),
+    listPacks: () => listPacks(),
+    switchPack: async (packId: string): Promise<void> => {
+      setPack(packId);
+      clearPackCache(); // next route_back lazy-loads the new pack's graph + POIs
+      const fix = defaultFixFor(packId);
+      if (fix) setSimulatedFix(fix);
+      const info = (await listPacks()).find((p) => p.id === packId);
+      if (!info) throw new Error(`unknown pack: ${packId}`);
+      opts.onEvent({
+        type: 'pack-changed',
+        pack: info,
+        fix: { lat: fix?.lat ?? info.center[1], lon: fix?.lon ?? info.center[0] },
+      });
+    },
     abort: () => loop.abort(),
     getStats: () => engine.getStats(),
   };
