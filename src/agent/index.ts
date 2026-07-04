@@ -50,8 +50,21 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
     opts.prewarm ?? false,
   );
 
+  // Wrap the event sink so we can kick off the deferred other-tier pre-warm
+  // after the FIRST completed turn — a fast first impression beats instant
+  // swap-readiness (the worker also has a 45s idle fallback). No-op when
+  // prewarm is disabled (the worker just ignores the trigger).
+  let firstTurnDone = false;
+  const emit: AgentEventHandler = (e) => {
+    opts.onEvent(e);
+    if (e.type === 'agent-turn-done' && !firstTurnDone) {
+      firstTurnDone = true;
+      engine.triggerPrewarm();
+    }
+  };
+
   const registry = createTools({
-    emit: opts.onEvent,
+    emit,
     engine: {
       visionInfer: async (frame, prompt) => {
         const r = await engine.visionInfer(frame, prompt);
@@ -60,7 +73,7 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
     },
   });
 
-  const loop = createAgentLoop({ engine, registry, emit: opts.onEvent, systemPrompt: SYSTEM_PROMPT });
+  const loop = createAgentLoop({ engine, registry, emit, systemPrompt: SYSTEM_PROMPT });
 
   // Kick off the default-tier load; progress + ready/error surface through
   // onEvent (engine-status). We don't block façade creation on it so the UI

@@ -66,6 +66,15 @@ const abortedIds = new Set<number>();
 // are ignored rather than leaking abortedIds entries.
 const inFlight = new Set<number>();
 
+// Deferred pre-warm: the other tier loads only AFTER the first completed turn
+// (main thread posts 'prewarm') or PREWARM_IDLE_MS of idle — whichever first.
+// Pre-warming during the first turn spikes its prefill (seen live: 37s); a fast
+// first impression beats instant swap-readiness.
+const PREWARM_IDLE_MS = 45000;
+let prewarmTier: ModelTier | null = null;
+let prewarmStarted = false;
+let prewarmTimer: ReturnType<typeof setTimeout> | null = null;
+
 const active = (): Instance | undefined => instances[activeTier];
 
 // ---------------------------------------------------------------- loading ----
@@ -189,10 +198,25 @@ async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
   post({ type: 'status', status: { state: 'ready', tier, loadMs: Math.round(performance.now() - t0) } });
 
   if (prewarm) {
-    // Background, silent. On failure (e.g. GPU OOM) leave it uncached so
-    // switchTier falls back to an on-demand load with a 'compiling' status.
-    void loadTier(OTHER[tier], false).catch(() => undefined);
+    // DEFER — don't start now. Arm it for the first completed turn (main thread
+    // posts 'prewarm') or a PREWARM_IDLE_MS fallback, whichever comes first.
+    prewarmTier = OTHER[tier];
+    prewarmStarted = false;
+    prewarmTimer = setTimeout(maybeStartPrewarm, PREWARM_IDLE_MS);
   }
+}
+
+/** Start the deferred other-tier pre-warm exactly once (background, silent). */
+function maybeStartPrewarm(): void {
+  if (!prewarmTier || prewarmStarted) return;
+  prewarmStarted = true;
+  if (prewarmTimer !== null) {
+    clearTimeout(prewarmTimer);
+    prewarmTimer = null;
+  }
+  // On failure (e.g. GPU OOM) leave it uncached so switchTier falls back to an
+  // on-demand load with a 'compiling' status.
+  void loadTier(prewarmTier, false).catch(() => undefined);
 }
 
 /** Tier switch: instant hot-swap if warm, else load-on-demand with status. */
@@ -332,6 +356,9 @@ ctx.addEventListener('message', (ev: MessageEvent<WorkerRequest>) => {
       break;
     case 'setTier':
       void switchTier(msg.tier);
+      break;
+    case 'prewarm':
+      maybeStartPrewarm();
       break;
     case 'generate':
       inFlight.add(msg.id);

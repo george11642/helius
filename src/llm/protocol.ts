@@ -25,6 +25,7 @@ export type GenerateKind = 'chat' | 'transcribe' | 'vision';
 export type WorkerRequest =
   | { type: 'load'; tier: ModelTier; modelBaseUrl: string; prewarm: boolean }
   | { type: 'setTier'; tier: ModelTier }
+  | { type: 'prewarm' } // trigger the deferred other-tier pre-warm (after first turn / idle)
   | {
       type: 'generate';
       id: number;

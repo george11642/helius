@@ -27,6 +27,8 @@ export interface Engine {
   visionInfer(frame: RawFrame, prompt: string): Promise<EngineResult>;
   /** Interrupt the most recent in-flight generation. */
   abort(): void;
+  /** Trigger the deferred other-tier pre-warm (idempotent; e.g. after the first turn). */
+  triggerPrewarm(): void;
   getStats(): { decodeTps: number; prefillMs: number } | null;
   currentTier(): ModelTier;
   dispose(): void;
@@ -61,6 +63,7 @@ export function createEngine(
 
   let nextId = 1;
   let activeId = 0;
+  let prewarmTriggered = false;
   let tier: ModelTier = 'E2B';
   let lastStats: { decodeTps: number; prefillMs: number } | null = null;
   const pending = new Map<number, Pending>();
@@ -192,6 +195,11 @@ export function createEngine(
     },
     abort(): void {
       if (activeId) send({ type: 'abort', id: activeId });
+    },
+    triggerPrewarm(): void {
+      if (prewarmTriggered) return; // once — the worker also has a 45s idle fallback
+      prewarmTriggered = true;
+      send({ type: 'prewarm' });
     },
     getStats() {
       return lastStats;

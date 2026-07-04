@@ -4,7 +4,7 @@
 // assistant tool_calls carry an arguments OBJECT; tool results are JSON STRINGS.
 
 import type { AgentEventHandler, ChatMessage } from '../lib/contract';
-import { createDisplayFilter, parseToolCalls, toAssistantToolCalls } from '../lib/parse';
+import { canonicalToolCallKey, createDisplayFilter, parseToolCalls, toAssistantToolCalls } from '../lib/parse';
 import type { Engine } from '../llm/engine';
 import type { RawFrame } from '../llm/protocol';
 import { READ_SIGN_PROMPT, type ToolRegistry } from '../tools/registry';
@@ -57,11 +57,14 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
   async function runInner(userText: string): Promise<void> {
     history.push({ role: 'user', content: userText });
 
-    let step = 0;
+    let iteration = 0; // generate/regenerate rounds (the loop budget)
+    let step = 0; // monotonic per EXECUTED tool call across the turn — unique chip numbers
     let done = false;
+    // Consecutive-duplicate guard: identity + result of the last tool actually run.
+    let lastExecuted: { key: string; result: Record<string, unknown> } | null = null;
 
-    while (step < MAX_STEPS && !aborted) {
-      step++;
+    while (iteration < MAX_STEPS && !aborted) {
+      iteration++;
       const messages: ChatMessage[] = [{ role: 'system', content: systemPrompt }, ...history];
 
       const filter = createDisplayFilter();
@@ -106,6 +109,20 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
       history.push({ role: 'assistant', tool_calls: toAssistantToolCalls(calls) });
 
       for (const call of calls) {
+        // Consecutive-duplicate guard: if the model re-emits the exact call it
+        // just ran (name+args), don't re-run, re-draw, or add another chip —
+        // hand back the prior result so it moves on instead of looping.
+        const key = canonicalToolCallKey(call.name, call.args);
+        if (lastExecuted && lastExecuted.key === key) {
+          history.push({
+            role: 'tool',
+            name: call.name,
+            content: JSON.stringify({ note: 'duplicate_call', previous_result: lastExecuted.result }),
+          });
+          continue;
+        }
+
+        step++;
         emit({ type: 'tool-start', call: { name: call.name, args: call.args }, step });
         const tool = registry.get(call.name);
         const t0 = performance.now();
@@ -130,6 +147,7 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
 
         const res = await tool.run(call.args);
         const ms = round(performance.now() - t0);
+        lastExecuted = { key, result: res.data }; // this is now the "immediately previous executed" call
         if (res.data && typeof res.data.error === 'string') {
           emit({ type: 'tool-error', name: call.name, message: res.data.error, step });
         } else {

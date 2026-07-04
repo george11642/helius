@@ -7,6 +7,7 @@ import {
   stripMarkers,
   createDisplayFilter,
   toAssistantToolCalls,
+  canonicalToolCallKey,
 } from '../src/lib/parse.ts';
 
 let passed = 0;
@@ -170,6 +171,24 @@ function ok(cond: boolean, name: string): void {
     [{ type: 'function', function: { name: 'locate', arguments: {} } }],
     'toAssistantToolCalls: LOCKED shape, arguments as object',
   );
+}
+
+// ---- canonicalToolCallKey (loop's consecutive-duplicate identity) ----
+{
+  const a = canonicalToolCallKey('route_back', { destination: 'trailhead' });
+  ok(a === canonicalToolCallKey('route_back', { destination: 'trailhead' }), 'canonicalKey: identical -> same');
+  ok(a !== canonicalToolCallKey('route_back', { destination: 'crest' }), 'canonicalKey: diff args -> diff');
+  ok(a !== canonicalToolCallKey('locate', { destination: 'trailhead' }), 'canonicalKey: diff name -> diff');
+  ok(
+    canonicalToolCallKey('pace_eta', { distance_m: 100, ascent_m: 5 }) ===
+      canonicalToolCallKey('pace_eta', { ascent_m: 5, distance_m: 100 }),
+    'canonicalKey: top-level key order ignored',
+  );
+  ok(
+    canonicalToolCallKey('x', { a: { p: 1, q: 2 } }) === canonicalToolCallKey('x', { a: { q: 2, p: 1 } }),
+    'canonicalKey: nested key order ignored',
+  );
+  ok(canonicalToolCallKey('locate', {}) === canonicalToolCallKey('locate', {}), 'canonicalKey: empty args stable');
 }
 
 // ---- display filter: tool-call turn is suppressed ----

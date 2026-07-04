@@ -139,7 +139,7 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
   const mi = km * 0.621371;
   return {
     data: {
-      status: 'ready',
+      status: 'ok', // clear success signal as the first key, so the model reads the turn as done
       dest: dest.name,
       distance_m: Math.round(result.distanceM),
       distance_mi: +mi.toFixed(2),
