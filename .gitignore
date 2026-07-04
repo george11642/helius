@@ -1,4 +1,4 @@
-node_modules/
+/comnode_modules/
 dist/
 dev-dist/
 .DS_Store
@@ -22,3 +22,7 @@ public/models/
 ios/**/.build/
 ios/**/DerivedData/
 ios/Packages/LiteRTLM/Frameworks/
+
+# Xcode / SwiftPM generated user state
+ios/**/xcuserdata/
+ios/**/.swiftpm/

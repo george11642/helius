@@ -145,12 +145,33 @@ a one-time, ~10-minute session. Do it in order.
    app → **Trust**. Re-run.
 9. **Grant permissions** on first use: Location (When In Use), Microphone, Speech
    Recognition, Camera. Location must be granted for real GPS `locate`.
-10. **Field test.** Outdoors with a real fix: "Get me back to the trailhead
-    before dark" → watch the tool chain, the compass arrow, and try the torch SOS
-    beacon and camera sign-reading.
+10. **On-device smoke check (this session, ~5 min)** — verify each before George leaves:
+    - **Model loads:** launch; the header goes to "on-device · no network". First load
+      reads the 2.4 GB weights from `Documents/` (step 7) — a few seconds on the A18.
+      If it says "model not found", the copy in step 7 didn't land — redo it.
+    - **Tool chain:** "Get me back to the trailhead before dark" → chips light
+      `locate → sun_clock → route_back` with a grounded answer. (Real routing needs a
+      GPS fix inside the Sandia pack bbox; otherwise the simulated La Luz fix is used.)
+    - **read_sign (2 min — marquee beat, FIRST real-camera OCR test):** tap the camera
+      button, point at the printed French test sign ("SENTIER DU LAC / Refuge — 2,4 km
+      / Danger : verglas"), take the photo → the `read_sign()` chip fires and Helius
+      returns the transcription + translation (verglas → ice; "be cautious of ice on
+      the trail"). On the simulator this was verified via the photo library.
+    - **Torch SOS (first real hardware test):** "Start an SOS beacon" → the rear torch
+      should actually FLASH the `... --- ...` pattern; the banner's STOP ends it.
+    - **Compass:** after a route, the amber arrow points at the waypoint and swings as
+      the phone rotates (needs a real heading — turn the phone).
+11. **Field test.** Outdoors with a real fix inside the Sandia pack: "Get me back to
+    the trailhead before dark" → tool chain + compass + torch SOS, on camera.
 
-> Free-provisioning certs expire after 7 days; re-run from Xcode to refresh. Fine
-> for the field test window.
+> Signing note (this machine): there is currently **no Apple ID in Xcode → Accounts**,
+> so `-allowProvisioningUpdates` fails with "No Accounts / No profiles". Two unblocks:
+> (a) add George's Apple ID in Xcode (free Personal Team, step 3); or (b) an App Store
+> Connect API key exists for team **PFSQAU75V7** at
+> `~/.appstoreconnect/private_keys/AuthKey_PFSQAU75V7.p8` — pass it to `xcodebuild`
+> with `-authenticationKeyPath/-authenticationKeyID PFSQAU75V7/-authenticationKeyIssuerID <issuer>`
+> to sign non-interactively (the Issuer ID must come from App Store Connect → Users
+> and Access → Integrations). Free-provisioning certs expire after 7 days; re-run to refresh.
 
 ---
 

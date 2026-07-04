@@ -248,3 +248,4 @@ void startAgent().then((handle) => {
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.register('/sw.js');
 }
+
