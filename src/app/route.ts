@@ -8,6 +8,9 @@ import { formatClock } from './dom';
 
 export interface RouteHandle {
   handleEvent(e: AgentEvent): void;
+  /** Hides the toast — called on a pack switch, since a route drawn for the
+   *  old region no longer means anything for the new one. */
+  clear(): void;
 }
 
 export function mountRoute(container: HTMLElement): RouteHandle {
@@ -22,5 +25,9 @@ export function mountRoute(container: HTMLElement): RouteHandle {
     toast.hidden = false;
   }
 
-  return { handleEvent };
+  function clear(): void {
+    toast.hidden = true;
+  }
+
+  return { handleEvent, clear };
 }

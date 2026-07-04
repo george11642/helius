@@ -7,6 +7,7 @@ import { mountStatus } from './app/status';
 import { mountBeacon } from './app/beacon';
 import { mountDevLoc } from './app/devloc';
 import { mountRoute } from './app/route';
+import { mountPackPicker } from './app/packpicker';
 import { speak, setMuted } from './speech/tts';
 import { HeliusMap } from './map/render';
 import type { RouteLineString } from './map/render';
@@ -29,13 +30,31 @@ const DEFAULT_FIX = { lat: 35.1983, lon: -106.4439, accuracyM: 14 };
 const refs = renderShell(document.getElementById('app')!);
 const boot = mountBoot();
 
-const map = new HeliusMap();
+// Reassigned on every pack switch (see switchMapPack) — HeliusMap has no
+// destroy()/setPack() of its own (checked render.ts), so a pack switch tears
+// down the old MapLibre instance via its exposed `.instance` escape hatch
+// and constructs a fresh HeliusMap for the new pack, rather than reaching
+// into render.ts's private internals.
+let map = new HeliusMap();
 let mapInitStarted = false;
 
 function isRouteLineString(g: unknown): g is RouteLineString {
   if (!g || typeof g !== 'object') return false;
   const obj = g as Record<string, unknown>;
   return obj.type === 'LineString' && Array.isArray(obj.coordinates);
+}
+
+async function initMapForPack(packId: string, fix: { lat: number; lon: number }): Promise<void> {
+  mapInitStarted = true; // a pack switch counts too — don't let initMapOnce's sandia-default clobber it later
+  map.instance?.remove(); // release the old WebGL context/listeners before replacing it
+  refs.mapRoot.innerHTML = ''; // drop the "OFFLINE MAP" placeholder text/grid (or the old canvas) before the new one mounts
+  map = new HeliusMap();
+  try {
+    await map.init(refs.mapRoot, packId);
+    map.setFix(fix.lat, fix.lon, DEFAULT_FIX.accuracyM);
+  } catch (err) {
+    console.warn('[helius] map init failed', err);
+  }
 }
 
 // Deferred until the engine reaches 'ready' — MapLibre's style/source init
@@ -45,13 +64,7 @@ function isRouteLineString(g: unknown): g is RouteLineString {
 async function initMapOnce(): Promise<void> {
   if (mapInitStarted) return;
   mapInitStarted = true;
-  refs.mapRoot.innerHTML = ''; // drop the "OFFLINE MAP" placeholder text/grid before the real canvas mounts
-  try {
-    await map.init(refs.mapRoot, 'sandia');
-    map.setFix(DEFAULT_FIX.lat, DEFAULT_FIX.lon, DEFAULT_FIX.accuracyM);
-  } catch (err) {
-    console.warn('[helius] map init failed', err);
-  }
+  await initMapForPack('sandia', DEFAULT_FIX);
 }
 
 // Assigned once the (mock or real) agent factory resolves; mounted modules
@@ -69,8 +82,14 @@ const status = mountStatus(refs.headerChips, {
 const trace = mountTrace(refs.toolTraceRail);
 const route = mountRoute(refs.routeToastLayer);
 const beacon = mountBeacon();
-mountDevLoc({
+const devloc = mountDevLoc({
   onFixChange: (lat, lon, accuracyM) => map.setFix(lat, lon, accuracyM),
+});
+const packPicker = mountPackPicker(refs.headerPackSlot, {
+  onSwitchPack: (packId) => {
+    if (!agent) return Promise.reject(new Error('agent not ready'));
+    return agent.switchPack(packId);
+  },
 });
 
 const chat = mountChat(refs.chatMessages, refs.chatInputRow, {
@@ -105,6 +124,7 @@ function dispatch(e: AgentEvent): void {
     // on the 'ready' status itself, not on the createHelius() promise.
     if (e.status.state === 'ready') {
       chat.setEnabled(true);
+      packPicker.setEnabled(true);
       // Not just the first ready — a later tier swap re-emits this too, and
       // showing its loadMs live is itself part of the "elasticity" pitch
       // (proves a warm tier swap is actually fast, not just claimed).
@@ -141,6 +161,12 @@ function dispatch(e: AgentEvent): void {
   if (e.type === 'beacon') {
     if (e.action === 'start') map.setBeaconMode(true);
     else if (e.action === 'stop') map.setBeaconMode(false);
+  }
+  if (e.type === 'pack-changed') {
+    route.clear(); // a route drawn for the old region means nothing in the new one
+    devloc.setPack(e.pack.id, e.fix);
+    status.setPack(e.pack.id);
+    void initMapForPack(e.pack.id, e.fix);
   }
 
   chat.handleEvent(e);
@@ -187,6 +213,10 @@ async function startAgent(): Promise<HeliusHandle> {
 void startAgent().then((handle) => {
   agent = handle;
   renderFooter();
+  handle
+    .listPacks()
+    .then((packs) => packPicker.setPacks(packs, 'sandia'))
+    .catch((err) => console.warn('[helius] listPacks failed', err));
 });
 
 // Registers the service worker vite-plugin-pwa generates (registerType:

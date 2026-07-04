@@ -4,7 +4,7 @@
 // (d) TTS mute toggle.
 
 import type { EngineStatus, ModelTier } from '../lib/contract';
-import { warmPack } from '../map/warm';
+import { warmPack, checkOfflineReady } from '../map/warm';
 import { warmCache as warmKokoroCache } from '../speech/tts';
 
 export interface StatusOptions {
@@ -17,6 +17,10 @@ export interface StatusHandle {
   el: HTMLElement;
   handleEngineStatus(status: EngineStatus): void;
   setStats(stats: { decodeTps: number; prefillMs: number } | null): void;
+  /** Offline-readiness is pack-specific (each pack has its own map assets to
+   *  warm) — call on every 'pack-changed' event so the badge/warm-button
+   *  correctly reset to "not yet warmed" for the newly active pack. */
+  setPack(packId: string): void;
 }
 
 // The contract's EngineStatus 'ready' variant only types {tier, loadMs}, but the
@@ -44,6 +48,7 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
   const muteChip = container.querySelector<HTMLButtonElement>('.chip-mute')!;
 
   let currentTier: ModelTier = 'E2B';
+  let currentPack = 'sandia';
   let modelReady = false;
   let switching = false;
   let muted = false;
@@ -51,14 +56,13 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
   // packs are read via pmtiles Range requests (only ever cache partial 206
   // responses — see src/map/warm.ts) and kokoro's ~86MB loads lazily from HF
   // CDN on first use, neither of which happens just from booting the model.
-  // The badge only goes green once an explicit warm-up has actually run.
+  // The badge only goes green once checkOfflineReady() confirms it for real.
   let offlineWarmed = false;
   let warming = false;
 
   function refreshOfflineBadge(): void {
-    const swActive = 'serviceWorker' in navigator && navigator.serviceWorker.controller !== null;
     warmChip.hidden = !modelReady || offlineWarmed;
-    if (swActive && modelReady && offlineWarmed) {
+    if (offlineWarmed) {
       offlineChip.dataset.state = 'ready';
       offlineChip.textContent = '⬢ OFFLINE-READY';
     } else {
@@ -72,12 +76,21 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
     warming = true;
     warmChip.textContent = 'downloading…';
     warmChip.disabled = true;
-    Promise.all([warmPack('sandia'), warmKokoroCache()])
-      .then(([packResults, kokoroOk]) => {
+    Promise.all([warmPack(currentPack), warmKokoroCache()])
+      .then(async ([packResults, kokoroOk]) => {
         const packOk = packResults.every((r) => r.ok);
-        offlineWarmed = packOk && kokoroOk;
-        if (!offlineWarmed) {
+        if (!packOk || !kokoroOk) {
           console.warn('[helius] offline warm-up incomplete', { packResults, kokoroOk });
+          warmChip.textContent = 'Download for offline (retry)';
+          return;
+        }
+        // Final truth check — not just "did our own warm calls report
+        // success", but does Cache Storage + the SW controller actually back
+        // it up right now.
+        const result = await checkOfflineReady(currentPack);
+        offlineWarmed = result.ok;
+        if (!result.ok) {
+          console.warn('[helius] checkOfflineReady still not ok after warm-up', result.missing);
           warmChip.textContent = 'Download for offline (retry)';
         }
       })
@@ -152,7 +165,13 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
     opts.onMuteChange(muted);
   });
 
+  function setPack(packId: string): void {
+    currentPack = packId;
+    offlineWarmed = false; // the new pack's assets haven't been warmed yet
+    refreshOfflineBadge();
+  }
+
   refreshOfflineBadge();
 
-  return { el: container, handleEngineStatus, setStats };
+  return { el: container, handleEngineStatus, setStats, setPack };
 }

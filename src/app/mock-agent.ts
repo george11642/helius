@@ -5,13 +5,15 @@
 // this over the real one via ?mock=1, or automatically if the real one
 // isn't there yet.
 
-import type { AgentEvent, AgentEventHandler, ModelTier } from '../lib/contract';
+import type { AgentEvent, AgentEventHandler, ModelTier, PackInfo } from '../lib/contract';
 
 export interface HeliusHandle {
   sendText(text: string): Promise<void>;
   sendVoice(audio: Float32Array): Promise<void>;
   readSign(image: ImageBitmap | HTMLCanvasElement | OffscreenCanvas): Promise<void>;
   setTier(tier: ModelTier): Promise<void>;
+  listPacks(): Promise<PackInfo[]>;
+  switchPack(packId: string): Promise<void>;
   abort(): void;
   getStats(): { decodeTps: number; prefillMs: number } | null;
 }
@@ -23,6 +25,11 @@ export interface CreateHeliusOptions {
 
 const RESPONSE_TEXT =
   "You have 2 hours 14 minutes of light left. Head west 0.6 miles down the ridge trail — you'll reach the trailhead by 7:41 PM with time to spare.";
+
+const MOCK_PACKS: PackInfo[] = [
+  { id: 'sandia', name: 'Sandia', bbox: [-106.7, 34.9, -106.2, 35.4], center: [-106.4439, 35.1983], totalBytes: 42_000_000 },
+  { id: 'chamonix', name: 'Chamonix', bbox: [6.7, 45.8, 7.1, 46.0], center: [6.885, 45.97], totalBytes: 38_000_000 },
+];
 
 function createTimerBag() {
   const ids: number[] = [];
@@ -156,6 +163,15 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<HeliusHan
       await new Promise<void>((resolve) => timers.schedule(400, resolve));
       currentTier = tier;
       emit({ type: 'engine-status', status: { state: 'ready', tier, loadMs: 400 } });
+    },
+    async listPacks() {
+      return MOCK_PACKS;
+    },
+    async switchPack(packId: string) {
+      const info = MOCK_PACKS.find((p) => p.id === packId);
+      if (!info) throw new Error(`unknown pack: ${packId}`);
+      await new Promise<void>((resolve) => timers.schedule(300, resolve));
+      emit({ type: 'pack-changed', pack: info, fix: { lat: info.center[1], lon: info.center[0] } });
     },
     abort() {
       timers.clearAll();

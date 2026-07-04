@@ -6,6 +6,9 @@
 // this file stays the single source of layout truth.
 
 export interface ShellRefs {
+  /** Own slot, separate from headerChips — status.ts fully replaces
+   *  headerChips's innerHTML, which would otherwise wipe this out. */
+  headerPackSlot: HTMLElement;
   headerChips: HTMLElement;
   chatMessages: HTMLElement;
   chatInputRow: HTMLElement;
@@ -22,7 +25,10 @@ export function renderShell(root: HTMLElement): ShellRefs {
         <span class="wordmark">HELIUS <span class="sun-glyph">&#9728;</span></span>
         <span class="subtitle">works when nothing else does</span>
       </div>
-      <div class="header-chips"></div>
+      <div class="header-row">
+        <div class="header-pack-slot"></div>
+        <div class="header-chips"></div>
+      </div>
     </header>
     <main class="shell-main">
       <section class="chat-col" aria-label="Conversation">
@@ -43,6 +49,7 @@ export function renderShell(root: HTMLElement): ShellRefs {
   `;
 
   return {
+    headerPackSlot: root.querySelector('.header-pack-slot')!,
     headerChips: root.querySelector('.header-chips')!,
     chatMessages: root.querySelector('.chat-messages')!,
     chatInputRow: root.querySelector('.chat-input-row')!,
