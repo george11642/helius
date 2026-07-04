@@ -85,12 +85,24 @@ export function buildStyle(pack = 'sandia', opts: BuildStyleOptions = {}): Style
   const vendorBase = opts.vendorBaseUrl ?? '/vendor';
   const dem = opts.demSource ?? null;
 
+  // Declared here (empty, populated later via setData) rather than added at
+  // runtime after the map's 'load' event, which is how render.ts originally
+  // did it: verified live that 'load' can take 40-90s+ under contention for
+  // reasons unrelated to whether the viewport is already visually usable
+  // (background/edge tile activity on OTHER sources it's also waiting on),
+  // so anything gated on 'load' — drawRoute, setFix's accuracy circle,
+  // setBeaconMode — could silently do nothing for that whole window. Being
+  // part of the style from the start means these sources exist the instant
+  // the Map object is constructed, no waiting required.
+  const emptyFeatureCollection = { type: 'FeatureCollection' as const, features: [] };
   const sources: StyleSpecification['sources'] = {
     basemap: {
       type: 'vector',
       url: `pmtiles://${packBase}/basemap.pmtiles`,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
     },
+    route: { type: 'geojson', data: emptyFeatureCollection },
+    accuracy: { type: 'geojson', data: emptyFeatureCollection },
   };
 
   if (dem) {
@@ -323,6 +335,45 @@ export function buildStyle(pack = 'sandia', opts: BuildStyleOptions = {}): Style
         'text-letter-spacing': 0.05,
       },
       paint: { 'text-color': PALETTE.label, 'text-halo-color': PALETTE.labelHalo, 'text-halo-width': 1.4 },
+    },
+
+    // Runtime-driven layers (route/fix/beacon) — topmost, on top of all
+    // basemap/terrain content. Sources start empty; HeliusMap populates them
+    // via setData/setPaintProperty once the corresponding action is called.
+    {
+      id: 'route-casing',
+      type: 'line',
+      source: 'route',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': PALETTE.pathCasing, 'line-width': 7, 'line-opacity': 0.9 },
+    },
+    {
+      id: 'route-line',
+      type: 'line',
+      source: 'route',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': PALETTE.path, 'line-width': 4 },
+    },
+    {
+      id: 'accuracy-fill',
+      type: 'fill',
+      source: 'accuracy',
+      paint: { 'fill-color': PALETTE.path, 'fill-opacity': 0.12 },
+    },
+    {
+      id: 'accuracy-outline',
+      type: 'line',
+      source: 'accuracy',
+      paint: { 'line-color': PALETTE.path, 'line-width': 1, 'line-opacity': 0.4 },
+    },
+    {
+      id: 'beacon-dim',
+      type: 'background',
+      paint: {
+        'background-color': '#000000',
+        'background-opacity': 0,
+        'background-opacity-transition': { duration: 400, delay: 0 },
+      },
     },
   ] as LayerSpecification[];
 

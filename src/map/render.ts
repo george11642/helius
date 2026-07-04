@@ -332,10 +332,6 @@ function buildDestinationFlagElement(): HTMLDivElement {
   return el;
 }
 
-// ---------- empty GeoJSON sources used by route/accuracy layers ----------
-
-const EMPTY_FEATURE_COLLECTION = { type: 'FeatureCollection' as const, features: [] };
-
 // The canonical, specifically-chosen sandia demo scene (La Luz switchbacks) —
 // not just "somewhere in the region". Other packs get their center from their
 // own manifest.json (see getPackCenter) rather than always starting here:
@@ -384,6 +380,18 @@ export class HeliusMap {
   private routeFullCoords: [number, number][] | null = null;
 
   private beaconOn = false;
+
+  // main.ts fires `void initMapOnce()` without awaiting it, so agent activity
+  // (a route/beacon/setFix event) can complete — a mock or fast real turn is
+  // ~seconds — well before this class's own init() resolves, which involves
+  // several awaited fetches and can take 40-90s under contention (see
+  // README). Verified live: this is exactly why drawRoute() appeared to
+  // silently do nothing in the prod build — `this.map` (or the 'route'
+  // source, added only after 'load') simply didn't exist yet when it was
+  // called. Public methods that need a ready map queue a retry of themselves
+  // instead of a no-op; init() flushes the queue once it's actually ready.
+  private mapReady = false;
+  private pendingActions: Array<() => void> = [];
 
   /** Raw MapLibre instance, for callers that need direct access beyond this wrapper's API. Null until init() resolves (or if unsupported). */
   get instance(): maplibregl.Map | null {
@@ -449,51 +457,52 @@ export class HeliusMap {
     this.map = map;
 
     map.on('error', (e) => {
-      console.warn('[HeliusMap] map error', e.error ?? e);
+      // Logging the raw Error object (the old `e.error ?? e`) reads as a bare
+      // "Error" once it passes through most console-capture tooling — Error's
+      // message/stack are non-enumerable, so anything that serializes the
+      // argument (rather than calling console's own Error formatting)
+      // silently drops them. Pull the string out explicitly instead.
+      console.warn('[HeliusMap] map error', e.error?.message ?? String(e), e.error?.stack ?? '');
     });
+
+    // route/accuracy/beacon-dim sources+layers are declared in buildStyle()
+    // itself now (empty, populated later via setData/setPaintProperty), so
+    // drawRoute/setFix/setBeaconMode only actually need the 'route' source
+    // to be registered — NOT `map.isStyleLoaded()`/'load', both verified
+    // live to behave the same way here: `Style.loaded()` requires every
+    // declared source's initial tiles to have finished (same class of wait
+    // as 'load', not "is the style JSON parsed yet" — confirmed by staying
+    // false for 120+ seconds on this contended machine while the map was
+    // ALREADY visibly rendering basemap/hillshade/trails). Polling the one
+    // concrete thing this code needs, directly, sidesteps that entirely:
+    // source registration from a style's `sources` dict is synchronous
+    // object construction, no network involved, so this resolves within
+    // milliseconds of the Map constructor returning.
+    await new Promise<void>((resolve) => {
+      const check = () => {
+        if (map.getSource('route')) {
+          resolve();
+        } else {
+          setTimeout(check, 20);
+        }
+      };
+      check();
+    });
+
+    this.mapReady = true;
+    const pending = this.pendingActions;
+    this.pendingActions = [];
+    for (const run of pending) run();
+
+    // Debug-only escape hatch, unconditional (not gated behind import.meta.env.DEV)
+    // — the bug this exists to chase (drawRoute silently doing nothing in the
+    // PROD bundle) can only be reproduced IN production, where there's no dev
+    // console access to the module otherwise. Exposes only this instance's own
+    // already-public API; harmless to leave in.
+    (window as unknown as { __heliusMapDebug?: HeliusMap }).__heliusMapDebug = this;
 
     await new Promise<void>((resolve) => {
       map.on('load', () => resolve());
-    });
-
-    map.addSource('route', { type: 'geojson', data: EMPTY_FEATURE_COLLECTION });
-    map.addLayer({
-      id: 'route-casing',
-      type: 'line',
-      source: 'route',
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': PALETTE.pathCasing, 'line-width': 7, 'line-opacity': 0.9 },
-    });
-    map.addLayer({
-      id: 'route-line',
-      type: 'line',
-      source: 'route',
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': PALETTE.path, 'line-width': 4 },
-    });
-
-    map.addSource('accuracy', { type: 'geojson', data: EMPTY_FEATURE_COLLECTION });
-    map.addLayer({
-      id: 'accuracy-fill',
-      type: 'fill',
-      source: 'accuracy',
-      paint: { 'fill-color': PALETTE.path, 'fill-opacity': 0.12 },
-    });
-    map.addLayer({
-      id: 'accuracy-outline',
-      type: 'line',
-      source: 'accuracy',
-      paint: { 'line-color': PALETTE.path, 'line-width': 1, 'line-opacity': 0.4 },
-    });
-
-    map.addLayer({
-      id: 'beacon-dim',
-      type: 'background',
-      paint: {
-        'background-color': '#000000',
-        'background-opacity': 0,
-        'background-opacity-transition': { duration: 400, delay: 0 },
-      },
     });
 
     void this.loadPois();
@@ -536,6 +545,10 @@ export class HeliusMap {
   }
 
   setFix(lat: number, lon: number, accuracyM: number): void {
+    if (!this.mapReady) {
+      this.pendingActions.push(() => this.setFix(lat, lon, accuracyM));
+      return;
+    }
     const map = this.map;
     if (!map) return;
 
@@ -559,6 +572,10 @@ export class HeliusMap {
   }
 
   drawRoute(geojson: RouteLineString, opts: DrawRouteOptions = {}): void {
+    if (!this.mapReady) {
+      this.pendingActions.push(() => this.drawRoute(geojson, opts));
+      return;
+    }
     const map = this.map;
     if (!map) return;
     const routeSource = map.getSource('route');
@@ -630,6 +647,13 @@ export class HeliusMap {
   }
 
   flyToRoute(): void {
+    if (!this.mapReady) {
+      // Queued after whatever drawRoute() call preceded it (main.ts always
+      // calls them back-to-back), so this replays post-drawRoute and finds
+      // routeFullCoords already populated instead of flying to nothing.
+      this.pendingActions.push(() => this.flyToRoute());
+      return;
+    }
     const map = this.map;
     if (!map || !this.routeFullCoords || this.routeFullCoords.length === 0) return;
     const [sw, ne] = boundsOf(this.routeFullCoords);
@@ -637,6 +661,10 @@ export class HeliusMap {
   }
 
   setBeaconMode(on: boolean): void {
+    if (!this.mapReady) {
+      this.pendingActions.push(() => this.setBeaconMode(on));
+      return;
+    }
     this.beaconOn = on;
     const map = this.map;
     if (!map || !map.getLayer('beacon-dim')) return;
