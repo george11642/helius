@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Helius runtime spike — Gemma 4 E2B / transformers.js / WebGPU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { background:#0a0e14; color:#e6edf3; font:14px/1.5 ui-monospace,Menlo,monospace; margin:2rem; }
+  h1 { color:#ffb454; font-size:1.1rem; }
+  #log { white-space:pre-wrap; border:1px solid #263041; padding:1rem; border-radius:8px; min-height:10rem; }
+  .ok { color:#7fd962; } .bad { color:#f26d78; } .dim { color:#8a919e; }
+  button { background:#ffb454; color:#0a0e14; border:0; padding:.5rem 1rem; border-radius:6px; font-weight:700; cursor:pointer; margin-right:.5rem; }
+</style>
+</head>
+<body>
+<h1>Helius runtime spike — Gemma 4 E2B · transformers.js 4.2.0 · WebGPU</h1>
+<div>
+  <button id="btn-run">run full spike</button>
+  <button id="btn-load">load only</button>
+  <span class="dim">?auto=1 to autorun · ?enc=fp16 for proven encoder combo · ?src=hub to load from HF instead of local mirror</span>
+</div>
+<p id="status" class="dim">idle</p>
+<div id="log"></div>
+<script type="module" src="./spike.js"></script>
+</body>
+</html>
