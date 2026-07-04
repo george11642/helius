@@ -11,6 +11,11 @@ export interface PackPickerOptions {
 
 export interface PackPickerHandle {
   setPacks(packs: PackInfo[], currentId: string): void;
+  /** Resyncs the displayed selection to the canonical current pack — call on
+   *  every 'pack-changed' event rather than trusting the select already
+   *  shows it, since that event is the single source of truth (a future
+   *  code path could switch packs some other way than this picker). */
+  setCurrentPack(packId: string): void;
   setEnabled(enabled: boolean): void;
 }
 
@@ -48,9 +53,14 @@ export function mountPackPicker(container: HTMLElement, opts: PackPickerOptions)
       });
   });
 
+  function setCurrentPack(packId: string): void {
+    currentPackId = packId;
+    select.value = packId;
+  }
+
   function setEnabled(enabled: boolean): void {
     select.disabled = !enabled || switching;
   }
 
-  return { setPacks, setEnabled };
+  return { setPacks, setCurrentPack, setEnabled };
 }

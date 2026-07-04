@@ -13,6 +13,19 @@ export interface RouteHandle {
   clear(): void;
 }
 
+// e.g. 127.66249996948243 -> "~2h 8m"; 62.4 -> "62min". Rounds once and
+// reuses that same integer for the arrival-time math below, so the two
+// numbers in the toast never disagree over a fraction of a minute.
+function formatEta(rawMinutes: number): { text: string; minutes: number } {
+  const minutes = Math.round(rawMinutes);
+  if (minutes >= 90) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return { text: `~${hours}h ${mins}m`, minutes };
+  }
+  return { text: `${minutes}min`, minutes };
+}
+
 export function mountRoute(container: HTMLElement): RouteHandle {
   container.innerHTML = `<div class="route-toast" hidden></div>`;
   const toast = container.querySelector<HTMLElement>('.route-toast')!;
@@ -20,8 +33,9 @@ export function mountRoute(container: HTMLElement): RouteHandle {
   function handleEvent(e: AgentEvent): void {
     if (e.type !== 'route') return;
     const km = (e.distanceM / 1000).toFixed(1);
-    const arrival = formatClock(new Date(Date.now() + e.etaMin * 60000));
-    toast.textContent = `ROUTE READY — ${km}km · ${e.etaMin}min · arrives ${arrival}`;
+    const eta = formatEta(e.etaMin);
+    const arrival = formatClock(new Date(Date.now() + eta.minutes * 60000));
+    toast.textContent = `ROUTE READY — ${km}km · ${eta.text} · arrives ${arrival}`;
     toast.hidden = false;
   }
 

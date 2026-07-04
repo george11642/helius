@@ -59,6 +59,18 @@ function ok(cond: boolean, name: string): void {
   eq(r.calls.length, 1, 'no close marker: still parses');
   eq(r.calls[0].name, 'sun_clock', 'no close marker: name');
 }
+// ---- truncated call: opening '{' but no closing '}' (stream cut off) must be
+//      argsOk:false so the loop's repair path fires (Codex round-2) ----
+{
+  const r = parseToolCalls('<|tool_call>call:pace_eta{distance_m:123'); // raw truncation, nothing after
+  eq(r.calls.length, 1, 'truncated call: still surfaces one call');
+  eq(r.calls[0].name, 'pace_eta', 'truncated call: name');
+  ok(r.calls[0].argsOk === false, 'truncated call: argsOk=false');
+}
+{
+  const r = parseToolCalls('<|tool_call>call:pace_eta{distance_m:123<|tool_response>'); // truncated then response
+  ok(r.calls[0].argsOk === false, 'truncated + response marker: argsOk=false');
+}
 
 // ---- args with real values (template <|"|> format) ----
 {

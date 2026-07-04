@@ -94,6 +94,7 @@ export function createEngine(
         const p = pending.get(msg.id);
         if (!p) break;
         pending.delete(msg.id);
+        if (activeId === msg.id) activeId = 0; // settled — a later abort() won't send this stale id
         lastStats = { decodeTps: msg.result.decodeTps, prefillMs: msg.result.prefillMs };
         p.resolve({ ...msg.result, aborted: msg.aborted });
         break;
@@ -102,6 +103,7 @@ export function createEngine(
         const p = pending.get(msg.id);
         if (p) {
           pending.delete(msg.id);
+          if (activeId === msg.id) activeId = 0;
           p.reject(new Error(msg.message));
         }
         break;

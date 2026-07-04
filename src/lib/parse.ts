@@ -279,21 +279,27 @@ export function parseToolCalls(rawText: string): ParsedTurn {
     const braceIdx = afterOpen + callMatch[0].length;
     const braced = balancedBrace(rawText, braceIdx);
 
-    let body = '';
+    let args: Record<string, unknown> = {};
+    let argsOk: boolean;
     let consumeEnd: number;
     if (braced) {
-      body = braced.body;
+      const parsed = parseArgs(braced.body);
+      args = parsed.args;
+      argsOk = parsed.ok;
       // consume through the close marker if present, else through the `}`
       const closeIdx = rawText.indexOf(CALL_CLOSE, braced.end);
       consumeEnd = closeIdx === -1 ? braced.end + 1 : closeIdx + CALL_CLOSE.length;
     } else {
-      // no braces at all — treat the rest up to close marker as empty-arg call
+      // No balanced {...}. An opening '{' with no matching '}' means the call was
+      // truncated mid-arguments (the stream cut off) — flag argsOk:false so the
+      // loop's repair path fires instead of running the tool on empty args. No
+      // '{' at all is a genuine no-arg call.
+      argsOk = rawText[braceIdx] !== '{';
       const closeIdx = rawText.indexOf(CALL_CLOSE, braceIdx);
       consumeEnd = closeIdx === -1 ? rawText.length : closeIdx + CALL_CLOSE.length;
     }
 
-    const { args, ok } = parseArgs(body);
-    calls.push({ name, args, argsOk: ok, raw: rawText.slice(openIdx, consumeEnd) });
+    calls.push({ name, args, argsOk, raw: rawText.slice(openIdx, consumeEnd) });
     searchFrom = consumeEnd;
   }
 

@@ -62,6 +62,9 @@ const activeStops = new Map<number, InterruptableStoppingCriteria>();
 // Requests aborted before generation actually started (InterruptableStoppingCriteria
 // only bites once decoding is underway; a request can sit behind a model load).
 const abortedIds = new Set<number>();
+// Generation ids currently accepted + running, so aborts for settled/unknown ids
+// are ignored rather than leaking abortedIds entries.
+const inFlight = new Set<number>();
 
 const active = (): Instance | undefined => instances[activeTier];
 
@@ -331,6 +334,7 @@ ctx.addEventListener('message', (ev: MessageEvent<WorkerRequest>) => {
       void switchTier(msg.tier);
       break;
     case 'generate':
+      inFlight.add(msg.id);
       generate({
         id: msg.id,
         kind: msg.kind,
@@ -339,9 +343,17 @@ ctx.addEventListener('message', (ev: MessageEvent<WorkerRequest>) => {
         maxNewTokens: msg.maxNewTokens,
         audio: msg.audio,
         image: msg.image,
-      }).catch((err) => post({ type: 'error', id: msg.id, message: String(err).slice(0, 300) }));
+      })
+        .catch((err) => post({ type: 'error', id: msg.id, message: String(err).slice(0, 300) }))
+        .finally(() => {
+          inFlight.delete(msg.id);
+          abortedIds.delete(msg.id);
+        });
       break;
     case 'abort': {
+      // Ignore aborts for ids with no active/pending generation (already settled,
+      // or never issued) — otherwise abortedIds would leak stale entries.
+      if (!inFlight.has(msg.id)) break;
       // Mark it aborted (caught at the pre-generation bail points) AND interrupt
       // it if decoding has already started — covers both windows.
       abortedIds.add(msg.id);

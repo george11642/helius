@@ -10,7 +10,12 @@
 // Invoke manually from the console for now — `import('/src/map/warm.ts').
 // then(m => m.warmPack('sandia'))` — until the UI wires a button to it.
 
-const PACK_ASSETS = ['basemap.pmtiles', 'terrain.pmtiles', 'graph.bin', 'pois.json'] as const;
+// manifest.json included on Codex's flag: HeliusMap.init() fetches it to
+// center non-sandia packs (see getPackCenter in render.ts) and silently
+// falls back to the sandia demo coordinates if that fetch fails — without
+// it warmed too, an offline pack switch to e.g. chamonix would render
+// centered on Albuquerque instead of the Alps.
+const PACK_ASSETS = ['manifest.json', 'basemap.pmtiles', 'terrain.pmtiles', 'graph.bin', 'pois.json'] as const;
 
 export interface WarmPackResult {
   url: string;
@@ -95,6 +100,7 @@ export async function checkOfflineReady(pack: string): Promise<OfflineReadyResul
         return !!reg?.active;
       })(),
     ],
+    ['manifest.json', isCached(`${base}/manifest.json`)],
     ['basemap.pmtiles', isCached(`${base}/basemap.pmtiles`)],
     ['terrain.pmtiles', isCached(`${base}/terrain.pmtiles`)],
     ['graph.bin', isCached(`${base}/graph.bin`)],

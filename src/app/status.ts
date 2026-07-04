@@ -17,9 +17,10 @@ export interface StatusHandle {
   el: HTMLElement;
   handleEngineStatus(status: EngineStatus): void;
   setStats(stats: { decodeTps: number; prefillMs: number } | null): void;
-  /** Offline-readiness is pack-specific (each pack has its own map assets to
-   *  warm) — call on every 'pack-changed' event so the badge/warm-button
-   *  correctly reset to "not yet warmed" for the newly active pack. */
+  /** Offline-readiness is pack-specific (each pack has its own map assets) —
+   *  call on every 'pack-changed' event so the badge/warm-button re-query
+   *  checkOfflineReady for the newly active pack, rather than keeping the
+   *  previous pack's cached result. */
   setPack(packId: string): void;
 }
 
@@ -52,17 +53,21 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
   let modelReady = false;
   let switching = false;
   let muted = false;
-  // SW registered + model downloaded does NOT mean truly offline-ready: map
+  // Never a session flag we set ourselves — checkOfflineReady() is queried
+  // fresh on every trigger below and IS the truth; `offlineOk` is just the
+  // last query's result, cached only for rendering between triggers. SW
+  // registered + model downloaded does NOT mean truly offline-ready: map
   // packs are read via pmtiles Range requests (only ever cache partial 206
   // responses — see src/map/warm.ts) and kokoro's ~86MB loads lazily from HF
-  // CDN on first use, neither of which happens just from booting the model.
-  // The badge only goes green once checkOfflineReady() confirms it for real.
-  let offlineWarmed = false;
+  // CDN on first use, neither of which happens just from booting the model —
+  // and a pack switched back to doesn't need re-warming if it already was.
+  let offlineOk = false;
+  let refreshInFlight = false;
   let warming = false;
 
-  function refreshOfflineBadge(): void {
-    warmChip.hidden = !modelReady || offlineWarmed;
-    if (offlineWarmed) {
+  function render(): void {
+    warmChip.hidden = !modelReady || offlineOk;
+    if (offlineOk) {
       offlineChip.dataset.state = 'ready';
       offlineChip.textContent = '⬢ OFFLINE-READY';
     } else {
@@ -71,37 +76,46 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
     }
   }
 
+  // checkOfflineReady is a fast, Cache-Storage-only read (its own docs: well
+  // under ~200ms) — dropping an overlapping call rather than queueing it is
+  // an acceptable simplification at that speed.
+  async function refreshOfflineReady(): Promise<void> {
+    if (!modelReady) {
+      render();
+      return;
+    }
+    if (refreshInFlight) return;
+    refreshInFlight = true;
+    try {
+      const result = await checkOfflineReady(currentPack);
+      offlineOk = result.ok;
+      if (!result.ok) console.debug('[helius] offline not ready yet', result.missing);
+    } catch (err) {
+      console.warn('[helius] checkOfflineReady failed', err);
+      offlineOk = false;
+    } finally {
+      refreshInFlight = false;
+      render();
+    }
+  }
+
   warmChip.addEventListener('click', () => {
-    if (warming || offlineWarmed) return;
+    if (warming || offlineOk) return;
     warming = true;
     warmChip.textContent = 'downloading…';
     warmChip.disabled = true;
     Promise.all([warmPack(currentPack), warmKokoroCache()])
-      .then(async ([packResults, kokoroOk]) => {
+      .then(([packResults, kokoroOk]) => {
         const packOk = packResults.every((r) => r.ok);
-        if (!packOk || !kokoroOk) {
-          console.warn('[helius] offline warm-up incomplete', { packResults, kokoroOk });
-          warmChip.textContent = 'Download for offline (retry)';
-          return;
-        }
-        // Final truth check — not just "did our own warm calls report
-        // success", but does Cache Storage + the SW controller actually back
-        // it up right now.
-        const result = await checkOfflineReady(currentPack);
-        offlineWarmed = result.ok;
-        if (!result.ok) {
-          console.warn('[helius] checkOfflineReady still not ok after warm-up', result.missing);
-          warmChip.textContent = 'Download for offline (retry)';
-        }
+        if (!packOk || !kokoroOk) console.warn('[helius] offline warm-up incomplete', { packResults, kokoroOk });
+        return refreshOfflineReady();
       })
-      .catch((err) => {
-        console.warn('[helius] offline warm-up failed', err);
-        warmChip.textContent = 'Download for offline (retry)';
-      })
+      .catch((err) => console.warn('[helius] offline warm-up failed', err))
       .finally(() => {
         warming = false;
         warmChip.disabled = false;
-        refreshOfflineBadge();
+        warmChip.textContent = offlineOk ? 'Download for offline' : 'Download for offline (retry)';
+        render();
       });
   });
 
@@ -113,10 +127,10 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('controllerchange', refreshOfflineBadge);
+    navigator.serviceWorker.addEventListener('controllerchange', () => void refreshOfflineReady());
   }
-  window.addEventListener('online', refreshOfflineBadge);
-  window.addEventListener('offline', refreshOfflineBadge);
+  window.addEventListener('online', () => void refreshOfflineReady());
+  window.addEventListener('offline', () => void refreshOfflineReady());
 
   function handleEngineStatus(status: EngineStatus): void {
     if (status.state === 'ready') {
@@ -125,8 +139,10 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
       switching = false;
       tierChip.dataset.switching = 'false';
       renderTierChip(status.tier, readTextOnlyDegrade(status));
+      void refreshOfflineReady();
+    } else {
+      render();
     }
-    refreshOfflineBadge();
   }
 
   function setStats(stats: { decodeTps: number; prefillMs: number } | null): void {
@@ -167,11 +183,12 @@ export function mountStatus(container: HTMLElement, opts: StatusOptions): Status
 
   function setPack(packId: string): void {
     currentPack = packId;
-    offlineWarmed = false; // the new pack's assets haven't been warmed yet
-    refreshOfflineBadge();
+    // Don't assume "not warmed" — a pack switched back to may already be
+    // cached from before. Let checkOfflineReady decide, not a blind reset.
+    void refreshOfflineReady();
   }
 
-  refreshOfflineBadge();
+  render();
 
   return { el: container, handleEngineStatus, setStats, setPack };
 }

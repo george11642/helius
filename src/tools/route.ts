@@ -66,13 +66,18 @@ function getPois(pack: string): Promise<PoisFile> {
   return p;
 }
 
-let pendingRoute: PendingRoute | null = null;
+// Stamped with the pack it was computed for. A route_back that started before a
+// switchPack can resolve and write pendingRoute AFTER clearPackCache ran — the
+// stamp lets takePendingRoute drop that stale geometry instead of ghosting
+// old-pack coordinates onto the new map.
+let pendingRoute: (PendingRoute & { pack: string }) | null = null;
 
 /** The agent loop calls this right after a successful route_back to emit 'route'. */
 export function takePendingRoute(): PendingRoute | null {
   const r = pendingRoute;
   pendingRoute = null;
-  return r;
+  if (!r || r.pack !== getPack()) return null; // stale: computed for a pack we've since left
+  return { geojson: r.geojson, distanceM: r.distanceM, etaMin: r.etaMin };
 }
 
 /** Drop cached graph + POIs (and any pending route) so the next route_back
@@ -127,8 +132,9 @@ export async function runRouteBack(args: Record<string, unknown>): Promise<ToolR
     };
   }
 
-  // Success: stash geometry for the loop to emit; return compact numbers only.
-  pendingRoute = { geojson: result.geojson, distanceM: result.distanceM, etaMin: result.etaMin };
+  // Success: stash geometry (stamped with the pack it's for) for the loop to
+  // emit; return compact numbers only.
+  pendingRoute = { geojson: result.geojson, distanceM: result.distanceM, etaMin: result.etaMin, pack };
   const km = result.distanceM / 1000;
   const mi = km * 0.621371;
   return {

@@ -30,13 +30,20 @@ const DEFAULT_FIX = { lat: 35.1983, lon: -106.4439, accuracyM: 14 };
 const refs = renderShell(document.getElementById('app')!);
 const boot = mountBoot();
 
-// Reassigned on every pack switch (see switchMapPack) — HeliusMap has no
+// Reassigned on every pack switch (see initMapForPack) — HeliusMap has no
 // destroy()/setPack() of its own (checked render.ts), so a pack switch tears
 // down the old MapLibre instance via its exposed `.instance` escape hatch
 // and constructs a fresh HeliusMap for the new pack, rather than reaching
 // into render.ts's private internals.
 let map = new HeliusMap();
 let mapInitStarted = false;
+
+// Guards against two overlapping initMapForPack calls (e.g. a rapid
+// double-switch): only the call whose generation is still current when its
+// own await resolves is allowed to publish itself as the live `map` and call
+// setFix — an older, superseded call tears down whatever it built instead of
+// racing to apply its (now-stale) fix to whichever instance won.
+let mapGeneration = 0;
 
 function isRouteLineString(g: unknown): g is RouteLineString {
   if (!g || typeof g !== 'object') return false;
@@ -46,14 +53,28 @@ function isRouteLineString(g: unknown): g is RouteLineString {
 
 async function initMapForPack(packId: string, fix: { lat: number; lon: number }): Promise<void> {
   mapInitStarted = true; // a pack switch counts too — don't let initMapOnce's sandia-default clobber it later
+  const myGeneration = ++mapGeneration;
+  packPicker.setEnabled(false); // block further switches until this one settles — the practical fix for the race
+
   map.instance?.remove(); // release the old WebGL context/listeners before replacing it
   refs.mapRoot.innerHTML = ''; // drop the "OFFLINE MAP" placeholder text/grid (or the old canvas) before the new one mounts
-  map = new HeliusMap();
+  const nextMap = new HeliusMap();
+  map = nextMap;
+
   try {
-    await map.init(refs.mapRoot, packId);
-    map.setFix(fix.lat, fix.lon, DEFAULT_FIX.accuracyM);
+    await nextMap.init(refs.mapRoot, packId);
+    if (myGeneration !== mapGeneration) {
+      // A newer switch started while this one was still initializing —
+      // we lost the race. Tear down rather than apply a stale fix or leave
+      // two canvases fighting over #map-root.
+      nextMap.instance?.remove();
+      return;
+    }
+    nextMap.setFix(fix.lat, fix.lon, DEFAULT_FIX.accuracyM);
   } catch (err) {
     console.warn('[helius] map init failed', err);
+  } finally {
+    if (myGeneration === mapGeneration) packPicker.setEnabled(true);
   }
 }
 
@@ -166,6 +187,7 @@ function dispatch(e: AgentEvent): void {
     route.clear(); // a route drawn for the old region means nothing in the new one
     devloc.setPack(e.pack.id, e.fix);
     status.setPack(e.pack.id);
+    packPicker.setCurrentPack(e.pack.id); // resync display to the event, the actual source of truth
     void initMapForPack(e.pack.id, e.fix);
   }
 
