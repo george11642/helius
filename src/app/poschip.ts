@@ -25,7 +25,11 @@ export function mountPosChip(container: HTMLElement): PosChipHandle {
   }
 
   function handleEvent(e: AgentEvent): void {
-    if (e.type === 'tool-done' && e.name === 'locate') {
+    if (e.type === 'pack-changed') {
+      // The last locate summary describes the OLD pack's fix/coverage — a
+      // stale claim after a region switch. Hide until the next locate().
+      chip.hidden = true;
+    } else if (e.type === 'tool-done' && e.name === 'locate') {
       set(e.summary, WARN_RE.test(e.summary));
     } else if (e.type === 'tool-done' && e.name === 'route_back' && WARN_RE.test(e.summary)) {
       set(e.summary, true);
