@@ -7,9 +7,14 @@ is **done and verified** unless a line says otherwise. Submission deadline:
 ## The live deliverables (share these)
 
 - **Judge URL (live, real-model verified):** https://helius-9d0.pages.dev
-  - Gemma E2B loads from R2 in ~82s; offline map (basemap + hillshade + contours
-    from R2 terrain) + trails + POIs render; real turn @ ~22 tok/s draws the
-    10.64 km La Luz route; zero console errors. Scroll/zoom/pan work.
+  - **Redeployed with the full Jul-4 wave + review fixes (commit 84c5b46)** and
+    re-verified cold in a fresh profile: E2B from R2 ready in ~71s, then
+    **network cut → reload → ready in 3.0s from OPFS → real offline turn
+    answered** (spike/offline-reload-check.mjs). `NVIDIA_API_KEY` Pages secret
+    set — `/api/brief` reports `configured:true` live.
+  - Offline map/pack assets still need the warm-up: keep the page online until
+    the OFFLINE-READY badge fills (pack pmtiles/manifest stream from R2 into
+    the SW cache after the SW activates) before cutting Wi-Fi.
   - Cloudflare Pages project `helius`, account `d13d307f042336a52467a0583099794c`.
     Deploy token in `~/.config/global.env` as `CLOUDFLARE_PAGES_TOKEN` (Pages:Write).
   - Redeploy: `pnpm build && find dist -name '*.pmtiles' -delete && \

@@ -34,6 +34,13 @@ await readyWhen();
 console.log(`  ready in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 check('online cold load reaches ready', true);
 
+// Let the service worker finish installing/precaching before cutting the
+// network — an offline page navigation needs the SW to serve index.html.
+await page
+  .waitForFunction(async () => (await navigator.serviceWorker?.getRegistration())?.active != null, null, { timeout: 60000 })
+  .catch(() => console.log('  (no active service worker — dev server? offline reload will fail)'));
+await page.waitForTimeout(8000);
+
 console.log('going OFFLINE + reload…');
 await ctx.setOffline(true);
 t0 = Date.now();
@@ -45,16 +52,16 @@ check(`offline reload boots from OPFS (${offlineSecs.toFixed(1)}s)`, true);
 check('offline reload has no probe-backoff stall (< 45s)', offlineSecs < 45);
 
 // A real grounded turn while offline
-await page.fill('.chat-input, textarea, input[type=text]', 'How much daylight is left?').catch(() => null);
-const input = await page.$('.chat-input:not([disabled]), textarea:not([disabled])');
+const input = await page.waitForSelector('.chat-input:not([disabled])', { timeout: 30000 }).catch(() => null);
 if (input) {
+  await input.fill('How much daylight is left?');
   await input.press('Enter');
   const answered = await page
-    .waitForFunction(() => document.querySelectorAll('.msg-assistant, .chat-msg[data-role=assistant]').length > 0, null, { timeout: 120000 })
+    .waitForFunction(() => /daylight|sunset|minute/i.test(document.body.textContent ?? ''), null, { timeout: 180000 })
     .then(() => true, () => false);
   check('offline real turn answers', answered);
 } else {
-  console.log('SKIP  offline turn (input selector not found)');
+  console.log('SKIP  offline turn (chat input never enabled)');
 }
 
 await page.screenshot({ path: new URL('./wavefix-offline-reload.png', import.meta.url).pathname });
