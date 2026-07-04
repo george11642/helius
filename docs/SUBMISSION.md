@@ -24,6 +24,9 @@ behalf** — this is the prefilled draft he reviews and submits himself.
 **Built at the event:**
 > 100% built within the hackathon window. The repository was born at the moment the window opened — first commit *"Helius is born"* at **03:30:49 MDT, July 4, 2026** — and every line (runtime spike, engine, agent loop, tools, offline map, routing graph, region packs) was written in-window. The commit history is the build log.
 
+**Video description must include (CC BY 4.0 requirement):**
+> Music: "Ascending the Vale" by Kevin MacLeod (incompetech.com) — licensed under Creative Commons BY 4.0.
+
 **Links:**
 - Repository: https://github.com/george11642/helius
 - Demo video (≤60s): _[YouTube unlisted — TBD]_
