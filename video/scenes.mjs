@@ -51,10 +51,13 @@ clearCrashRestore();
 const ctx = await chromium.launchPersistentContext(PROFILE, {
   channel: 'chrome',
   headless: false,
-  viewport: { width: 960, height: 540 },
-  deviceScaleFactor: 2,
+  // viewport:null = real window, no emulation — the capture records physical pixels,
+  // so the page must genuinely lay out at the window's content size (emulated
+  // viewports letterbox/clip inside the real window and lie about outer/inner).
+  viewport: null,
   ignoreDefaultArgs: ['--enable-automation'],
   args: [
+    `--app=${DEMO_URL}`, // chromeless app window: no tab strip / omnibox in frame
     '--window-position=0,0', '--window-size=960,540', '--force-device-scale-factor=2',
     '--disable-infobars', '--disable-session-crashed-bubble', '--test-type',
     '--no-first-run', '--no-default-browser-check',
@@ -63,7 +66,11 @@ const ctx = await chromium.launchPersistentContext(PROFILE, {
     '--enable-unsafe-webgpu', '--enable-features=Vulkan',
   ],
 });
-const page = ctx.pages()[0] || (await ctx.newPage());
+// with --app the initial window can register a beat late — poll before falling
+// back to newPage() (which would open a normal tabbed window and ruin the frame)
+let page = ctx.pages()[0];
+for (let i = 0; !page && i < 50; i++) { await new Promise((r) => setTimeout(r, 100)); page = ctx.pages()[0]; }
+if (!page) page = await ctx.newPage();
 
 const traceLines = [];
 page.on('console', (m) => {
@@ -119,7 +126,7 @@ try {
   // 1. offline warm for the green badge
   await softWait(async () => {
     await page.click('.chip-warm-offline', { timeout: 3000 });
-    await page.waitForSelector('.chip-offline[data-state="ready"]', { timeout: 45000 });
+    await page.waitForSelector('.chip-offline[data-state="ready"]', { timeout: 120000 });
   }, 'OFFLINE-READY badge');
   // 2. force-load E4B via a tier round-trip (setTier loads it directly — NO warm-up
   //    turn, which would pollute the conversation and make the hero turn shortcut to
@@ -133,7 +140,46 @@ try {
   }, 'warm both tiers');
   console.log('==> warmed (both tiers resident, conversation fresh). Rolling scenes.');
 
+  // ---- true-size the window + measure the crop origin ----
+  // Make the CONTENT area exactly 960x540 logical (1920x1080 physical @2x), then
+  // tell capture.sh where the content starts on screen (menu bar + title bar).
+  const cdp = await ctx.newCDPSession(page);
+  const { windowId } = await cdp.send('Browser.getWindowForTarget');
+  const chromeH = await page.evaluate(() => window.outerHeight - window.innerHeight);
+  const chromeW = await page.evaluate(() => window.outerWidth - window.innerWidth);
+  await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: 960 + chromeW, height: 540 + chromeH } });
+  await page.waitForTimeout(800); // let layout settle
+  const crop = await page.evaluate(() => ({
+    x: Math.round((window.screenX + (window.outerWidth - window.innerWidth) / 2) * window.devicePixelRatio),
+    y: Math.round((window.screenY + (window.outerHeight - window.innerHeight)) * window.devicePixelRatio),
+    iw: window.innerWidth, ih: window.innerHeight, dpr: window.devicePixelRatio,
+  }));
+  console.log(`==> window content ${crop.iw}x${crop.ih}@${crop.dpr} → crop origin ${crop.x},${crop.y}`);
+
+  // ---- start the screen capture AT t0 (sync by construction) ----
+  let capProc = null;
+  if (process.env.CAPTURE === '1') {
+    const { spawn } = await import('node:child_process');
+    const capOut = process.env.CAPTURE_OUT || `takes/take-${LABEL}.mov`;
+    const capArgs = ['--seconds', process.env.CAPTURE_SECONDS || '150', '--out', capOut];
+    if (process.env.CAPTURE_ROUGH === '1') capArgs.unshift('--rough');
+    capProc = spawn(join(HERE, 'capture.sh'), capArgs, {
+      cwd: HERE,
+      env: { ...process.env, CROP_X: String(crop.x), CROP_Y: String(crop.y) },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    await new Promise((resolve, reject) => {
+      const to = setTimeout(() => reject(new Error('capture never produced frames (20s)')), 20000);
+      const watch = (d) => { if (/frame=\s*\d/.test(String(d))) { clearTimeout(to); resolve(); } };
+      capProc.stdout.on('data', watch);
+      capProc.stderr.on('data', watch);
+      capProc.on('exit', (c) => { clearTimeout(to); reject(new Error(`capture exited early (${c})`)); });
+    });
+    console.log(`==> capture rolling → ${capOut} (crop ${crop.x},${crop.y})`);
+  }
+
   t0 = Date.now();
+  console.log('T0EPOCH:' + t0);
 
   await scene(1, 'idle-ready', async () => {
     await hardWait(() => page.waitForSelector('.wordmark', { timeout: 5000 }), 'wordmark');
@@ -208,8 +254,15 @@ try {
     await page.waitForTimeout(1000);
   });
 
+  if (capProc) {
+    await page.waitForTimeout(1500); // tail pad after the last scene
+    capProc.kill('SIGINT'); // ffmpeg finalizes the mov trailer on SIGINT
+    await new Promise((r) => { if (capProc.exitCode !== null) return r(); capProc.on('exit', r); setTimeout(r, 15000); });
+    console.log('==> capture finalized.');
+  }
+
   const ok = failures.length === 0;
-  const timing = { t0, url: DEMO_URL, label: LABEL, ok, failures, totalMs: Date.now() - t0, traceChips: traceLines.length, scenes };
+  const timing = { t0, t0Epoch: t0, url: DEMO_URL, label: LABEL, ok, failures, totalMs: Date.now() - t0, traceChips: traceLines.length, scenes };
   writeFileSync(join(HERE, 'scenes-timing.json'), JSON.stringify(timing, null, 2));
   console.log(`\n==> scenes-timing.json: ${scenes.length} scenes, ${traceLines.length} TRACE chips, ${((Date.now() - t0) / 1000).toFixed(1)}s total, ${ok ? 'ALL PASS ✓' : 'FAILURES: ' + failures.join(', ')}`);
   console.log(`==> screenshots → ${OUTDIR}`);

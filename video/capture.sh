@@ -39,6 +39,7 @@ fi
 echo "==> using screen device index: $IDX" >&2
 [ "$LIST" = "1" ] && { echo "$IDX"; exit 0; }
 
+CROP_X="${CROP_X:-0}"
 CROP_Y="${CROP_Y:-0}"
 if [ "$CROP_Y" = "0" ]; then
   echo "   Pre-flight: HIDE the menu bar first (System Settings → Control Center →" >&2
@@ -64,7 +65,7 @@ echo "==> recording → $OUT  (${LABEL}, 60fps, cursor on; press q to stop)" >&2
 exec ffmpeg -hide_banner \
   -f avfoundation -framerate 60 -capture_cursor 1 -i "${IDX}:none" \
   ${DUR[@]+"${DUR[@]}"} \
-  -vf "crop=1920:1080:0:${CROP_Y}" \
+  -vf "crop=1920:1080:${CROP_X}:${CROP_Y}" \
   "${VCODEC[@]}" \
   -pix_fmt yuv420p \
   "$OUT"

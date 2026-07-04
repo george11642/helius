@@ -77,7 +77,11 @@ export default defineConfig({
             // and workbox won't cache it anyway. The app "pack warm-up" does a
             // FULL GET once (cacheable 200); rangeRequests then slices that
             // cached full body to answer offline Range reads.
-            urlPattern: /\.pmtiles/,
+            // Function matcher, NOT a RegExp: workbox only applies RegExp
+            // routes to cross-origin URLs when the match starts at index 0,
+            // so a mid-URL pattern silently never matched the R2 pack host —
+            // packs cached in dev (same-origin) but never in production.
+            urlPattern: ({ url }: { url: URL }) => url.pathname.endsWith('.pmtiles'),
             handler: 'CacheFirst',
             options: {
               cacheName: 'map-data',
@@ -98,7 +102,8 @@ export default defineConfig({
             // cacheable the moment they moved to R2 in production, breaking
             // the offline-pack story for anything but pmtiles (whose own
             // rule above matches on file extension alone, unaffected by host).
-            urlPattern: /\/packs\/.*\.(json|geojson|bin)$/,
+            // Function matcher for the same cross-origin reason as .pmtiles above.
+            urlPattern: ({ url }: { url: URL }) => /\/packs\/.+\.(json|geojson|bin)$/.test(url.pathname),
             handler: 'CacheFirst',
             options: { cacheName: 'pack-data' },
           },
