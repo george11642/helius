@@ -19,5 +19,8 @@ Runtime: @huggingface/transformers 4.2.0 · Model: onnx-community/gemma-4-E2B-it
 - assistant tool call: `{ role:'assistant', tool_calls:[{ type:'function', function:{ name, arguments:<OBJECT> } }] }` — arguments MUST be an object (string args render `{{}}`).
 - tool response: `{ role:'tool', name, content:<JSON STRING> }` — mapping content throws (`format_tool_response_block` mapping branch broken in @huggingface/jinja); string renders `response:name{value:<|"|>…<|"|>}` and the model consumes it fine.
 
+## Native vision probe (03:49)
+Synthetic French trail sign rendered to canvas → `RawImage.fromCanvas` → user content `[{type:'image'},{type:'text',…}]` → **all four lines read verbatim, translated correctly ("verglas" → black ice), correct hiker-facing reasoning.** 12.0s for 220 tokens incl. vision encode (q4f16 encoder). `read_sign` tool upgrades to native Gemma 4 vision; tesseract OCR demoted to deterministic fallback.
+
 ## Decision
 **LOCKED:** transformers.js + Gemma 4 E2B q4f16 WebGPU as the only runtime. Native audio-in replaces the planned moonshine STT on the primary path (moonshine stays mirrored as fallback). Kokoro remains for TTS. E4B q4f16 text stack mirrored for the MatFormer elasticity beat. MediaPipe/LiteRT-LM paths retired unexercised.
