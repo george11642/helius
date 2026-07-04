@@ -10,6 +10,7 @@
 		06111E4A0A1FD5B11B4E8671 /* Tools.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE13EE7BB9B30CA34F5A1BE /* Tools.swift */; };
 		062233C06930A60E1E5E52E8 /* Morse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716B24E9D6E4FE2286E2CC87 /* Morse.swift */; };
 		0656BA008DC325B65E1DBBA7 /* MockEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297EB111CC32C17892ECCAC1 /* MockEngine.swift */; };
+		0DC2233B1B1FE79100A2A140 /* MapPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A373173B229A5A4790BE956 /* MapPanelView.swift */; };
 		170461F0F8F1C3DB957F3ED3 /* CompassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F503CA1001D9F327D770F36 /* CompassView.swift */; };
 		2990E676EFE2373C6262119E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA63C5AAF97F2AA56EE81868 /* Theme.swift */; };
 		2D523937E77296C714A72E1B /* TorchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38F2FAA5BC143381476A66C /* TorchController.swift */; };
@@ -18,6 +19,7 @@
 		343EA545C47403CD4BD9492C /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDE9073FF58962CC10926B8 /* SystemPrompt.swift */; };
 		40D3D4754A2B2ED7C0D34557 /* HeliusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7551E08AE3816D0881F44750 /* HeliusViewModel.swift */; };
 		541101FC879BFCEE28CDD442 /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C6AA94B1FFF29494EA328 /* TranscriptView.swift */; };
+		6101C1CD2415F8C889015B17 /* StrobeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D8F4E438B0C453A7CB9F4B7 /* StrobeView.swift */; };
 		67C01041246B3B057ADD337B /* ToolTraceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1689C827E26352EE630EAD10 /* ToolTraceView.swift */; };
 		67EF9E3CD8E7BBD75D930A1C /* HeliusRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5CD3359CB7D9BBE31A7A3F /* HeliusRuntime.swift */; };
 		76E7BC4EB93E790A4FC4FF9B /* LiteRTLM in Frameworks */ = {isa = PBXBuildFile; productRef = 4A20983186AC4749B0F886CC /* LiteRTLM */; };
@@ -25,7 +27,10 @@
 		881A08A4E012A32E576783C9 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75481AAD02E7D0384F8E380A /* ImagePicker.swift */; };
 		8EEB97EFA5C280BF7021E687 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A969A4335883FA929B54A19 /* SpeechRecognizer.swift */; };
 		90808413F9F3B48C6A5FE516 /* HeliusCore in Frameworks */ = {isa = PBXBuildFile; productRef = A609B3604EFF78FF8799580B /* HeliusCore */; };
+		9CEF44EF3CC28D05AB19BCCA /* web-map in Resources */ = {isa = PBXBuildFile; fileRef = 7F6CB86C66D4EED653901B0A /* web-map */; };
+		A2E9F652814DB004A5133A71 /* MapSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31DC4468F107D240BBA5EE6 /* MapSchemeHandler.swift */; };
 		AD3A5844127DDDFC26935E91 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D34BEA0E6287EA622DC74B4 /* Speaker.swift */; };
+		AFB1A31BF3E02B8F4C89A853 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EDD58B187E0CBFED239A49A /* SettingsView.swift */; };
 		C7B7EAFABE7A19A5FAE74501 /* graph.bin in Resources */ = {isa = PBXBuildFile; fileRef = 69289589AF1CFF400A9A317A /* graph.bin */; };
 		CED60267A9940E7F128CB36A /* AgentEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E72B79491181DAEA86045CB /* AgentEvent.swift */; };
 		D309CD6F19B9430AED9FFB92 /* StatusHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */; };
@@ -33,11 +38,13 @@
 		E3405D50DF6CFE27B3C80163 /* MicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573CF0EDCAE614C72D0B285B /* MicButton.swift */; };
 		E34E2AEB45748322769443BB /* SignReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D390B123B562EBE48DDF1A /* SignReader.swift */; };
 		ECE607DA89445F7B489FB984 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70FF23B683AC0F2E460F177 /* ContentView.swift */; };
+		F68E5F5D9ADA41FCABB681A7 /* MapBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBF014121A8D805C8FB68A3 /* MapBridge.swift */; };
 		FA4F4377A95731BA0712C013 /* HeliusGoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3B872D0A660461BD50833A /* HeliusGoApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1689C827E26352EE630EAD10 /* ToolTraceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolTraceView.swift; sourceTree = "<group>"; };
+		1FBF014121A8D805C8FB68A3 /* MapBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBridge.swift; sourceTree = "<group>"; };
 		297EB111CC32C17892ECCAC1 /* MockEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockEngine.swift; sourceTree = "<group>"; };
 		2E3B872D0A660461BD50833A /* HeliusGoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusGoApp.swift; sourceTree = "<group>"; };
 		2EDE9073FF58962CC10926B8 /* SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompt.swift; sourceTree = "<group>"; };
@@ -47,15 +54,19 @@
 		49D390B123B562EBE48DDF1A /* SignReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignReader.swift; sourceTree = "<group>"; };
 		4A58ABFD5F15FCA45499FFF1 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		573CF0EDCAE614C72D0B285B /* MicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicButton.swift; sourceTree = "<group>"; };
+		5EDD58B187E0CBFED239A49A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		69289589AF1CFF400A9A317A /* graph.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = graph.bin; sourceTree = "<group>"; };
 		6A969A4335883FA929B54A19 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		716B24E9D6E4FE2286E2CC87 /* Morse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morse.swift; sourceTree = "<group>"; };
 		7265BE1B9DBFA1B38BAC4238 /* ModelLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLocator.swift; sourceTree = "<group>"; };
 		75481AAD02E7D0384F8E380A /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		7551E08AE3816D0881F44750 /* HeliusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusViewModel.swift; sourceTree = "<group>"; };
+		7A373173B229A5A4790BE956 /* MapPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapPanelView.swift; sourceTree = "<group>"; };
 		7F4686D7608FD343827BB2BA /* LiteRTLM */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LiteRTLM; path = Packages/LiteRTLM; sourceTree = SOURCE_ROOT; };
+		7F6CB86C66D4EED653901B0A /* web-map */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "web-map"; sourceTree = SOURCE_ROOT; };
 		8D34BEA0E6287EA622DC74B4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		8E72B79491181DAEA86045CB /* AgentEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEvent.swift; sourceTree = "<group>"; };
+		9D8F4E438B0C453A7CB9F4B7 /* StrobeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrobeView.swift; sourceTree = "<group>"; };
 		9F503CA1001D9F327D770F36 /* CompassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompassView.swift; sourceTree = "<group>"; };
 		A38F2FAA5BC143381476A66C /* TorchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorchController.swift; sourceTree = "<group>"; };
 		A70FF23B683AC0F2E460F177 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -63,7 +74,8 @@
 		AA63C5AAF97F2AA56EE81868 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		ACE13EE7BB9B30CA34F5A1BE /* Tools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tools.swift; sourceTree = "<group>"; };
 		C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusHeaderView.swift; sourceTree = "<group>"; };
-		C5CF835FD3A51815FB4C6BCC /* HeliusGo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeliusGo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5CF835FD3A51815FB4C6BCC /* HeliusGo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeliusGo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D31DC4468F107D240BBA5EE6 /* MapSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapSchemeHandler.swift; sourceTree = "<group>"; };
 		EA5CD3359CB7D9BBE31A7A3F /* HeliusRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusRuntime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,11 +117,23 @@
 			children = (
 				9F503CA1001D9F327D770F36 /* CompassView.swift */,
 				573CF0EDCAE614C72D0B285B /* MicButton.swift */,
+				5EDD58B187E0CBFED239A49A /* SettingsView.swift */,
 				C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */,
+				9D8F4E438B0C453A7CB9F4B7 /* StrobeView.swift */,
 				1689C827E26352EE630EAD10 /* ToolTraceView.swift */,
 				478C6AA94B1FFF29494EA328 /* TranscriptView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		44F6334FDFBA7E95C5246C3F /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				1FBF014121A8D805C8FB68A3 /* MapBridge.swift */,
+				7A373173B229A5A4790BE956 /* MapPanelView.swift */,
+				D31DC4468F107D240BBA5EE6 /* MapSchemeHandler.swift */,
+			);
+			path = Map;
 			sourceTree = "<group>";
 		};
 		46FD8F41563ECA8EF2056B97 /* ViewModel */ = {
@@ -167,6 +191,7 @@
 				97388B737F9C8CC1AFF45C1F /* Agent */,
 				BA3140D13BE860D9135A34D3 /* App */,
 				2D0DB3DA40786695EC172020 /* Engine */,
+				44F6334FDFBA7E95C5246C3F /* Map */,
 				963487695C5D5537A965239F /* Platform */,
 				5A56DC62592C6659638D5DE2 /* Resources */,
 				F7E619A5761EED6B4B86C612 /* Tools */,
@@ -181,6 +206,7 @@
 			children = (
 				BD002EDE81C0B66316BCF32A /* HeliusGo */,
 				0B37C899D07112ADD67E44DB /* Packages */,
+				7F6CB86C66D4EED653901B0A /* web-map */,
 				E27BFD75036D7A405F82B3EB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -234,6 +260,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = D7ED753892138301BCE1F10E /* Build configuration list for PBXProject "HeliusGo" */;
 			developmentRegion = en;
@@ -265,6 +293,7 @@
 			files = (
 				C7B7EAFABE7A19A5FAE74501 /* graph.bin in Resources */,
 				DAF7BEF84E26BF548154733A /* pois.json in Resources */,
+				9CEF44EF3CC28D05AB19BCCA /* web-map in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,14 +313,19 @@
 				881A08A4E012A32E576783C9 /* ImagePicker.swift in Sources */,
 				304F770A66274F1E449F1D7C /* LiteRTEngine.swift in Sources */,
 				7EFD97F0813D5228DC10DCF5 /* LocationProvider.swift in Sources */,
+				F68E5F5D9ADA41FCABB681A7 /* MapBridge.swift in Sources */,
+				0DC2233B1B1FE79100A2A140 /* MapPanelView.swift in Sources */,
+				A2E9F652814DB004A5133A71 /* MapSchemeHandler.swift in Sources */,
 				E3405D50DF6CFE27B3C80163 /* MicButton.swift in Sources */,
 				0656BA008DC325B65E1DBBA7 /* MockEngine.swift in Sources */,
 				2D9042B0132BAD154FC59A67 /* ModelLocator.swift in Sources */,
 				062233C06930A60E1E5E52E8 /* Morse.swift in Sources */,
+				AFB1A31BF3E02B8F4C89A853 /* SettingsView.swift in Sources */,
 				E34E2AEB45748322769443BB /* SignReader.swift in Sources */,
 				AD3A5844127DDDFC26935E91 /* Speaker.swift in Sources */,
 				8EEB97EFA5C280BF7021E687 /* SpeechRecognizer.swift in Sources */,
 				D309CD6F19B9430AED9FFB92 /* StatusHeaderView.swift in Sources */,
+				6101C1CD2415F8C889015B17 /* StrobeView.swift in Sources */,
 				343EA545C47403CD4BD9492C /* SystemPrompt.swift in Sources */,
 				2990E676EFE2373C6262119E /* Theme.swift in Sources */,
 				67C01041246B3B057ADD337B /* ToolTraceView.swift in Sources */,
@@ -370,7 +404,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZBX3F56T7;
 				INFOPLIST_FILE = HeliusGo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -456,7 +489,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZBX3F56T7;
 				INFOPLIST_FILE = HeliusGo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (

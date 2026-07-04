@@ -1,11 +1,13 @@
 import SwiftUI
 
-/// Top strip: app mark, model/engine state, GPS source, tier badge.
+/// Top strip: app mark, model/engine state, GPS source badge, settings gear.
 struct StatusHeaderView: View {
     let engineKind: EngineKind
     let lifecycle: EngineLifecycle
     let gpsLive: Bool
+    let demoMode: Bool
     let backendLabel: String
+    let onSettings: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
@@ -21,20 +23,34 @@ struct StatusHeaderView: View {
                 Text(statusText)
                     .font(Theme.mono(10.5))
                     .foregroundStyle(Theme.textDim)
+                    .lineLimit(1)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .trailing, spacing: 3) {
                 Badge(text: engineKind.rawValue, color: Theme.amber)
-                HStack(spacing: 5) {
-                    Badge(text: gpsLive ? "GPS LIVE" : "GPS SIM", color: gpsLive ? Theme.good : Theme.textDim)
-                    Badge(text: backendLabel, color: Theme.textDim)
-                }
+                Badge(text: gpsBadgeText, color: gpsBadgeColor)
+            }
+            Button(action: onSettings) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.textDim)
+                    .padding(.leading, 2)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Theme.panel)
         .overlay(Rectangle().frame(height: 1).foregroundStyle(Theme.stroke), alignment: .bottom)
+    }
+
+    private var gpsBadgeText: String {
+        if demoMode { return "DEMO FIX" }
+        return gpsLive ? "GPS LIVE" : "GPS WAIT"
+    }
+
+    private var gpsBadgeColor: Color {
+        if demoMode { return Theme.amber }
+        return gpsLive ? Theme.good : Theme.textDim
     }
 
     private var statusColor: Color {

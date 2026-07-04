@@ -6,6 +6,8 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var vm = HeliusViewModel()
     @State private var showCamera = false
+    @State private var showSettings = false
+    @State private var mapExpanded = true
 
     var body: some View {
         ZStack {
@@ -16,8 +18,12 @@ struct ContentView: View {
                     engineKind: vm.engineKind,
                     lifecycle: vm.lifecycle,
                     gpsLive: vm.gpsLive,
-                    backendLabel: vm.backendLabel
+                    demoMode: vm.demoMode,
+                    backendLabel: vm.backendLabel,
+                    onSettings: { showSettings = true }
                 )
+
+                MapPanelView(bridge: vm.mapBridge, packName: vm.packName, expanded: $mapExpanded)
 
                 ToolTraceView(chips: vm.chips)
 
@@ -42,11 +48,23 @@ struct ContentView: View {
 
                 inputBar
             }
+
+            // No torch (simulator / iPad): the screen itself becomes the beacon.
+            if vm.beaconActive && !TorchController.shared.hasTorch {
+                StrobeView(message: vm.beaconMessage, pattern: vm.beaconPattern) {
+                    vm.stopBeacon()
+                }
+                .transition(.opacity)
+                .zIndex(10)
+            }
         }
         .onAppear { vm.onAppear() }
         .sheet(isPresented: $showCamera) {
             ImagePicker { cg in vm.onSignImage(cg) }
                 .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(vm: vm)
         }
     }
 
@@ -67,6 +85,7 @@ struct ContentView: View {
             VStack(spacing: 8) {
                 examplePrompt("Get me back to the trailhead before dark")
                 examplePrompt("How much daylight do I have left?")
+                examplePrompt("Make me a plan to stay safe until morning")
             }
             .padding(.top, 6)
             Spacer()

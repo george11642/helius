@@ -2,20 +2,28 @@ import SwiftUI
 
 /// Horizontal strip of tool chips that light up as the agent chains tools —
 /// locate() → sun_clock() → route_back() — mirroring the web app's trace.
+/// Each finished chip shows its result summary ("fix 35.1983,-106.4439 ±14m",
+/// "sunset 20:24, 118 min light") so the agentic chain is legible at a glance.
 struct ToolTraceView: View {
     let chips: [TraceChip]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(chips) { chip in
-                    ChipView(chip: chip)
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(chips) { chip in
+                        ChipView(chip: chip).id(chip.id)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .onChange(of: chips) { latest in
+                guard let last = latest.last else { return }
+                withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo(last.id, anchor: .trailing) }
+            }
         }
-        .frame(height: chips.isEmpty ? 0 : 44)
+        .frame(height: chips.isEmpty ? 0 : 58)
         .opacity(chips.isEmpty ? 0 : 1)
         .animation(.easeInOut(duration: 0.2), value: chips)
     }
@@ -25,19 +33,28 @@ private struct ChipView: View {
     let chip: TraceChip
 
     var body: some View {
-        HStack(spacing: 6) {
-            icon
-            Text(chip.name + "()")
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(color)
-            if let ms = chip.ms {
-                Text("\(ms)ms").font(Theme.mono(10)).foregroundStyle(Theme.textDim)
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 6) {
+                icon
+                Text(chip.name + "()")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(color)
+                if let ms = chip.ms {
+                    Text("\(ms)ms").font(Theme.mono(10)).foregroundStyle(Theme.textDim)
+                }
+            }
+            if let summary = chip.summary, !summary.isEmpty {
+                Text(summary)
+                    .font(Theme.mono(10))
+                    .foregroundStyle(Theme.textDim)
+                    .lineLimit(1)
+                    .frame(maxWidth: 240, alignment: .leading)
             }
         }
-        .padding(.horizontal, 10).padding(.vertical, 7)
-        .background(color.opacity(0.12))
-        .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1))
-        .clipShape(Capsule())
+        .padding(.horizontal, 10).padding(.vertical, 6)
+        .background(color.opacity(0.1))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.45), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
     @ViewBuilder private var icon: some View {

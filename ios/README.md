@@ -65,12 +65,54 @@ HeliusGo/
   Tools/          The 7 tools as LiteRTLM `Tool` conformances; Morse encoder
   Platform/       LocationProvider (CoreLocation), TorchController (torch SOS),
                   SpeechRecognizer (on-device STT), Speaker (TTS), SignReader (Vision OCR)
-  Views/          StatusHeader, Transcript, ToolTrace (chips), Compass, MicButton
+  Map/            Embedded offline map: MapSchemeHandler (helius:// bundle server with
+                  Range support), MapBridge (Swift→JS command queue), MapPanelView (WKWebView host)
+  Views/          StatusHeader, Transcript, ToolTrace (chips + result summaries), Compass,
+                  MicButton, SettingsView, StrobeView (no-torch screen beacon)
   Resources/      graph.bin, pois.json
+web-map/          Self-contained MapLibre+PMTiles page (index.html, map.js) + vendored
+                  maplibre-gl/pmtiles JS, Noto glyphs, dark sprites, and pack/ (basemap.pmtiles
+                  is git-ignored — run scripts/sync-pack.sh after cloning)
 Packages/
   HeliusCore/     Pure-Swift, `swift test`-verified: sun math + graph.bin parser + A* routing
   LiteRTLM/       Vendored LiteRT-LM (xcframework + Swift wrapper)
 ```
+
+### Offline map (WKWebView + MapLibre + PMTiles)
+
+The same proven renderer as the web app, embedded natively. A `WKURLSchemeHandler`
+serves the bundled `web-map/` folder over `helius://local/...` **with HTTP Range
+support**, so the pmtiles JS client range-reads the 28 MB Sandia basemap archive
+straight out of the app bundle (memory-mapped, zero network). The page is a
+hand-port of `src/map/style.ts` + `src/map/render.ts` (night-ops palette, amber
+dashed trails, pulsing fix marker, destination flag, **animated route reveal**);
+terrain/DEM layers are omitted (the 78 MB terrain archive is not bundled).
+Swift pushes state through `MapBridge` (`setFix`, `drawRoute`, `clearRoute` —
+queued until the page reports ready); when `route_back` succeeds the `.route`
+event draws the real A* geometry on the map, animated, and fits the camera.
+
+**After cloning:** `./scripts/sync-pack.sh` copies `basemap.pmtiles` from
+`../public/data/packs/sandia/` into `web-map/pack/` (it's git-ignored at 28 MB).
+Without it the app still builds; the map page just has no basemap tiles.
+
+### GPS, Demo Mode, and coverage honesty
+
+Real Core Location fixes are accepted **anywhere** (no bbox gate). `locate`
+reports `source` (`gps`/`demo_preset`), `in_pack_coverage`, and — when outside
+the Sandia bbox — an explicit note ("outside Sandia Mountains pack coverage,
+~N km from the nearest trail data") instead of silently substituting a preset.
+**Demo Mode** (Settings, default ON, persisted) pins the position to the La Luz
+switchbacks preset for indoor demos; the header badge shows DEMO FIX / GPS LIVE /
+GPS WAIT accordingly.
+
+### Settings & beacon fallback
+
+The gear in the status header opens Settings: engine (Gemma 4 E2B ↔ Mock, hot-
+swappable, persisted), Demo Mode, speak-answers toggle, pack info, credits.
+`morse_beacon` on a device with no torch (simulator, iPad) now falls back to a
+**full-screen white strobe** flashing the same Morse timeline at max brightness,
+with a STOP control (DEBUG env `HELIUS_TEST_BEACON=1` arms it at launch for
+simulator testing).
 
 - **Engine abstraction.** `HeliusEngine` has two implementations: `LiteRTEngine`
   (real Gemma 4) and `MockEngine` (deterministic scripted turn for instant UI
@@ -91,6 +133,7 @@ Packages/
 
 ```bash
 cd ios
+./scripts/sync-pack.sh       # copy the git-ignored basemap.pmtiles into web-map/pack/
 xcodegen generate            # regenerate HeliusGo.xcodeproj from project.yml
 open HeliusGo.xcodeproj       # or use xcodebuild
 ```
@@ -150,8 +193,11 @@ a one-time, ~10-minute session. Do it in order.
       reads the 2.4 GB weights from `Documents/` (step 7) — a few seconds on the A18.
       If it says "model not found", the copy in step 7 didn't land — redo it.
     - **Tool chain:** "Get me back to the trailhead before dark" → chips light
-      `locate → sun_clock → route_back` with a grounded answer. (Real routing needs a
-      GPS fix inside the Sandia pack bbox; otherwise the simulated La Luz fix is used.)
+      `locate → sun_clock → route_back` with result summaries under each chip, a
+      grounded answer, and the **route drawn animated on the offline map**.
+      (Indoors: keep **Demo Mode ON** in Settings so the La Luz preset is used.
+      Outdoors: turn Demo Mode OFF for the real fix — routing works when the fix
+      is inside the Sandia pack; elsewhere `locate` reports coverage honestly.)
     - **read_sign (2 min — marquee beat, FIRST real-camera OCR test):** tap the camera
       button, point at the printed French test sign ("SENTIER DU LAC / Refuge — 2,4 km
       / Danger : verglas"), take the photo → the `read_sign()` chip fires and Helius
@@ -223,3 +269,27 @@ Luz oracle (10638.5 m, 16 steps, 1584 coords) and an Albuquerque sunset.
 2. **Constrained decoding was off.** Enabled
    `ExperimentalFlags.enableConversationConstrainedDecoding` in `warmUp` (Google's
    flag "primarily for function calling") for reliable tool-calling.
+
+---
+
+## Verification — map/trace/settings upgrade (2026-07-04, in-window)
+
+Verified on the iOS Simulator (iPhone 17 Pro, iOS 26.5), `HELIUS_ENGINE=mock`:
+
+- **Offline map:** boots with zero network — night-ops basemap, amber dashed
+  trails, POI/peak labels, pulsing fix marker at the La Luz preset. After the
+  "back before dark" turn, the **real A\* route (1584 pts, 10.64 km) draws
+  animated** to the La Luz Trailhead flag with a camera fit. Collapse/expand
+  keeps the WKWebView (and route) alive. `docs/screenshots/map-route.jpg`.
+- **Chip summaries:** every finished chip shows its result line (fix coords,
+  sunset/light minutes, route km/eta, pace verdict) — `docs/screenshots/map-route-chips.jpg`.
+- **Mock routes over the real graph:** MockEngine now runs the same
+  `RoutingGraph.findRoute` as the real engine, so the map shows genuine geometry.
+- **Settings sheet:** engine picker, Demo Mode, voice toggle, pack + about render
+  and toggle live; Demo Mode OFF flipped the header to GPS LIVE using the
+  simulator's real fix (the anywhere-GPS path).
+- **Screen-strobe beacon:** with no torch, the SOS beacon renders a full-screen
+  white Morse strobe with STOP — `docs/screenshots/strobe-flash.jpg`
+  (white "on" frame captured).
+- **Real-engine build:** the same binary contains `LiteRTEngine` (compiles in
+  this build); on-device model load unchanged (Documents/ `.litertlm`).

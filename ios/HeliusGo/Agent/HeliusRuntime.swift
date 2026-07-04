@@ -28,8 +28,30 @@ final class HeliusRuntime {
         set { lock.lock(); _fix = newValue; lock.unlock() }
     }
 
+    /// Whether `currentFix` came from real Core Location (vs the demo preset).
+    /// Written by the view model alongside `currentFix`; read by `locate` so its
+    /// tool result is honest about the fix source.
+    var fixIsLive = false
+
     /// The offline trail graph, loaded once from the bundled `graph.bin`.
     var graph: RoutingGraph?
+
+    // MARK: Pack coverage
+
+    /// The bundled pack's identity + bbox (sandia manifest.json values).
+    static let packName = "Sandia Mountains"
+    static let packBBox = (minLon: -107.15, minLat: 34.65, maxLon: -106.15, maxLat: 35.55)
+
+    /// Distance from `fix` to the pack bbox: 0 when inside, else km to the
+    /// nearest edge — so `locate` can say "outside Sandia pack coverage,
+    /// N km from nearest trail data" instead of silently substituting a preset.
+    static func coverageKm(lat: Double, lon: Double) -> Double {
+        let b = packBBox
+        if lat >= b.minLat, lat <= b.maxLat, lon >= b.minLon, lon <= b.maxLon { return 0 }
+        let clampedLat = min(max(lat, b.minLat), b.maxLat)
+        let clampedLon = min(max(lon, b.minLon), b.maxLon)
+        return haversineM(lat, lon, clampedLat, clampedLon) / 1000
+    }
 
     /// A frame captured for `read_sign`, consumed on the next read.
     var pendingSignImage: CGImage?

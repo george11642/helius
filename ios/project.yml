@@ -34,6 +34,15 @@ targets:
       - path: HeliusGo
         excludes:
           - "Info.plist"
+      # Embedded offline map: MapLibre+PMTiles page, vendored JS, glyphs,
+      # sprites, and the Sandia basemap archive. Bundled as a folder reference
+      # so the web page's relative paths survive into the app bundle
+      # (served to the WKWebView by MapSchemeHandler over helius://).
+      # NOTE: web-map/pack/basemap.pmtiles is git-ignored (28 MB) — run
+      # scripts/sync-pack.sh once after cloning to copy it from the webapp.
+      - path: web-map
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: LiteRTLM
         product: LiteRTLM

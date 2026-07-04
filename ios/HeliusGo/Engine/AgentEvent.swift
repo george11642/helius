@@ -42,7 +42,7 @@ enum AgentEvent {
     case toolStarted(name: String, argsSummary: String?)
     case toolFinished(name: String, summary: String?, ms: Int)
     case toolFailed(name: String, summary: String?, ms: Int)
-    case beacon(active: Bool, pattern: String)
+    case beacon(active: Bool, pattern: String, message: String)
     case route(distanceM: Double, etaMin: Double, waypointCount: Int)
     case assistantFinal(String)
     case turnEnded

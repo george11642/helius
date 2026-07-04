@@ -35,9 +35,26 @@ struct LocateTool: Tool {
         rt.emit(.toolStarted(name: Self.name, argsSummary: nil))
         let t0 = Date()
         let f = rt.currentFix
-        let summary = "fix \(fmt4(f.lat)),\(fmt4(f.lon)) ±\(f.accuracyM)m @\(f.elevationM)m"
+        let source = rt.fixIsLive ? "gps" : "demo_preset"
+        let offPackKm = HeliusRuntime.coverageKm(lat: f.lat, lon: f.lon)
+
+        var summary = "fix \(fmt4(f.lat)),\(fmt4(f.lon)) ±\(f.accuracyM)m @\(f.elevationM)m"
+        var result: [String: Any] = [
+            "lat": f.lat, "lon": f.lon, "accuracy_m": f.accuracyM, "elevation_m": f.elevationM,
+            "source": source,
+            "pack": HeliusRuntime.packName,
+            "in_pack_coverage": offPackKm == 0,
+        ]
+        if offPackKm > 0 {
+            // Honest coverage report: the fix is real but the offline trail data
+            // doesn't cover it, so routing tools will fail off-network here.
+            let kmStr = String(format: "%.0f", offPackKm)
+            summary += " — outside \(HeliusRuntime.packName) pack, \(kmStr) km away"
+            result["coverage_note"] =
+                "Position is outside the \(HeliusRuntime.packName) pack coverage, ~\(kmStr) km from the nearest trail data. Offline routing is unavailable here."
+        }
         rt.emit(.toolFinished(name: Self.name, summary: summary, ms: elapsedMs(t0)))
-        return ["lat": f.lat, "lon": f.lon, "accuracy_m": f.accuracyM, "elevation_m": f.elevationM]
+        return result
     }
 }
 
@@ -190,12 +207,12 @@ struct MorseBeaconTool: Tool {
         switch action {
         case "start":
             TorchController.shared.start(message: msg)
-            rt.emit(.beacon(active: true, pattern: pattern))
+            rt.emit(.beacon(active: true, pattern: pattern, message: msg))
         case "stop":
             TorchController.shared.stop()
-            rt.emit(.beacon(active: false, pattern: pattern))
+            rt.emit(.beacon(active: false, pattern: pattern, message: msg))
         default:
-            rt.emit(.beacon(active: false, pattern: pattern))
+            rt.emit(.beacon(active: false, pattern: pattern, message: msg))
         }
 
         let state = action == "start" ? "flashing" : (action == "stop" ? "stopped" : "armed")

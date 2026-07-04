@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+  Helius Go — embedded offline map.
+
+  Self-contained WKWebView page served entirely from the app bundle via
+  MapSchemeHandler (helius://local/...). Reuses the web app's proven
+  MapLibre + PMTiles renderer: the style below is a hand-port of
+  src/map/style.ts (terrain/DEM layers omitted — the 78MB terrain archive
+  is not bundled), and the fix marker / destination flag / animated route
+  draw mirror src/map/render.ts. Zero network: maplibre-gl, pmtiles, glyphs,
+  sprites and the basemap archive all ship inside the app.
+
+  Swift -> JS bridge (called via evaluateJavaScript, see MapPanelView.swift):
+    heliusMap.setFix(lat, lon, accuracyM)
+    heliusMap.drawRoute([[lon,lat],...], animateMs)   // animated like the web
+    heliusMap.clearRoute()
+  JS -> Swift: webkit.messageHandlers.helius.postMessage({type:'ready'|'error'})
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<link rel="stylesheet" href="./vendor/maplibre-gl.css" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #0a0e14; overflow: hidden; }
+  #map { position: absolute; inset: 0; }
+  .maplibregl-ctrl-attrib { background: rgba(10,14,20,0.6) !important; }
+  .maplibregl-ctrl-attrib a { color: #8b98a9 !important; font-size: 9px; }
+
+  /* Fix marker + destination flag — copied from src/map/render.ts ensureMarkerStyles() */
+  .helius-fix-marker { position: relative; width: 18px; height: 18px; }
+  .helius-fix-marker .dot {
+    position: absolute; inset: 0; margin: auto; width: 10px; height: 10px; border-radius: 50%;
+    background: #ffb454; box-shadow: 0 0 6px 2px #ffb454aa;
+  }
+  .helius-fix-marker .ring {
+    position: absolute; inset: 0; margin: auto; width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid #ffb454; animation: helius-fix-pulse 1.8s ease-out infinite;
+  }
+  @keyframes helius-fix-pulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(3.4); opacity: 0; }
+  }
+  .helius-dest-flag { display: block; filter: drop-shadow(0 0 3px rgba(0,0,0,0.6)); }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="./vendor/maplibre-gl.js"></script>
+<script src="./vendor/pmtiles.js"></script>
+<script src="./map.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import Foundation
+import HeliusCore
 
 /// Deterministic scripted engine. Runs the canonical "get me back before dark"
 /// turn — emitting the same tool-trace and route events the real engine does —
@@ -20,8 +21,30 @@ final class MockEngine: HeliusEngine {
 
         await tool(emit, "locate", "fix 35.1983,-106.4439 ±14m @2926m", 41)
         await tool(emit, "sun_clock", "sunset 20:24, 118 min light, dark in 148 min", 23)
-        await tool(emit, "route_back", "route to La Luz Trailhead: 10.64 km / 6.61 mi, ~128 min, 84 pts", 62)
-        emit(.route(distanceM: 10_640, etaMin: 128, waypointCount: 84))
+
+        // Route over the REAL bundled graph (same A* + graph.bin the real
+        // engine uses) so the map draws genuine La Luz geometry — the scripted
+        // numbers below are only the fallback if the graph didn't load.
+        let rt = HeliusRuntime.shared
+        let f = rt.currentFix
+        if let graph = rt.graph {
+            let result = graph.findRoute(from: LatLon(lat: f.lat, lon: f.lon), to: RouteDestination.trailhead.coord)
+            if result.isSuccess {
+                rt.lastRoute = result
+                rt.lastRouteDestination = .trailhead
+                let km = result.distanceM / 1000
+                let mi = km * 0.621371
+                let summary = "route to La Luz Trailhead: \(String(format: "%.2f", km)) km / \(String(format: "%.2f", mi)) mi, ~\(Int(result.etaMin.rounded())) min, \(result.coordinates.count) pts"
+                await tool(emit, "route_back", summary, 62)
+                emit(.route(distanceM: result.distanceM, etaMin: result.etaMin, waypointCount: result.coordinates.count))
+            } else {
+                await tool(emit, "route_back", "route to La Luz Trailhead: 10.64 km / 6.61 mi, ~128 min, 84 pts", 62)
+                emit(.route(distanceM: 10_640, etaMin: 128, waypointCount: 84))
+            }
+        } else {
+            await tool(emit, "route_back", "route to La Luz Trailhead: 10.64 km / 6.61 mi, ~128 min, 84 pts", 62)
+            emit(.route(distanceM: 10_640, etaMin: 128, waypointCount: 84))
+        }
         await tool(emit, "pace_eta", "ETA 128 min, arrive 22:32 — 20 min AFTER sunset", 7)
 
         let answer = "You're about 10.6 km / 6.6 mi from the La Luz trailhead — roughly 2 hours 8 minutes on foot, which lands you around 20 minutes after sunset. Start down the La Luz trail now and keep a steady, careful pace. If the light runs out before you reach the bottom, stop where you are and I'll flash an SOS beacon so searchers can find you."
