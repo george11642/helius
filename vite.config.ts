@@ -85,7 +85,16 @@ export default defineConfig({
             // Registered BEFORE ml-models on purpose: routes match in order,
             // and graph.bin would otherwise be captured by the `.bin` rule and
             // share the LLM shards' eviction budget.
-            urlPattern: /\/data\/packs\/.*\.(json|geojson|bin)$/,
+            //
+            // Matches on "/packs/" alone (not "/data/packs/") so this also
+            // catches the production R2 shape (pub-....r2.dev/packs/<pack>/
+            // <asset>, no /data prefix — see src/map/pack-base.ts) as well as
+            // the dev-local /data/packs/<pack>/<asset> shape. Without this,
+            // graph.bin/pois.json/manifest.json would silently stop being SW
+            // cacheable the moment they moved to R2 in production, breaking
+            // the offline-pack story for anything but pmtiles (whose own
+            // rule above matches on file extension alone, unaffected by host).
+            urlPattern: /\/packs\/.*\.(json|geojson|bin)$/,
             handler: 'CacheFirst',
             options: { cacheName: 'pack-data' },
           },
