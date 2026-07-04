@@ -42,6 +42,10 @@ const PACK_META: Record<string, { region: string; terrain: string }> = {
   fontainebleau: { region: 'Île-de-France, France', terrain: 'forest & boulders · 130 m' },
 };
 
+// Auto-continue threshold vs. caps.modelResidentMB — which the pre-flight now
+// scopes to the E2B tier's own OPFS directory (src/llm/preflight.ts), so other
+// tiers' files can't trip this. ~3244 MB measured asset sum; the ~1.4% slack
+// absorbs minor config drift. Must stay in sync with FULLY_RESIDENT_BYTES there.
 const MODEL_FULL_MB = 3200; // measured E2B q4f16 footprint; >= this ⇒ fully resident
 
 function fmtGb(mb: number): string {
@@ -272,9 +276,16 @@ export function mountOnboarding(opts: OnboardingOptions): OnboardingHandle {
     const resident = caps.modelResidentMB;
     if (v === 'unsupported') {
       verdictLine.textContent = '✕ This device cannot run the on-device model';
-      loadBtn.disabled = false;
-      loadBtn.classList.add('onb-load-btn-secondary');
-      loadBtn.innerHTML = 'Try loading anyway';
+      if (caps.webgpu) {
+        loadBtn.disabled = false;
+        loadBtn.classList.add('onb-load-btn-secondary');
+        loadBtn.innerHTML = 'Try loading anyway';
+      } else {
+        // No WebGPU adapter: the worker-side backstop hard-refuses too, so an
+        // override is structurally impossible — don't offer a button that can
+        // only ever flip the screen to an error card.
+        loadBtn.hidden = true;
+      }
       mapOnlyBtn.classList.add('onb-maponly-primary');
       return;
     }
@@ -303,6 +314,18 @@ export function mountOnboarding(opts: OnboardingOptions): OnboardingHandle {
 
     if (status.state === 'preflight') {
       renderVerdict(status.verdict, status.caps);
+      if (opts.instant && status.verdict === 'unsupported' && !dismissed) {
+        // Instant flow assumes an autoload will drive the boot card — but an
+        // 'unsupported' verdict VETOES the autoload (agent emits 'idle' next),
+        // and the buttonless card would sit at "starting…" forever. Fall back
+        // to the gate: the hero carries the verdict, the override button (when
+        // it can work) and the map-only escape.
+        el.dataset.mode = 'gate';
+        el.dataset.phase = 'hero';
+        hero.hidden = false;
+        card.hidden = true;
+        started = false; // the autoload never started — let the button fire
+      }
       return;
     }
     if (status.state === 'idle') {
@@ -365,12 +388,20 @@ export function mountOnboarding(opts: OnboardingOptions): OnboardingHandle {
 
 // ---- brief viewer modal (works fully offline — reads the localStorage cache) --
 
+/** HTML-escape a brief string. Every string in a MissionBrief is Nemotron
+ *  (LLM) output relayed by /api/brief — length-capped in normalizeBrief but
+ *  otherwise untrusted, so it must never reach innerHTML unescaped. */
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /** ISO timestamps render as local clock time; non-ISO strings pass through. */
 function fmtBriefTime(s: string): string {
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? s : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+/** Items must already be escaped (or composed from escaped parts) by the caller. */
 function section(title: string, items: string[]): string {
   if (!items.length) return '';
   return `<div class="brief-section"><div class="brief-section-title">${title}</div><ul>${items
@@ -385,19 +416,19 @@ export function showBriefModal(brief: MissionBrief): void {
   modal.innerHTML = `
     <div class="brief-modal-card">
       <button type="button" class="brief-modal-close" aria-label="Close">&times;</button>
-      <div class="brief-modal-title">MISSION BRIEFING — ${brief.destination}</div>
+      <div class="brief-modal-title">MISSION BRIEFING — ${esc(brief.destination)}</div>
       <div class="brief-modal-meta">prepared ${new Date(brief.generatedAt).toLocaleString()} · cached on-device, readable offline</div>
-      <p class="brief-summary">${brief.summary}</p>
+      <p class="brief-summary">${esc(brief.summary)}</p>
       <div class="brief-section"><div class="brief-section-title">DAYLIGHT</div>
-        <ul><li>Sunset ${fmtBriefTime(brief.daylight.sunset)} — turn around by <strong>${fmtBriefTime(brief.daylight.turnaroundBy)}</strong></li><li>${brief.daylight.note}</li></ul>
+        <ul><li>Sunset ${esc(fmtBriefTime(brief.daylight.sunset))} — turn around by <strong>${esc(fmtBriefTime(brief.daylight.turnaroundBy))}</strong></li><li>${esc(brief.daylight.note)}</li></ul>
       </div>
-      ${section('ROUTE PLAN', brief.route)}
-      ${section('BAIL-OUTS (ranked)', brief.bailouts.map((b) => `${b.name} — ${b.why ?? ''}`))}
-      ${section('WATER', brief.water)}
-      ${section('GEAR', brief.gear)}
-      ${section('TERRAIN CAUTIONS', brief.terrain)}
-      ${section('SIGNAL COVERAGE', brief.signal)}
-      ${section('LOCAL PHRASES', brief.phrases.map((p) => `<em>${p.local}</em> — ${p.english}`))}
+      ${section('ROUTE PLAN', brief.route.map(esc))}
+      ${section('BAIL-OUTS (ranked)', brief.bailouts.map((b) => esc(`${b.name} — ${b.why ?? ''}`)))}
+      ${section('WATER', brief.water.map(esc))}
+      ${section('GEAR', brief.gear.map(esc))}
+      ${section('TERRAIN CAUTIONS', brief.terrain.map(esc))}
+      ${section('SIGNAL COVERAGE', brief.signal.map(esc))}
+      ${section('LOCAL PHRASES', brief.phrases.map((p) => `<em>${esc(p.local)}</em> — ${esc(p.english)}`))}
     </div>
   `;
   document.body.appendChild(modal);

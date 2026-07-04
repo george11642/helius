@@ -18,7 +18,7 @@
 // available in workers) so the browser marks the origin's OPFS + caches as
 // non-evictable (iOS Safari otherwise evicts after ~7 days of disuse).
 
-import { measureResidentModelBytes } from './opfs-cache';
+import { cleanupLegacyWeightCache, measureResidentModelBytes } from './opfs-cache';
 import type { CapabilityVerdict, DeviceCaps } from '../lib/contract';
 
 export interface PreflightResult {
@@ -29,6 +29,15 @@ export interface PreflightResult {
 // E2B q4f16 full multimodal footprint is ~3.2GB (measured on the live asset
 // set); require headroom for manifests + decompression scratch.
 const REQUIRED_STORAGE_BYTES = 3.6e9;
+// At or above this many resident bytes the load is a pure LOCAL read — no new
+// storage is consumed, so the quota check must not veto it. Matches
+// MODEL_FULL_MB in src/app/onboarding.ts (3200 MB vs the ~3244 MB measured
+// asset sum — deliberate ~1.4% slack for minor config drift).
+const FULLY_RESIDENT_BYTES = 3.2e9;
+// OPFS directory of the default tier the pre-flight verdict is about — the
+// resident measurement is scoped here so complete files of another tier can't
+// make THIS tier look already-downloaded.
+const DEFAULT_TIER_DIR = 'gemma-4-e2b-onnx';
 // Largest single external-data shard is ~1.5GB (embed_tokens_q4f16.onnx_data);
 // individual GPU buffers are per-tensor and smaller, but adapters reporting
 // tiny maxima will not survive session compile.
@@ -67,6 +76,10 @@ export async function runPreflight(): Promise<PreflightResult> {
   const maxBinding = adapter?.limits?.maxStorageBufferBindingSize;
 
   // ---- storage --------------------------------------------------------------
+  // Reclaim the pre-wave SW double-store (multi-GB dead .onnx copies in the
+  // 'ml-models' Cache Storage bucket) BEFORE estimating, so stale usage from a
+  // previous build can't flip the quota verdict on a machine that ran fine.
+  await cleanupLegacyWeightCache().catch(() => 0);
   let quota: number | undefined;
   let usage: number | undefined;
   let persisted: boolean | undefined;
@@ -88,7 +101,7 @@ export async function runPreflight(): Promise<PreflightResult> {
   // ---- device class ----------------------------------------------------------
   const deviceMemoryGB = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const mobile = detectMobile();
-  const modelResidentBytes = await measureResidentModelBytes();
+  const modelResidentBytes = await measureResidentModelBytes(DEFAULT_TIER_DIR);
 
   const caps: DeviceCaps = {
     webgpu: Boolean(adapter),
@@ -109,11 +122,13 @@ export async function runPreflight(): Promise<PreflightResult> {
     return { verdict: 'unsupported', caps };
   }
 
-  // Storage: only binding if the weights are NOT already fully local.
+  // Storage: only binding if the weights are NOT already fully local — a
+  // fully-resident model loads as a pure local read that consumes no new
+  // storage, so a tight remaining quota must not veto it.
   const stillNeeded = Math.max(0, REQUIRED_STORAGE_BYTES - modelResidentBytes);
-  if (quota !== undefined && quota - (usage ?? 0) < stillNeeded) {
+  if (modelResidentBytes < FULLY_RESIDENT_BYTES && quota !== undefined && quota - (usage ?? 0) < stillNeeded) {
     reasons.push(
-      `Not enough storage for the model (~${Math.round(stillNeeded / 1e9)}GB needed, ${Math.round(Math.max(0, quota - (usage ?? 0)) / 1e9)}GB available) — install the app to home screen for a bigger quota, use the native Helius Go app, or continue in map-only mode.`,
+      `Not enough storage for the model (~${(stillNeeded / 1e9).toFixed(1)}GB needed, ${(Math.max(0, quota - (usage ?? 0)) / 1e9).toFixed(1)}GB available) — install the app to home screen for a bigger quota, use the native Helius Go app, or continue in map-only mode.`,
     );
     return { verdict: 'unsupported', caps };
   }

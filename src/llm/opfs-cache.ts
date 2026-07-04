@@ -49,6 +49,10 @@ interface OpfsDirHandle {
 
 const ROOT_DIR = 'model-cache';
 const META_SUFFIX = '.meta.json';
+/** Negative-cache marker for a URL that 404'd — consulted only while OFFLINE
+ *  (an offline reload must not spend the retry budget probing files that were
+ *  simply absent upstream; online we always re-probe in case they appear). */
+const NOT_FOUND_SUFFIX = '.404';
 /** Persist the manifest at least this often while streaming (bytes). */
 const META_FLUSH_BYTES = 8 * 1024 * 1024;
 /** Abort a stalled response stream after this long with no bytes. */
@@ -137,6 +141,12 @@ function validatorOf(headers: Headers, total: number): string {
 
 /** Thrown for a 404 so match() can return undefined (transformers.js handles optional files itself). */
 class NotFoundError extends Error {}
+
+/** True when the browser KNOWS there is no network. Retrying/backing off in
+ *  that state just stalls an offline boot for minutes — fail fast instead. */
+function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
 
 export function createOpfsModelCache(
   baseUrl: string,
@@ -288,17 +298,41 @@ export function createOpfsModelCache(
 
     if (await migrateFromLegacyCache(url, dir, name, rel)) return;
 
+    // Offline reload: a file not complete in OPFS cannot be fetched. If it was
+    // negatively cached as a 404 last time we were online, report not-found
+    // instantly (transformers.js tolerates optional files); otherwise fail the
+    // probe fast below instead of burning ~60s of retry backoff per file.
+    if (isOffline()) {
+      const marked = await dir.getFileHandle(name + NOT_FOUND_SUFFIX).then(
+        () => true,
+        () => false,
+      );
+      if (marked) throw new NotFoundError(url);
+    }
+
     // The initial probe gets the same retry treatment as the stream: a flaky
-    // network at THIS point shouldn't fail the whole load either.
+    // network at THIS point shouldn't fail the whole load either. A KNOWN-dead
+    // network (navigator.onLine === false) is not flaky — fail immediately.
     let probed: { total: number; etag: string } | null = null;
     for (let pAttempt = 1; !probed; pAttempt++) {
       try {
         probed = await probe(url);
       } catch (err) {
-        if (err instanceof NotFoundError || pAttempt >= MAX_ATTEMPTS) throw err;
+        if (err instanceof NotFoundError) {
+          // Negative-cache the 404 so an OFFLINE boot skips this file instantly.
+          try {
+            await dir.getFileHandle(name + NOT_FOUND_SUFFIX, { create: true });
+          } catch {
+            /* marker is best-effort */
+          }
+          throw err;
+        }
+        if (pAttempt >= MAX_ATTEMPTS || isOffline()) throw err;
         await new Promise((r) => setTimeout(r, Math.min(30_000, 1000 * 2 ** Math.min(pAttempt, 5))));
       }
     }
+    // The URL exists upstream — drop any stale negative-cache marker.
+    void dir.removeEntry(name + NOT_FOUND_SUFFIX).catch(() => undefined);
     const { total, etag } = probed;
     const resuming = Boolean(existing && existing.etag === etag && existing.total === total && existing.done < total);
     let meta: FileMeta = resuming && existing ? existing : { url, etag, total, done: 0 };
@@ -325,15 +359,23 @@ export function createOpfsModelCache(
     activeDownloads++;
     try {
       let attempt = 0;
-      while (meta.done < total) {
+      // Loop against the LIVE meta.total, not the initial probe's value: a
+      // mid-download 200/If-Range-miss restart (streamOnce) or the revalidation
+      // probe below can legitimately change the object size, and exiting at the
+      // stale byte count would record a truncated file as complete (or 416-loop
+      // forever against a smaller replacement).
+      while (meta.done < meta.total) {
         attempt++;
-        const madeProgress = await streamOnce(dir, name, rel, url, meta).catch((err) => {
+        // Progress is judged by meta.done itself (streamOnce mutates it as
+        // chunks land), NOT by whether the attempt resolved — a stream that
+        // moved 300MB and then died must reset the retry budget too.
+        const doneBefore = meta.done;
+        await streamOnce(dir, name, rel, url, meta).catch((err) => {
           if (err instanceof NotFoundError) throw err;
-          if (attempt >= MAX_ATTEMPTS) throw err;
-          return false;
+          if (attempt >= MAX_ATTEMPTS || isOffline()) throw err;
         });
-        if (meta.done >= total) break;
-        if (madeProgress) attempt = 0; // flaky-but-moving network: keep going
+        if (meta.done >= meta.total) break;
+        if (meta.done > doneBefore) attempt = 0; // flaky-but-moving network: keep going
         const backoff = Math.min(30_000, 1000 * 2 ** Math.min(attempt, 5));
         await new Promise((r) => setTimeout(r, backoff));
         // Revalidate before resuming — the object may have changed server-side.
@@ -394,7 +436,19 @@ export function createOpfsModelCache(
       const cl = Number(resp.headers.get('content-length') ?? NaN);
       if (Number.isFinite(cl)) meta.total = cl;
       ledger.set(rel, { loaded: 0, total: meta.total });
-    } else if (resp.status !== 206) {
+    } else if (resp.status === 206) {
+      // Validate the range we ASKED for is the range we GOT — an edge/proxy
+      // answering `bytes 0-…` to a resume request would otherwise be appended
+      // at offset meta.done and silently corrupt the shard. content-range may
+      // be CORS-hidden (then we can't check — same trust as before); when
+      // visible, a mismatched start or total is a hard error → retry+reprobe.
+      const cr = /bytes\s+(\d+)-\d+\/(\d+|\*)/i.exec(resp.headers.get('content-range') ?? '');
+      if (cr && (Number(cr[1]) !== meta.done || (cr[2] !== '*' && Number(cr[2]) !== meta.total))) {
+        if (stallTimer !== null) clearTimeout(stallTimer);
+        void resp.body?.cancel().catch(() => undefined);
+        throw new Error(`GET ${url}: content-range mismatch (${cr[0]}, expected start ${meta.done} of ${meta.total})`);
+      }
+    } else {
       if (stallTimer !== null) clearTimeout(stallTimer);
       throw new Error(`GET ${url}: HTTP ${resp.status}`);
     }
@@ -545,14 +599,44 @@ export function createOpfsModelCache(
   };
 }
 
+/** One-time cleanup of the pre-wave service-worker double-store: older builds'
+ *  SW `.bin` rule also cached the multi-GB .onnx/.onnx_data weight shards in
+ *  the 'ml-models' Cache Storage bucket (vite.config.ts now excludes them, but
+ *  workbox never proactively evicts existing entries). Those copies are pure
+ *  dead weight — the usable legacy copy lives in 'transformers-cache' and is
+ *  migrated into OPFS by migrateFromLegacyCache — and on a storage-tight
+ *  machine they inflate navigator.storage.estimate() usage enough to flip the
+ *  pre-flight quota check to 'unsupported'. Main-thread-safe; returns entries
+ *  deleted. The .wasm/.bin runtime entries that bucket legitimately holds are
+ *  left alone. */
+export async function cleanupLegacyWeightCache(): Promise<number> {
+  let deleted = 0;
+  if (typeof caches === 'undefined') return deleted;
+  try {
+    const bucket = await caches.open('ml-models');
+    for (const req of await bucket.keys()) {
+      if (/\.onnx(_data[^/?]*)?(\?|$)/.test(req.url)) {
+        if (await bucket.delete(req)) deleted++;
+      }
+    }
+  } catch {
+    // Cache Storage unavailable — nothing stored, nothing to clean.
+  }
+  return deleted;
+}
+
 /** Bytes of COMPLETE model files resident in OPFS (main-thread-safe: async
  *  reads only). Used by the pre-flight gate: a device whose quota looks too
- *  small still gets a 'go' if the weights are already fully local. */
-export async function measureResidentModelBytes(): Promise<number> {
+ *  small still gets a 'go' if the weights are already fully local.
+ *  `subdir` scopes the sum to one tier's directory (e.g. 'gemma-4-e2b-onnx')
+ *  so complete files of the OTHER tier can't masquerade as this tier being
+ *  resident; omitted = everything under model-cache (legacy behavior). */
+export async function measureResidentModelBytes(subdir?: string): Promise<number> {
   let bytes = 0;
   try {
     const root = await getOpfsRoot();
-    const base = await root.getDirectoryHandle(ROOT_DIR, { create: false });
+    let base = await root.getDirectoryHandle(ROOT_DIR, { create: false });
+    if (subdir) base = await base.getDirectoryHandle(subdir, { create: false });
     const walk = async (dir: OpfsDirHandle): Promise<void> => {
       for await (const [entryName, entry] of dir.entries()) {
         if ((entry as { kind?: string }).kind === 'directory') {

@@ -7,6 +7,7 @@
 
 import type { ToolResult } from '../lib/contract';
 import { loadGraph } from '../map/graph';
+import { PACK_BASE_URL } from '../map/pack-base';
 import { route } from '../map/route';
 import type { GeoJSONLineString, RoutingGraph } from '../map/graph';
 import { getFix } from './location';
@@ -58,7 +59,9 @@ function getGraph(pack: string): Promise<RoutingGraph> {
 function getPois(pack: string): Promise<PoisFile> {
   let p = poisCache.get(pack);
   if (!p) {
-    p = fetch(`/data/packs/${pack}/pois.json`)
+    // Same resolved pack root as the graph/map (dev-local vs prod R2) — a
+    // hard-coded Pages path here could pair a fresh R2 graph with stale POIs.
+    p = fetch(`${PACK_BASE_URL}/${pack}/pois.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`pois.json ${r.status}`);
         return r.json() as Promise<PoisFile>;

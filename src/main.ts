@@ -47,13 +47,26 @@ let pendingLoad = false;
 let pendingPack: string | null = null;
 let chosenPack = 'sandia'; // tracks the canonical current pack (pack-changed is the source of truth)
 
+// Real geolocation (and its browser permission prompt) is deferred until the
+// onboarding gate is exited by a user gesture — a no-gesture prompt at cold
+// load from an unknown origin is a needless trust hit and Chrome often quietly
+// suppresses it anyway. Instant flows release immediately: their URL params
+// either set a demo fix (no prompt path at all) or were opened deliberately.
+let releaseRealGeo!: () => void;
+const realGeoGate = new Promise<void>((resolve) => {
+  releaseRealGeo = resolve;
+});
+if (instantFlow) releaseRealGeo();
+
 const boot = mountOnboarding({
   instant: instantFlow,
   onStartLoad: () => {
+    releaseRealGeo();
     if (agent) void agent.loadModel();
     else pendingLoad = true;
   },
   onMapOnly: () => {
+    releaseRealGeo();
     setActivity('map-only mode');
     void initMapOnce();
   },
@@ -147,6 +160,7 @@ const route = mountRoute(refs.routeToastLayer);
 const beacon = mountBeacon();
 const devloc = mountDevLoc({
   onFixChange: (lat, lon, accuracyM) => map.setFix(lat, lon, accuracyM),
+  startRealGeoAfter: realGeoGate,
 });
 const packPicker = mountPackPicker(refs.headerPackSlot, {
   onSwitchPack: (packId) => {

@@ -91,18 +91,26 @@ let opfsCache: OpfsModelCache | null = null;
 let statusLoads = 0;
 
 let lastFetchPostAt = 0;
+// The downloader's ledger only knows files whose match() has run, so
+// overallTotal GROWS as transformers.js discovers components (embed → vision →
+// decoder) and the raw percentage can jump backwards mid-load. Clamp the
+// DISPLAYED pct monotonic non-decreasing per load; byte counts stay raw/honest.
+// Reset whenever a status-emitting load starts (primaryLoad / switchTier).
+let maxFetchPct = 0;
 function postFetchProgress(p: DownloadProgress): void {
   if (statusLoads <= 0) return;
   const done = p.overallTotal > 0 && p.overallLoaded >= p.overallTotal;
   const now = performance.now();
   if (!done && now - lastFetchPostAt < 200) return; // downloader emits per network chunk — throttle
   lastFetchPostAt = now;
+  const rawPct = p.overallTotal > 0 ? Math.min(100, (p.overallLoaded / p.overallTotal) * 100) : 0;
+  maxFetchPct = Math.max(maxFetchPct, rawPct);
   post({
     type: 'status',
     status: {
       state: 'downloading',
       stage: 'fetch',
-      pct: p.overallTotal > 0 ? Math.min(100, (p.overallLoaded / p.overallTotal) * 100) : 0,
+      pct: maxFetchPct,
       file: p.file,
       mbDone: +(p.overallLoaded / 1e6).toFixed(1),
       mbTotal: +(p.overallTotal / 1e6).toFixed(1),
@@ -197,6 +205,7 @@ async function purgeConfigCache(): Promise<number> {
 /** Primary load: bring up `tier`, report ready, then silently pre-warm the other tier. */
 async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
   activeTier = tier;
+  maxFetchPct = 0; // fresh load, fresh monotonic progress baseline
 
   // Fail FAST if this context can't run the model at all — a device without a
   // WebGPU adapter would otherwise download ~3.2GB and only then die at
@@ -267,6 +276,7 @@ async function switchTier(tier: ModelTier): Promise<void> {
     return;
   }
   // Not warm yet (pre-warm disabled or still in flight): show compiling and wait.
+  maxFetchPct = 0; // a fresh on-demand load may emit fetch progress of its own
   post({ type: 'status', status: { state: 'compiling' } });
   const t0 = performance.now();
   try {

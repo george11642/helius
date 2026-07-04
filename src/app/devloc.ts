@@ -48,6 +48,12 @@ export interface DevLocOptions {
   /** Fires on every accepted fix — demo preset OR real GPS — so the map view
    *  can re-center on whatever position the tools will actually report. */
   onFixChange?(lat: number, lon: number, accuracyM: number): void;
+  /** When given, REAL geolocation (and its browser permission prompt) waits
+   *  for this to resolve — e.g. until the onboarding gate is dismissed by a
+   *  user gesture. A no-gesture prompt at second zero from an unknown origin
+   *  is a trust hit and Chrome's quiet-permission heuristics often suppress
+   *  it anyway. Demo URL params are unaffected (no prompt involved). */
+  startRealGeoAfter?: Promise<void>;
 }
 
 export interface DevLocHandle {
@@ -140,20 +146,25 @@ export function mountDevLoc(opts: DevLocOptions = {}): DevLocHandle {
     // Real GPS is the primary source. Until the first fix lands (or if the
     // permission is denied), the app truthfully has no position.
     coords.textContent = 'waiting for GPS…';
-    startRealGeolocation((fix, source) => {
-      if (source === 'gps') {
-        coords.textContent = `${fix.lat.toFixed(4)}, ${fix.lon.toFixed(4)} · GPS ±${fix.accuracyM}m`;
-        opts.onFixChange?.(fix.lat, fix.lon, fix.accuracyM);
-      }
-    });
-    // If no fix arrives, surface the status once the initial attempt settles.
-    window.setTimeout(() => {
-      const s = getFixState();
-      if (!s.fix && !s.demoMode) {
-        coords.textContent =
-          s.geoStatus === 'denied' ? 'GPS denied — pick a preset for demo mode' : s.geoStatus === 'requesting' ? 'waiting for GPS…' : 'no GPS — pick a preset for demo mode';
-      }
-    }, 13_000);
+    const startGeo = (): void => {
+      if (getFixState().demoMode) return; // a preset was picked while we waited
+      startRealGeolocation((fix, source) => {
+        if (source === 'gps') {
+          coords.textContent = `${fix.lat.toFixed(4)}, ${fix.lon.toFixed(4)} · GPS ±${fix.accuracyM}m`;
+          opts.onFixChange?.(fix.lat, fix.lon, fix.accuracyM);
+        }
+      });
+      // If no fix arrives, surface the status once the initial attempt settles.
+      window.setTimeout(() => {
+        const s = getFixState();
+        if (!s.fix && !s.demoMode) {
+          coords.textContent =
+            s.geoStatus === 'denied' ? 'GPS denied — pick a preset for demo mode' : s.geoStatus === 'requesting' ? 'waiting for GPS…' : 'no GPS — pick a preset for demo mode';
+        }
+      }, 13_000);
+    };
+    if (opts.startRealGeoAfter) void opts.startRealGeoAfter.then(startGeo);
+    else startGeo();
   }
 
   return { setPack };
