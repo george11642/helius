@@ -1,5 +1,8 @@
 # Helius — Live Judging Runbook
 
+
+> **Profile note:** run the demo and any judge rehearsal in a **fresh Chrome profile** (or the deployed judge URL in a clean browser). Long-lived dev profiles with many GB of accumulated localhost model caches can wedge service-worker installs (precache stays empty → offline page-reload breaks). Fresh profiles install and precache correctly — verified.
+
 Your drive-it-yourself script for the live demo call. Helius is deterministic and
 the tool-trace is the star — if you warm it correctly and follow the beats, it
 runs itself. **The trace rail is the story. If a beat ever hiccups, move on and
