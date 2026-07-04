@@ -116,6 +116,10 @@ const T = JSON.parse(fs.readFileSync(tp, 'utf8'));
 // Beat targets (seconds), script order — sum ~= 60 so the cut fills the 58.5s VO.
 const BEATS = { 'idle-ready': 4, 'hero-ask': 5, 'trace-chips': 12, 'route-draw': 8, 'mic-pulse': 3, 'tier-swap': 6, 'read-sign': 8, 'beacon': 8, 'end-hold': 6 };
 if (beatsFile) { try { Object.assign(BEATS, JSON.parse(fs.readFileSync(beatsFile, 'utf8'))); } catch (e) { console.error('bad BEATS_JSON: ' + e.message); process.exit(4); } }
+// Trim anchor per scene: 'head' keeps the first `target`s (default); 'tail' keeps
+// the LAST `target`s. beacon tail-anchors so its 8s beat lands on the STROBE
+// payoff (the ~13s climax) instead of the model arming that leads up to it.
+const ANCHOR = { beacon: 'tail' };
 const scenes = T.scenes || [];
 if (!scenes.length) { console.error('no scenes in timing'); process.exit(2); }
 let total = 0; const rows = [];
@@ -127,9 +131,15 @@ for (const s of scenes) {
   else { target = 6; console.error(`   (no beat for '${s.label}', defaulting ${target}s)`); }
   const ex = Math.min(Math.max(real, MIN_REAL), target);  // real window, floored, never past target
   const pad = +(target - ex).toFixed(3);                   // frozen tail (0 when we trimmed instead)
-  rows.push(`${s.label} ${(L + (s.startMs || 0) / 1000).toFixed(3)} ${ex.toFixed(3)} ${pad.toFixed(3)}`);
+  const trimmed = real > target + 0.001;
+  const anchor = ANCHOR[s.label] || 'head';
+  // a tail-anchored trim slides the start forward to keep the LAST target seconds
+  let startSec = L + (s.startMs || 0) / 1000;
+  if (trimmed && anchor === 'tail') startSec += real - target;
+  rows.push(`${s.label} ${startSec.toFixed(3)} ${ex.toFixed(3)} ${pad.toFixed(3)}`);
   total += target;
-  console.error(`   ${s.label.padEnd(12)} real ${real.toFixed(1)}s → ${target}s  ${pad > 0.001 ? 'hold +' + pad.toFixed(1) + 's' : 'trim'}`);
+  const how = pad > 0.001 ? 'hold +' + pad.toFixed(1) + 's' : (trimmed ? 'trim(' + anchor + ')' : 'exact');
+  console.error(`   ${s.label.padEnd(12)} real ${real.toFixed(1)}s → ${target}s  ${how}`);
 }
 total = +total.toFixed(3);
 if (total > 62) { console.error(`paced plan ${total}s exceeds 62s`); process.exit(3); }

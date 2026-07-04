@@ -13,7 +13,7 @@
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DEMO_URL = process.env.DEMO_URL || 'http://localhost:4174/?prewarm=1';
@@ -25,7 +25,28 @@ const READY_MS = 240000;
 const SCENE_CAP_MS = 30000;
 mkdirSync(OUTDIR, { recursive: true });
 
-const ctx = await chromium.launchPersistentContext(join(HERE, '.chrome-profile'), {
+const PROFILE = join(HERE, '.chrome-profile');
+
+// Belt+suspenders against Chrome's "Restore pages? / Chrome didn't shut down
+// correctly" crash bubble — it ate a prior take by covering the app and eating
+// clicks. Mark the previous session clean in the persistent profile BEFORE
+// Playwright launches it (paired with --disable-session-crashed-bubble below).
+function clearCrashRestore() {
+  const prefsPath = join(PROFILE, 'Default', 'Preferences');
+  try {
+    const prefs = JSON.parse(readFileSync(prefsPath, 'utf8'));
+    prefs.profile = prefs.profile || {};
+    prefs.profile.exit_type = 'Normal';
+    prefs.profile.exited_cleanly = true;
+    writeFileSync(prefsPath, JSON.stringify(prefs));
+    console.log('==> cleared crash-restore state in profile Preferences');
+  } catch (e) {
+    console.log(`  (no crash-restore state to clear — ${String(e.message || e).slice(0, 60)})`);
+  }
+}
+clearCrashRestore();
+
+const ctx = await chromium.launchPersistentContext(PROFILE, {
   channel: 'chrome',
   headless: false,
   viewport: { width: 960, height: 540 },
@@ -33,7 +54,8 @@ const ctx = await chromium.launchPersistentContext(join(HERE, '.chrome-profile')
   ignoreDefaultArgs: ['--enable-automation'],
   args: [
     '--window-position=0,0', '--window-size=960,540', '--force-device-scale-factor=2',
-    '--disable-infobars', '--no-first-run', '--no-default-browser-check',
+    '--disable-infobars', '--disable-session-crashed-bubble', '--test-type',
+    '--no-first-run', '--no-default-browser-check',
     '--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream',
     `--use-file-for-fake-video-capture=${SIGN}`,
     '--enable-unsafe-webgpu', '--enable-features=Vulkan',

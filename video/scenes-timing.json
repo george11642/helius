@@ -1,82 +1,82 @@
 {
-  "t0": 1783174484648,
+  "t0": 1783175764696,
   "url": "http://localhost:4174/?prewarm=1",
-  "label": "warm2",
+  "label": "dry",
   "ok": true,
   "failures": [],
-  "totalMs": 49169,
+  "totalMs": 46148,
   "traceChips": 10,
   "scenes": [
     {
       "n": 1,
       "label": "idle-ready",
-      "startMs": 1204,
-      "endMs": 1210,
-      "ms": 6,
+      "startMs": 1203,
+      "endMs": 1207,
+      "ms": 4,
       "failed": false
     },
     {
       "n": 2,
       "label": "hero-ask",
-      "startMs": 2669,
-      "endMs": 2768,
-      "ms": 99,
+      "startMs": 2651,
+      "endMs": 2723,
+      "ms": 72,
       "failed": false
     },
     {
       "n": 3,
       "label": "trace-chips",
-      "startMs": 4142,
-      "endMs": 12546,
-      "ms": 8404,
+      "startMs": 4099,
+      "endMs": 12382,
+      "ms": 8283,
       "failed": false
     },
     {
       "n": 4,
       "label": "route-draw",
-      "startMs": 13927,
-      "endMs": 16726,
-      "ms": 2799,
+      "startMs": 13791,
+      "endMs": 17155,
+      "ms": 3364,
       "failed": false
     },
     {
       "n": "2b",
       "label": "mic-pulse",
-      "startMs": 18058,
-      "endMs": 19078,
-      "ms": 1020,
+      "startMs": 18494,
+      "endMs": 19498,
+      "ms": 1004,
       "failed": false
     },
     {
       "n": 5,
       "label": "tier-swap",
-      "startMs": 20464,
-      "endMs": 22103,
-      "ms": 1639,
+      "startMs": 20886,
+      "endMs": 22520,
+      "ms": 1634,
       "failed": false
     },
     {
       "n": 6,
       "label": "read-sign",
-      "startMs": 23544,
-      "endMs": 27637,
-      "ms": 4093,
+      "startMs": 23941,
+      "endMs": 28538,
+      "ms": 4597,
       "failed": false
     },
     {
       "n": 7,
       "label": "beacon",
-      "startMs": 28960,
-      "endMs": 46675,
-      "ms": 17715,
+      "startMs": 29862,
+      "endMs": 43647,
+      "ms": 13785,
       "failed": false
     },
     {
       "n": 8,
       "label": "end-hold",
-      "startMs": 48016,
-      "endMs": 49021,
-      "ms": 1005,
+      "startMs": 44988,
+      "endMs": 45999,
+      "ms": 1011,
       "failed": false
     }
   ]
