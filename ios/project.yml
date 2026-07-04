@@ -14,6 +14,8 @@ options:
 packages:
   LiteRTLM:
     path: Packages/LiteRTLM
+  HeliusCore:
+    path: Packages/HeliusCore
 
 settings:
   base:
@@ -35,6 +37,8 @@ targets:
     dependencies:
       - package: LiteRTLM
         product: LiteRTLM
+      - package: HeliusCore
+        product: HeliusCore
     info:
       path: HeliusGo/Info.plist
       properties:

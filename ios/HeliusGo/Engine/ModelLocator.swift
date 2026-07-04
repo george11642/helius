@@ -18,12 +18,23 @@ enum ModelLocator {
         "/Users/georgeteifel/dev/helius-assets/models/gemma-4-E2B-litert/gemma-4-E2B-it.litertlm"
 
     static func resolveModelPath() -> String {
+        // 1. Explicit override (fast simulator/dev runs).
         if let p = ProcessInfo.processInfo.environment["HELIUS_MODEL_PATH"], !p.isEmpty {
             return p
         }
+        // 2. Pushed into the app's Documents on device (keeps the .app small — the
+        //    ~2.4 GB model is copied to the container separately; see ios/README.md).
+        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let candidate = docs.appendingPathComponent("\(bundledResourceName).\(bundledResourceExt)")
+            if FileManager.default.fileExists(atPath: candidate.path) {
+                return candidate.path
+            }
+        }
+        // 3. Bundled as an app resource (self-contained device build).
         if let url = Bundle.main.url(forResource: bundledResourceName, withExtension: bundledResourceExt) {
             return url.path
         }
+        // 4. Development fallback (Mac/simulator can read the host asset directly).
         return devFallbackPath
     }
 

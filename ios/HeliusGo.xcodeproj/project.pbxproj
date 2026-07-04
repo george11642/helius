@@ -7,18 +7,64 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06111E4A0A1FD5B11B4E8671 /* Tools.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE13EE7BB9B30CA34F5A1BE /* Tools.swift */; };
+		062233C06930A60E1E5E52E8 /* Morse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716B24E9D6E4FE2286E2CC87 /* Morse.swift */; };
+		0656BA008DC325B65E1DBBA7 /* MockEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297EB111CC32C17892ECCAC1 /* MockEngine.swift */; };
+		170461F0F8F1C3DB957F3ED3 /* CompassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F503CA1001D9F327D770F36 /* CompassView.swift */; };
+		2990E676EFE2373C6262119E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA63C5AAF97F2AA56EE81868 /* Theme.swift */; };
+		2D523937E77296C714A72E1B /* TorchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38F2FAA5BC143381476A66C /* TorchController.swift */; };
 		2D9042B0132BAD154FC59A67 /* ModelLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7265BE1B9DBFA1B38BAC4238 /* ModelLocator.swift */; };
+		304F770A66274F1E449F1D7C /* LiteRTEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A850793AB3675813A97945EF /* LiteRTEngine.swift */; };
+		343EA545C47403CD4BD9492C /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDE9073FF58962CC10926B8 /* SystemPrompt.swift */; };
+		40D3D4754A2B2ED7C0D34557 /* HeliusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7551E08AE3816D0881F44750 /* HeliusViewModel.swift */; };
+		541101FC879BFCEE28CDD442 /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C6AA94B1FFF29494EA328 /* TranscriptView.swift */; };
+		67C01041246B3B057ADD337B /* ToolTraceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1689C827E26352EE630EAD10 /* ToolTraceView.swift */; };
+		67EF9E3CD8E7BBD75D930A1C /* HeliusRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5CD3359CB7D9BBE31A7A3F /* HeliusRuntime.swift */; };
 		76E7BC4EB93E790A4FC4FF9B /* LiteRTLM in Frameworks */ = {isa = PBXBuildFile; productRef = 4A20983186AC4749B0F886CC /* LiteRTLM */; };
+		7EFD97F0813D5228DC10DCF5 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A58ABFD5F15FCA45499FFF1 /* LocationProvider.swift */; };
+		881A08A4E012A32E576783C9 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75481AAD02E7D0384F8E380A /* ImagePicker.swift */; };
+		8EEB97EFA5C280BF7021E687 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A969A4335883FA929B54A19 /* SpeechRecognizer.swift */; };
+		90808413F9F3B48C6A5FE516 /* HeliusCore in Frameworks */ = {isa = PBXBuildFile; productRef = A609B3604EFF78FF8799580B /* HeliusCore */; };
+		AD3A5844127DDDFC26935E91 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D34BEA0E6287EA622DC74B4 /* Speaker.swift */; };
+		C7B7EAFABE7A19A5FAE74501 /* graph.bin in Resources */ = {isa = PBXBuildFile; fileRef = 69289589AF1CFF400A9A317A /* graph.bin */; };
+		CED60267A9940E7F128CB36A /* AgentEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E72B79491181DAEA86045CB /* AgentEvent.swift */; };
+		D309CD6F19B9430AED9FFB92 /* StatusHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */; };
+		DAF7BEF84E26BF548154733A /* pois.json in Resources */ = {isa = PBXBuildFile; fileRef = 3294098C36FFA8337EA4BB0E /* pois.json */; };
+		E3405D50DF6CFE27B3C80163 /* MicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573CF0EDCAE614C72D0B285B /* MicButton.swift */; };
+		E34E2AEB45748322769443BB /* SignReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D390B123B562EBE48DDF1A /* SignReader.swift */; };
 		ECE607DA89445F7B489FB984 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70FF23B683AC0F2E460F177 /* ContentView.swift */; };
 		FA4F4377A95731BA0712C013 /* HeliusGoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3B872D0A660461BD50833A /* HeliusGoApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1689C827E26352EE630EAD10 /* ToolTraceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolTraceView.swift; sourceTree = "<group>"; };
+		297EB111CC32C17892ECCAC1 /* MockEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockEngine.swift; sourceTree = "<group>"; };
 		2E3B872D0A660461BD50833A /* HeliusGoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusGoApp.swift; sourceTree = "<group>"; };
+		2EDE9073FF58962CC10926B8 /* SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompt.swift; sourceTree = "<group>"; };
+		3171626412A6DC39E563975D /* HeliusCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HeliusCore; path = Packages/HeliusCore; sourceTree = SOURCE_ROOT; };
+		3294098C36FFA8337EA4BB0E /* pois.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = pois.json; sourceTree = "<group>"; };
+		478C6AA94B1FFF29494EA328 /* TranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptView.swift; sourceTree = "<group>"; };
+		49D390B123B562EBE48DDF1A /* SignReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignReader.swift; sourceTree = "<group>"; };
+		4A58ABFD5F15FCA45499FFF1 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
+		573CF0EDCAE614C72D0B285B /* MicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicButton.swift; sourceTree = "<group>"; };
+		69289589AF1CFF400A9A317A /* graph.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = graph.bin; sourceTree = "<group>"; };
+		6A969A4335883FA929B54A19 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		716B24E9D6E4FE2286E2CC87 /* Morse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morse.swift; sourceTree = "<group>"; };
 		7265BE1B9DBFA1B38BAC4238 /* ModelLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLocator.swift; sourceTree = "<group>"; };
+		75481AAD02E7D0384F8E380A /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		7551E08AE3816D0881F44750 /* HeliusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusViewModel.swift; sourceTree = "<group>"; };
 		7F4686D7608FD343827BB2BA /* LiteRTLM */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LiteRTLM; path = Packages/LiteRTLM; sourceTree = SOURCE_ROOT; };
+		8D34BEA0E6287EA622DC74B4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
+		8E72B79491181DAEA86045CB /* AgentEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEvent.swift; sourceTree = "<group>"; };
+		9F503CA1001D9F327D770F36 /* CompassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompassView.swift; sourceTree = "<group>"; };
+		A38F2FAA5BC143381476A66C /* TorchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorchController.swift; sourceTree = "<group>"; };
 		A70FF23B683AC0F2E460F177 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A850793AB3675813A97945EF /* LiteRTEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiteRTEngine.swift; sourceTree = "<group>"; };
+		AA63C5AAF97F2AA56EE81868 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		ACE13EE7BB9B30CA34F5A1BE /* Tools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tools.swift; sourceTree = "<group>"; };
+		C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusHeaderView.swift; sourceTree = "<group>"; };
 		C5CF835FD3A51815FB4C6BCC /* HeliusGo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeliusGo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA5CD3359CB7D9BBE31A7A3F /* HeliusRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeliusRuntime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +73,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76E7BC4EB93E790A4FC4FF9B /* LiteRTLM in Frameworks */,
+				90808413F9F3B48C6A5FE516 /* HeliusCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -36,6 +83,7 @@
 		0B37C899D07112ADD67E44DB /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				3171626412A6DC39E563975D /* HeliusCore */,
 				7F4686D7608FD343827BB2BA /* LiteRTLM */,
 			);
 			path = Packages;
@@ -44,9 +92,63 @@
 		2D0DB3DA40786695EC172020 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				8E72B79491181DAEA86045CB /* AgentEvent.swift */,
+				A850793AB3675813A97945EF /* LiteRTEngine.swift */,
+				297EB111CC32C17892ECCAC1 /* MockEngine.swift */,
 				7265BE1B9DBFA1B38BAC4238 /* ModelLocator.swift */,
 			);
 			path = Engine;
+			sourceTree = "<group>";
+		};
+		30FCE4C7D2494939BB699610 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9F503CA1001D9F327D770F36 /* CompassView.swift */,
+				573CF0EDCAE614C72D0B285B /* MicButton.swift */,
+				C4BFA469B4D618CC4C0119D6 /* StatusHeaderView.swift */,
+				1689C827E26352EE630EAD10 /* ToolTraceView.swift */,
+				478C6AA94B1FFF29494EA328 /* TranscriptView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		46FD8F41563ECA8EF2056B97 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				7551E08AE3816D0881F44750 /* HeliusViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		5A56DC62592C6659638D5DE2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				69289589AF1CFF400A9A317A /* graph.bin */,
+				3294098C36FFA8337EA4BB0E /* pois.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		963487695C5D5537A965239F /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				75481AAD02E7D0384F8E380A /* ImagePicker.swift */,
+				4A58ABFD5F15FCA45499FFF1 /* LocationProvider.swift */,
+				49D390B123B562EBE48DDF1A /* SignReader.swift */,
+				8D34BEA0E6287EA622DC74B4 /* Speaker.swift */,
+				6A969A4335883FA929B54A19 /* SpeechRecognizer.swift */,
+				A38F2FAA5BC143381476A66C /* TorchController.swift */,
+			);
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		97388B737F9C8CC1AFF45C1F /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				EA5CD3359CB7D9BBE31A7A3F /* HeliusRuntime.swift */,
+				2EDE9073FF58962CC10926B8 /* SystemPrompt.swift */,
+			);
+			path = Agent;
 			sourceTree = "<group>";
 		};
 		BA3140D13BE860D9135A34D3 /* App */ = {
@@ -54,6 +156,7 @@
 			children = (
 				A70FF23B683AC0F2E460F177 /* ContentView.swift */,
 				2E3B872D0A660461BD50833A /* HeliusGoApp.swift */,
+				AA63C5AAF97F2AA56EE81868 /* Theme.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -61,8 +164,14 @@
 		BD002EDE81C0B66316BCF32A /* HeliusGo */ = {
 			isa = PBXGroup;
 			children = (
+				97388B737F9C8CC1AFF45C1F /* Agent */,
 				BA3140D13BE860D9135A34D3 /* App */,
 				2D0DB3DA40786695EC172020 /* Engine */,
+				963487695C5D5537A965239F /* Platform */,
+				5A56DC62592C6659638D5DE2 /* Resources */,
+				F7E619A5761EED6B4B86C612 /* Tools */,
+				46FD8F41563ECA8EF2056B97 /* ViewModel */,
+				30FCE4C7D2494939BB699610 /* Views */,
 			);
 			path = HeliusGo;
 			sourceTree = "<group>";
@@ -84,6 +193,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F7E619A5761EED6B4B86C612 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				716B24E9D6E4FE2286E2CC87 /* Morse.swift */,
+				ACE13EE7BB9B30CA34F5A1BE /* Tools.swift */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -92,6 +210,7 @@
 			buildConfigurationList = 80410E4ACB760201D8BB55AB /* Build configuration list for PBXNativeTarget "HeliusGo" */;
 			buildPhases = (
 				00F531ABB05C9A3CCD3B2D6A /* Sources */,
+				7A76055D8E0FB8D661D6EA88 /* Resources */,
 				616973BDFBF58D9BEFD808D1 /* Frameworks */,
 			);
 			buildRules = (
@@ -101,6 +220,7 @@
 			name = HeliusGo;
 			packageProductDependencies = (
 				4A20983186AC4749B0F886CC /* LiteRTLM */,
+				A609B3604EFF78FF8799580B /* HeliusCore */,
 			);
 			productName = HeliusGo;
 			productReference = C5CF835FD3A51815FB4C6BCC /* HeliusGo.app */;
@@ -127,6 +247,7 @@
 			mainGroup = D116C7F3486F07D413D10F32;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				783CE2A2943FF9057EF2809B /* XCLocalSwiftPackageReference "Packages/HeliusCore" */,
 				EFEC2F3E9CFB3A93AD0723DB /* XCLocalSwiftPackageReference "Packages/LiteRTLM" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -139,14 +260,46 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		7A76055D8E0FB8D661D6EA88 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7B7EAFABE7A19A5FAE74501 /* graph.bin in Resources */,
+				DAF7BEF84E26BF548154733A /* pois.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		00F531ABB05C9A3CCD3B2D6A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CED60267A9940E7F128CB36A /* AgentEvent.swift in Sources */,
+				170461F0F8F1C3DB957F3ED3 /* CompassView.swift in Sources */,
 				ECE607DA89445F7B489FB984 /* ContentView.swift in Sources */,
 				FA4F4377A95731BA0712C013 /* HeliusGoApp.swift in Sources */,
+				67EF9E3CD8E7BBD75D930A1C /* HeliusRuntime.swift in Sources */,
+				40D3D4754A2B2ED7C0D34557 /* HeliusViewModel.swift in Sources */,
+				881A08A4E012A32E576783C9 /* ImagePicker.swift in Sources */,
+				304F770A66274F1E449F1D7C /* LiteRTEngine.swift in Sources */,
+				7EFD97F0813D5228DC10DCF5 /* LocationProvider.swift in Sources */,
+				E3405D50DF6CFE27B3C80163 /* MicButton.swift in Sources */,
+				0656BA008DC325B65E1DBBA7 /* MockEngine.swift in Sources */,
 				2D9042B0132BAD154FC59A67 /* ModelLocator.swift in Sources */,
+				062233C06930A60E1E5E52E8 /* Morse.swift in Sources */,
+				E34E2AEB45748322769443BB /* SignReader.swift in Sources */,
+				AD3A5844127DDDFC26935E91 /* Speaker.swift in Sources */,
+				8EEB97EFA5C280BF7021E687 /* SpeechRecognizer.swift in Sources */,
+				D309CD6F19B9430AED9FFB92 /* StatusHeaderView.swift in Sources */,
+				343EA545C47403CD4BD9492C /* SystemPrompt.swift in Sources */,
+				2990E676EFE2373C6262119E /* Theme.swift in Sources */,
+				67C01041246B3B057ADD337B /* ToolTraceView.swift in Sources */,
+				06111E4A0A1FD5B11B4E8671 /* Tools.swift in Sources */,
+				2D523937E77296C714A72E1B /* TorchController.swift in Sources */,
+				541101FC879BFCEE28CDD442 /* TranscriptView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +493,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		783CE2A2943FF9057EF2809B /* XCLocalSwiftPackageReference "Packages/HeliusCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/HeliusCore;
+		};
 		EFEC2F3E9CFB3A93AD0723DB /* XCLocalSwiftPackageReference "Packages/LiteRTLM" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/LiteRTLM;
@@ -350,6 +507,10 @@
 		4A20983186AC4749B0F886CC /* LiteRTLM */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LiteRTLM;
+		};
+		A609B3604EFF78FF8799580B /* HeliusCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HeliusCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

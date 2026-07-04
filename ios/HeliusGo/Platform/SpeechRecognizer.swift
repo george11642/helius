@@ -23,7 +23,13 @@ final class SpeechRecognizer: NSObject, ObservableObject {
 
     func requestAuthorization() {
         SFSpeechRecognizer.requestAuthorization { _ in }
-        AVAudioApplication.requestRecordPermission { _ in }
+        // Deployment target is iOS 16; AVAudioApplication.requestRecordPermission is
+        // iOS 17+, so fall back to the AVAudioSession API on 16.
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { _ in }
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission { _ in }
+        }
     }
 
     func start() {
