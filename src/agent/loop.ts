@@ -35,8 +35,23 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
   const { engine, registry, emit, systemPrompt } = deps;
   const history: ChatMessage[] = [];
   let aborted = false;
+  let busy = false;
 
   const stats = () => engine.getStats() ?? { decodeTps: 0, prefillMs: 0 };
+
+  // One turn at a time. Overlapping sendText/sendVoice/readSign are dropped —
+  // the UI also locks input, but this is the correctness backstop: concurrent
+  // turns would interleave `history` writes and engine generations. A dropped
+  // call resolves as a no-op (never rejects), so callers see no unhandled error.
+  async function guardTurn(run: () => Promise<void>): Promise<void> {
+    if (busy) return;
+    busy = true;
+    try {
+      await run();
+    } finally {
+      busy = false;
+    }
+  }
 
   /** The reasoning+tools loop, without turn-start/done bookkeeping. */
   async function runInner(userText: string): Promise<void> {
@@ -207,9 +222,9 @@ export function createAgentLoop(deps: AgentLoopDeps): AgentLoop {
   }
 
   return {
-    runText,
-    runVoice,
-    readSign,
+    runText: (text) => guardTurn(() => runText(text)),
+    runVoice: (audio) => guardTurn(() => runVoice(audio)),
+    readSign: (frame) => guardTurn(() => readSign(frame)),
     abort(): void {
       aborted = true;
       engine.abort();
