@@ -27,3 +27,12 @@ Synthetic French trail sign rendered to canvas → `RawImage.fromCanvas` → use
 
 ## Decision
 **LOCKED:** transformers.js + Gemma 4 E2B q4f16 WebGPU as the only runtime. Native audio-in replaces the planned moonshine STT on the primary path (moonshine stays mirrored as fallback). Kokoro remains for TTS. E4B q4f16 text stack mirrored for the MatFormer elasticity beat. MediaPipe/LiteRT-LM paths retired unexercised.
+
+## Airplane-mode proof (07:52 MDT — network physically OFF)
+macOS Wi-Fi disabled via `networksetup`; take-profile Chrome, cold navigation:
+**app ready in 3.09s fully offline** (shell from SW precache, 3.4GB weights from
+Cache API — the R2 URLs never touched the network), then a REAL agent turn
+completed offline: `sun_clock()` chip → "You have 753 minutes… sunset 08:25 PM"
+(correct NOAA math). `navigator.onLine === false` asserted throughout; Wi-Fi
+auto-restored by the harness trap. Scripts: video/wifi-proof.sh + wifi-offline-check.mjs;
+evidence: video/takes/wifi-proof-result.json + wifi-proof.png.
