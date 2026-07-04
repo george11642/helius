@@ -54,9 +54,22 @@ export default defineConfig({
             options: { cacheName: 'map-data' },
           },
           {
-            urlPattern: /\.(onnx|onnx_data|bin|wasm)$/,
+            // onnx_data_1/_2… suffixes: split >2GB weight files (E4B decoder)
+            urlPattern: /\.(onnx|onnx_data(_\d+)?|bin|wasm)$/,
             handler: 'CacheFirst',
-            options: { cacheName: 'ml-models', expiration: { maxEntries: 30 } },
+            options: { cacheName: 'ml-models', expiration: { maxEntries: 60 } },
+          },
+          {
+            // map glyphs + sprites (too many/too big to precache all fontstacks)
+            urlPattern: /\/vendor\/(fonts|sprites)\//,
+            handler: 'CacheFirst',
+            options: { cacheName: 'map-assets', expiration: { maxEntries: 400 } },
+          },
+          {
+            // region-pack metadata (pois/peaks/graph manifests)
+            urlPattern: /\/data\/packs\/.*\.(json|geojson)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'pack-data' },
           },
         ],
       },
