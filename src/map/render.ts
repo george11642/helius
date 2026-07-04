@@ -363,6 +363,20 @@ export interface DrawRouteOptions {
   animateMs?: number;
 }
 
+type PendingActionKind = 'setFix' | 'drawRoute' | 'flyToRoute' | 'setBeaconMode';
+
+// How long init() waits for the 'route' source to register (see init()'s use
+// of this) before giving up and treating the style as failed rather than
+// just slow. Normally this resolves in well under a second — source
+// registration from a style's `sources` dict is synchronous, no network
+// involved (see the comment at the poll itself) — so this is generously
+// wide on purpose: it exists to catch "the style construction itself is
+// broken/never happened" (e.g. an unreachable style: URL), not to budget
+// for ordinary slowness. Not to be confused with the SEPARATE, much slower
+// 'load' wait further down in init(), which genuinely can take 40-150s+
+// under contention for reasons unrelated to style health.
+const ROUTE_SOURCE_READY_TIMEOUT_MS = 30_000;
+
 export class HeliusMap {
   private map: maplibregl.Map | null = null;
   private _pack = 'sandia';
@@ -391,7 +405,46 @@ export class HeliusMap {
   // called. Public methods that need a ready map queue a retry of themselves
   // instead of a no-op; init() flushes the queue once it's actually ready.
   private mapReady = false;
-  private pendingActions: Array<() => void> = [];
+
+  // Codex R3: the old Array<() => void> queue had no bound — if the style
+  // never becomes ready (init() waits forever) and a caller re-invokes one of
+  // these on a timer (setFix does, in some call paths), pendingActions grows
+  // without limit, and would replay as one giant burst if init() ever DID
+  // recover. Only the latest call of each kind is ever meaningful — an
+  // intermediate setFix/drawRoute made obsolete by a later one has nothing
+  // worth replaying — so keying by kind bounds this to at most 4 entries by
+  // construction (setFix, drawRoute, flyToRoute, setBeaconMode), well under
+  // any reasonable cap. Replayed in a fixed kind-order (not push order) on
+  // flush so drawRoute always runs before flyToRoute regardless of which was
+  // (re-)queued more recently — flyToRoute reads routeFullCoords, which only
+  // drawRoute populates.
+  private pendingActions = new Map<PendingActionKind, () => void>();
+
+  // Set once if the 'route' source never registers within
+  // ROUTE_SOURCE_READY_TIMEOUT_MS (see init()) — the style construction
+  // itself failed/hung, not just slow
+  // tile loading. From then on, public calls are permanent no-ops (queueing
+  // them would just leak forever, since nothing will ever flush the queue).
+  private initFailed = false;
+  private warnedInitFailed = false;
+
+  // Checked at the top of every public method that needs a ready map.
+  // Returns true if the caller should return immediately (either queued for
+  // later, or permanently dropped because init failed) rather than proceed.
+  private deferUntilReady(kind: PendingActionKind, run: () => void): boolean {
+    if (this.initFailed) {
+      if (!this.warnedInitFailed) {
+        this.warnedInitFailed = true;
+        console.warn(`[HeliusMap] init failed earlier for pack '${this._pack}' — ${kind}() and all further calls are no-ops`);
+      }
+      return true;
+    }
+    if (!this.mapReady) {
+      this.pendingActions.set(kind, run);
+      return true;
+    }
+    return false;
+  }
 
   /** Raw MapLibre instance, for callers that need direct access beyond this wrapper's API. Null until init() resolves (or if unsupported). */
   get instance(): maplibregl.Map | null {
@@ -477,22 +530,49 @@ export class HeliusMap {
     // concrete thing this code needs, directly, sidesteps that entirely:
     // source registration from a style's `sources` dict is synchronous
     // object construction, no network involved, so this resolves within
-    // milliseconds of the Map constructor returning.
-    await new Promise<void>((resolve) => {
-      const check = () => {
-        if (map.getSource('route')) {
-          resolve();
-        } else {
-          setTimeout(check, 20);
-        }
-      };
-      check();
-    });
+    // milliseconds of the Map constructor returning — UNLESS the style
+    // itself never actually loaded (e.g. an unreachable style: URL), in
+    // which case 'route' would never appear at all. Codex R3: the earlier
+    // version of this poll had no ceiling for that case, so raced against
+    // ROUTE_SOURCE_READY_TIMEOUT_MS below rather than polling forever.
+    let pollStopped = false;
+    const routeSourceReady = await Promise.race([
+      new Promise<boolean>((resolve) => {
+        const check = () => {
+          if (pollStopped) return;
+          if (map.getSource('route')) resolve(true);
+          else setTimeout(check, 20);
+        };
+        check();
+      }),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ROUTE_SOURCE_READY_TIMEOUT_MS)),
+    ]);
+    pollStopped = true; // stop the loser's poll loop regardless of which branch won
+
+    if (!routeSourceReady) {
+      this.initFailed = true;
+      this.pendingActions.clear(); // nothing will ever flush these now
+      const err = new Error(
+        `[HeliusMap] style for pack '${pack}' never became ready within ${ROUTE_SOURCE_READY_TIMEOUT_MS}ms (route source never registered) — treating init as failed`,
+      );
+      console.warn(err.message);
+      // Route through the same 'error' handler/format as genuine MapLibre
+      // errors, so this shows up wherever those are already being watched.
+      map.fire('error', { error: err });
+      return;
+    }
 
     this.mapReady = true;
     const pending = this.pendingActions;
-    this.pendingActions = [];
-    for (const run of pending) run();
+    this.pendingActions = new Map();
+    // Fixed replay order, not queue/insertion order — coalescing keeps at
+    // most one pending call per kind, so this is the only ordering that
+    // matters: drawRoute must run before flyToRoute (which reads
+    // routeFullCoords, only populated by drawRoute) regardless of which one
+    // was queued or re-queued more recently.
+    for (const kind of ['setFix', 'drawRoute', 'flyToRoute', 'setBeaconMode'] as const) {
+      pending.get(kind)?.();
+    }
 
     // Debug-only escape hatch, unconditional (not gated behind import.meta.env.DEV)
     // — the bug this exists to chase (drawRoute silently doing nothing in the
@@ -545,10 +625,7 @@ export class HeliusMap {
   }
 
   setFix(lat: number, lon: number, accuracyM: number): void {
-    if (!this.mapReady) {
-      this.pendingActions.push(() => this.setFix(lat, lon, accuracyM));
-      return;
-    }
+    if (this.deferUntilReady('setFix', () => this.setFix(lat, lon, accuracyM))) return;
     const map = this.map;
     if (!map) return;
 
@@ -572,10 +649,7 @@ export class HeliusMap {
   }
 
   drawRoute(geojson: RouteLineString, opts: DrawRouteOptions = {}): void {
-    if (!this.mapReady) {
-      this.pendingActions.push(() => this.drawRoute(geojson, opts));
-      return;
-    }
+    if (this.deferUntilReady('drawRoute', () => this.drawRoute(geojson, opts))) return;
     const map = this.map;
     if (!map) return;
     const routeSource = map.getSource('route');
@@ -647,13 +721,10 @@ export class HeliusMap {
   }
 
   flyToRoute(): void {
-    if (!this.mapReady) {
-      // Queued after whatever drawRoute() call preceded it (main.ts always
-      // calls them back-to-back), so this replays post-drawRoute and finds
-      // routeFullCoords already populated instead of flying to nothing.
-      this.pendingActions.push(() => this.flyToRoute());
-      return;
-    }
+    // Replayed after drawRoute on flush regardless of queue order (see the
+    // fixed kind-order loop in init()), so this always finds routeFullCoords
+    // already populated instead of flying to nothing.
+    if (this.deferUntilReady('flyToRoute', () => this.flyToRoute())) return;
     const map = this.map;
     if (!map || !this.routeFullCoords || this.routeFullCoords.length === 0) return;
     const [sw, ne] = boundsOf(this.routeFullCoords);
@@ -661,10 +732,7 @@ export class HeliusMap {
   }
 
   setBeaconMode(on: boolean): void {
-    if (!this.mapReady) {
-      this.pendingActions.push(() => this.setBeaconMode(on));
-      return;
-    }
+    if (this.deferUntilReady('setBeaconMode', () => this.setBeaconMode(on))) return;
     this.beaconOn = on;
     const map = this.map;
     if (!map || !map.getLayer('beacon-dim')) return;
