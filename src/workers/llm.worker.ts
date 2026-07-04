@@ -23,6 +23,7 @@ import {
   InterruptableStoppingCriteria,
 } from '@huggingface/transformers';
 import { stripMarkers } from '../lib/parse';
+import { createOpfsModelCache, type DownloadProgress, type OpfsModelCache } from '../llm/opfs-cache';
 import type { ModelTier } from '../lib/contract';
 import type { GenerateKind, RawFrame, WorkerRequest, WorkerResponse } from '../llm/protocol';
 
@@ -79,6 +80,40 @@ const active = (): Instance | undefined => instances[activeTier];
 
 // ---------------------------------------------------------------- loading ----
 
+// OPFS-backed resumable model store (installed as transformers.js's custom
+// cache on the first 'load' message — see the routing switch below). All
+// network download progress is emitted from HERE (per-file bytes + overall),
+// because with the custom cache in place transformers.js itself only ever
+// sees instant local reads.
+let opfsCache: OpfsModelCache | null = null;
+// Number of in-flight loads that WANT status posted (primary load / on-demand
+// tier switch). Silent pre-warm downloads shouldn't repaint the UI.
+let statusLoads = 0;
+
+let lastFetchPostAt = 0;
+function postFetchProgress(p: DownloadProgress): void {
+  if (statusLoads <= 0) return;
+  const done = p.overallTotal > 0 && p.overallLoaded >= p.overallTotal;
+  const now = performance.now();
+  if (!done && now - lastFetchPostAt < 200) return; // downloader emits per network chunk — throttle
+  lastFetchPostAt = now;
+  post({
+    type: 'status',
+    status: {
+      state: 'downloading',
+      stage: 'fetch',
+      pct: p.overallTotal > 0 ? Math.min(100, (p.overallLoaded / p.overallTotal) * 100) : 0,
+      file: p.file,
+      mbDone: +(p.overallLoaded / 1e6).toFixed(1),
+      mbTotal: +(p.overallTotal / 1e6).toFixed(1),
+      fileMbDone: +(p.fileLoaded / 1e6).toFixed(1),
+      fileMbTotal: +(p.fileTotal / 1e6).toFixed(1),
+      filesDone: p.filesDone,
+      filesTotal: p.filesTotal,
+    },
+  });
+}
+
 /** Load one tier's processor+model (deduped). Emits download/compile status only when asked. */
 function loadTier(tier: ModelTier, emitStatus: boolean): Promise<Instance> {
   const cached = instances[tier];
@@ -90,15 +125,20 @@ function loadTier(tier: ModelTier, emitStatus: boolean): Promise<Instance> {
   let sawFull = false;
   let lastPostAt = 0;
   let lastPct = -1;
+  // With the OPFS custom cache installed, transformers.js's own progress
+  // reflects READING already-downloaded bytes from OPFS into the runtime
+  // (fast local pass), not the network — the downloader posts the network
+  // ('fetch') stage itself via postFetchProgress. Suppress the 'read' posts
+  // while a network download is active so the two sources don't interleave.
   const progress_callback = (e: { status?: string; progress?: number; loaded?: number; total?: number }) => {
     if (!emitStatus || e.status !== 'progress_total') return;
     const pct = Math.max(0, Math.min(100, e.progress ?? 0));
     if (pct >= 99.5 && !sawFull) {
       sawFull = true;
       post({ type: 'status', status: { state: 'compiling' } });
-    } else if (pct < 99.5) {
-      // Throttle: raw callbacks fire per network chunk (thousands of
-      // postMessages for a 3.4GB load). One update per 250ms or ≥1% step.
+    } else if (pct < 99.5 && !opfsCache?.busy()) {
+      // Throttle: raw callbacks fire per chunk (thousands of postMessages
+      // for a multi-GB read). One update per 250ms or ≥1% step.
       const now = performance.now();
       if (now - lastPostAt < 250 && pct - lastPct < 1) return;
       lastPostAt = now;
@@ -107,6 +147,7 @@ function loadTier(tier: ModelTier, emitStatus: boolean): Promise<Instance> {
         type: 'status',
         status: {
           state: 'downloading',
+          stage: 'read',
           pct,
           mbDone: e.loaded ? +(e.loaded / 1e6).toFixed(1) : undefined,
           mbTotal: e.total ? +(e.total / 1e6).toFixed(1) : undefined,
@@ -133,46 +174,45 @@ function loadTier(tier: ModelTier, emitStatus: boolean): Promise<Instance> {
   })();
 
   tierLoads.set(tier, promise);
+  if (emitStatus) {
+    statusLoads++;
+    void promise.catch(() => undefined).finally(() => statusLoads--);
+  }
   void promise.catch(() => undefined).finally(() => tierLoads.delete(tier));
   return promise;
 }
 
 /**
- * Purge just the small config/template entries (JSON + jinja) under the current
- * remoteHost from transformers.js's Cache Storage. A poisoned entry there — e.g.
- * a truncated config.json written during a flaky first load — otherwise bricks
- * loading permanently ("reading 'tokenizer_class'" on every reload). The big
- * weights (.onnx / .onnx_data) are left intact, so the retry only re-fetches a
- * few KB. Returns how many entries were deleted.
+ * Purge just the small config/template entries (JSON + jinja) from the OPFS
+ * model store. A poisoned entry there — e.g. a config truncated by a crash
+ * between data flush and manifest write — otherwise bricks loading permanently
+ * ("reading 'tokenizer_class'" on every reload). The big weights
+ * (.onnx / .onnx_data) are left intact, so the retry only re-fetches a few KB.
+ * Returns how many entries were deleted.
  */
 async function purgeConfigCache(): Promise<number> {
-  if (typeof caches === 'undefined') return 0;
-  const host = env.remoteHost ?? '';
-  const cacheKey = (env as { cacheKey?: string }).cacheKey ?? 'transformers-cache';
-  try {
-    const cache = await caches.open(cacheKey);
-    const keys = await cache.keys();
-    let deleted = 0;
-    for (const req of keys) {
-      if (host && !req.url.startsWith(host)) continue;
-      let path = req.url;
-      try {
-        path = new URL(req.url).pathname;
-      } catch {
-        // non-URL cache key — match against the raw string instead
-      }
-      if (/\.(json|jinja)$/.test(path) && (await cache.delete(req))) deleted++;
-    }
-    return deleted;
-  } catch {
-    return 0;
-  }
+  return opfsCache ? opfsCache.purgeSmallFiles() : 0;
 }
 
 /** Primary load: bring up `tier`, report ready, then silently pre-warm the other tier. */
 async function primaryLoad(tier: ModelTier, prewarm: boolean): Promise<void> {
   activeTier = tier;
-  post({ type: 'status', status: { state: 'downloading', pct: 0 } });
+
+  // Fail FAST if this context can't run the model at all — a device without a
+  // WebGPU adapter would otherwise download ~3.2GB and only then die at
+  // session compile (the main-thread pre-flight emits the richer verdict; this
+  // is the worker-side backstop for callers that skip it).
+  const gpu = (globalThis as { navigator?: { gpu?: { requestAdapter(): Promise<unknown | null> } } }).navigator?.gpu;
+  const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
+  if (!adapter) {
+    post({
+      type: 'status',
+      status: { state: 'error', message: 'WebGPU is unavailable in this browser/context — on-device model cannot start (map-only mode still works).' },
+    });
+    return;
+  }
+
+  post({ type: 'status', status: { state: 'downloading', stage: 'fetch', pct: 0 } });
   const t0 = performance.now();
   try {
     await loadTier(tier, true);
@@ -352,6 +392,16 @@ ctx.addEventListener('message', (ev: MessageEvent<WorkerRequest>) => {
       env.allowLocalModels = false;
       env.remoteHost = msg.modelBaseUrl;
       env.remotePathTemplate = '{model}';
+      // Model bytes live ONCE, in OPFS, via the resumable chunked downloader —
+      // NOT in transformers.js's Cache Storage path (whole-file GETs that lose
+      // all progress if the tab dies mid-shard; see src/llm/opfs-cache.ts).
+      if (!opfsCache) {
+        opfsCache = createOpfsModelCache(msg.modelBaseUrl, postFetchProgress);
+        const envCache = env as unknown as { useBrowserCache: boolean; useCustomCache: boolean; customCache: unknown };
+        envCache.useBrowserCache = false;
+        envCache.useCustomCache = true;
+        envCache.customCache = opfsCache;
+      }
       void primaryLoad(msg.tier, msg.prewarm);
       break;
     case 'setTier':

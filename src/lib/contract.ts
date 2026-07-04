@@ -5,9 +5,44 @@
 
 export type ModelTier = 'E2B' | 'E4B';
 
+/** Pre-flight capability verdict, emitted BEFORE any model bytes move. */
+export type CapabilityVerdict = 'go' | 'degraded' | 'unsupported';
+
+/** What the pre-flight probe actually saw (sizes rounded to MB/GB). */
+export interface DeviceCaps {
+  webgpu: boolean;
+  maxBufferSizeMB?: number;
+  maxStorageBufferBindingSizeMB?: number;
+  storageQuotaMB?: number;
+  storageUsageMB?: number;
+  persisted?: boolean;
+  deviceMemoryGB?: number;
+  mobile: boolean;
+  /** Complete model bytes already resident in OPFS (resume / repeat visit). */
+  modelResidentMB: number;
+  /** Human-readable reasons behind the verdict (empty for a clean 'go'). */
+  reasons: string[];
+}
+
 export type EngineStatus =
-  | { state: 'idle' }
-  | { state: 'downloading'; pct: number; file?: string; mbDone?: number; mbTotal?: number }
+  | { state: 'idle' } // engine constructed, no model load started (map-only mode)
+  | { state: 'preflight'; verdict: CapabilityVerdict; caps: DeviceCaps } // capability probe result, pre-download
+  | {
+      state: 'downloading';
+      /** Overall percent for the CURRENT stage (restarts at 0 when 'fetch' hands over to 'read'). */
+      pct: number;
+      /** 'fetch' = resumable network download into OPFS; 'read' = loading local bytes into the runtime. */
+      stage?: 'fetch' | 'read';
+      /** Current file (path under the model base URL). */
+      file?: string;
+      mbDone?: number;
+      mbTotal?: number;
+      /** Per-file progress for the file named above (fetch stage only). */
+      fileMbDone?: number;
+      fileMbTotal?: number;
+      filesDone?: number;
+      filesTotal?: number;
+    }
   | { state: 'compiling' } // WebGPU shader/session build after files are local
   | { state: 'ready'; tier: ModelTier; loadMs: number }
   | { state: 'error'; message: string };

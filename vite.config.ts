@@ -103,8 +103,14 @@ export default defineConfig({
             options: { cacheName: 'pack-data' },
           },
           {
-            // onnx_data_1/_2… suffixes: split >2GB weight files (E4B decoder)
-            urlPattern: /\.(onnx|onnx_data(_\d+)?|bin|wasm)$/,
+            // ONNX runtime .wasm + stray .bin ONLY. The LLM weights themselves
+            // (.onnx / .onnx_data*) are deliberately NOT service-worker cached:
+            // they are stored exactly once, in OPFS, by the worker's resumable
+            // chunked downloader (src/llm/opfs-cache.ts). Caching them here too
+            // used to DOUBLE-store ~3.4GB per tier, and an SW cache.match would
+            // also answer the downloader's Range requests with full bodies,
+            // breaking resumability.
+            urlPattern: /\.(bin|wasm)$/,
             handler: 'CacheFirst',
             options: { cacheName: 'ml-models', expiration: { maxEntries: 60 } },
           },

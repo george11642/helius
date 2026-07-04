@@ -4,6 +4,7 @@
 
 import type { AgentEventHandler, ModelTier, PackInfo } from '../lib/contract';
 import { createEngine, frameFromImage } from '../llm/engine';
+import { runPreflight } from '../llm/preflight';
 import { createTools } from '../tools/registry';
 import { setPack, listPacks, defaultFixFor } from '../tools/pack';
 import { clearPackCache } from '../tools/route';
@@ -21,6 +22,9 @@ export interface Helius {
   /** Switch region: swaps the active pack, invalidates the route cache, moves
    *  the demo fix to the pack's default, and emits a 'pack-changed' event. */
   switchPack(packId: string): Promise<void>;
+  /** Start the model load explicitly (map-only boots, or overriding a
+   *  pre-flight veto). The worker dedupes repeat loads of the same tier. */
+  loadModel(): Promise<void>;
   abort(): void;
   getStats(): { decodeTps: number; prefillMs: number } | null;
 }
@@ -39,6 +43,16 @@ export interface CreateHeliusOptions {
    * URL param / localStorage flag the shell reads).
    */
   prewarm?: boolean;
+  /**
+   * Kick off the model load automatically after the capability pre-flight
+   * (default true — the judge/video flow is unchanged). The pre-flight still
+   * vetoes an autoload on an 'unsupported' verdict (phone / no WebGPU / not
+   * enough storage): those devices boot into map-only mode (engine-status
+   * 'idle') instead of starting a ~3.2GB download that cannot end well; the
+   * UI can still call helius.loadModel() to override. Set false to gate the
+   * load behind onboarding entirely.
+   */
+  autoload?: boolean;
 }
 
 export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
@@ -75,13 +89,30 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
 
   const loop = createAgentLoop({ engine, registry, emit, systemPrompt: SYSTEM_PROMPT });
 
-  // Kick off the default-tier load; progress + ready/error surface through
-  // onEvent (engine-status). We don't block façade creation on it so the UI
-  // can render its loading state immediately — the worker queues any early
-  // sendText behind the in-flight load.
-  void engine.load('E2B').catch(() => {
-    /* surfaced via engine-status 'error' */
-  });
+  const startLoad = (): Promise<void> =>
+    engine.load('E2B').catch(() => {
+      /* surfaced via engine-status 'error' */
+    });
+
+  // Capability pre-flight, then (by default) the default-tier load; progress +
+  // ready/error surface through onEvent (engine-status). Façade creation is
+  // not blocked on any of it so the UI can render its loading state
+  // immediately — the worker queues any early sendText behind the in-flight
+  // load. An 'unsupported' verdict (phone / no WebGPU / not enough storage)
+  // vetoes the autoload and boots map-only (engine-status 'idle'); the UI can
+  // still call loadModel() to override.
+  void (async () => {
+    let vetoed = false;
+    try {
+      const pf = await runPreflight();
+      opts.onEvent({ type: 'engine-status', status: { state: 'preflight', verdict: pf.verdict, caps: pf.caps } });
+      vetoed = pf.verdict === 'unsupported';
+    } catch {
+      // The probe itself failing must never block the load path.
+    }
+    if ((opts.autoload ?? true) && !vetoed) void startLoad();
+    else opts.onEvent({ type: 'engine-status', status: { state: 'idle' } });
+  })();
 
   return {
     sendText: (text) => loop.runText(text),
@@ -106,6 +137,7 @@ export async function createHelius(opts: CreateHeliusOptions): Promise<Helius> {
         fix: { lat: fix?.lat ?? info.center[1], lon: fix?.lon ?? info.center[0] },
       });
     },
+    loadModel: () => startLoad(),
     abort: () => loop.abort(),
     getStats: () => engine.getStats(),
   };

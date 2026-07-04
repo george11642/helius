@@ -6,6 +6,23 @@ import { stat, open } from 'node:fs/promises';
 import { join, normalize, extname } from 'node:path';
 
 const PORT = Number(process.env.PORT || 8737);
+// Optional bandwidth cap (megabytes/second) for testing the app's resumable
+// model downloads against a realistically slow "network" on loopback, e.g.:
+//   THROTTLE_MBPS=8 node spike/serve.mjs
+const THROTTLE_MBPS = Number(process.env.THROTTLE_MBPS || 0);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function pipeThrottled(stream, res) {
+  const bytesPerTick = THROTTLE_MBPS * 1e6 * 0.05; // 50ms ticks
+  let sent = 0;
+  try {
+    for await (const chunk of stream) {
+      if (!res.write(chunk)) await new Promise((r) => res.once('drain', r));
+      sent += chunk.length;
+      if (sent >= bytesPerTick) { sent = 0; await sleep(50); }
+    }
+    res.end();
+  } catch { /* client went away mid-stream — normal for aborted downloads */ }
+}
 const SPIKE_DIR = new URL('.', import.meta.url).pathname;
 const MODELS_DIR = process.env.MODELS_DIR || `${process.env.HOME}/dev/helius-assets/models`;
 
@@ -25,6 +42,20 @@ const MIME = {
 
 createServer(async (req, res) => {
   try {
+    // CORS preflight: the app's resumable model downloader sends Range +
+    // If-Range headers cross-origin (5173 → 8737), which triggers an OPTIONS
+    // preflight. Mirror what prod R2 answers (verified live: 204 + ACAO * +
+    // Allow-Headers: range, if-range).
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, HEAD',
+        'Access-Control-Allow-Headers': 'range, if-range',
+        'Access-Control-Max-Age': '86400',
+      });
+      return res.end();
+    }
+
     const url = new URL(req.url, `http://localhost:${PORT}`);
     let pathname = decodeURIComponent(url.pathname);
     let filePath;
@@ -50,7 +81,12 @@ createServer(async (req, res) => {
       'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Resource-Policy': 'cross-origin',
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'content-range, etag, last-modified, accept-ranges',
       'Cache-Control': 'no-transform',
+      // Weak validator (mtime-size) so the resumable downloader can safely
+      // resume partial files across server restarts, like prod R2's ETag.
+      'ETag': `"${st.mtimeMs.toString(16)}-${st.size.toString(16)}"`,
+      'Last-Modified': new Date(st.mtimeMs).toUTCString(),
     };
 
     const range = req.headers.range;
@@ -69,15 +105,15 @@ createServer(async (req, res) => {
       res.writeHead(206, headers);
       const fh = await open(filePath, 'r');
       const stream = fh.createReadStream({ start, end });
-      stream.pipe(res);
-      stream.on('close', () => fh.close());
+      if (THROTTLE_MBPS > 0) { void pipeThrottled(stream, res).finally(() => fh.close()); }
+      else { stream.pipe(res); stream.on('close', () => fh.close()); }
     } else {
       headers['Content-Length'] = st.size;
       res.writeHead(200, headers);
       const fh = await open(filePath, 'r');
       const stream = fh.createReadStream();
-      stream.pipe(res);
-      stream.on('close', () => fh.close());
+      if (THROTTLE_MBPS > 0) { void pipeThrottled(stream, res).finally(() => fh.close()); }
+      else { stream.pipe(res); stream.on('close', () => fh.close()); }
     }
   } catch (e) {
     res.writeHead(500);
