@@ -60,9 +60,17 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 40 * 1024 * 1024,
         runtimeCaching: [
           {
+            // pmtiles are consumed via Range requests; a cached 206 is useless
+            // and workbox won't cache it anyway. The app "pack warm-up" does a
+            // FULL GET once (cacheable 200); rangeRequests then slices that
+            // cached full body to answer offline Range reads.
             urlPattern: /\.pmtiles/,
             handler: 'CacheFirst',
-            options: { cacheName: 'map-data' },
+            options: {
+              cacheName: 'map-data',
+              cacheableResponse: { statuses: [200] },
+              rangeRequests: true,
+            },
           },
           {
             // onnx_data_1/_2… suffixes: split >2GB weight files (E4B decoder)
