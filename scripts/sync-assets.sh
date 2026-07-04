@@ -20,9 +20,13 @@ cp -f "$MAP_SRC/abq-sandia.pmtiles" "$PACK_DIR/basemap.pmtiles"
 cp -f "$MAP_SRC/abq-sandia-terrain.pmtiles" "$PACK_DIR/terrain.pmtiles"
 cp -f "$MAP_SRC/sandia-peaks.json" "$PACK_DIR/peaks.json"
 
-echo "==> fonts + sprites"
+echo "==> fonts (only the stacks src/map/style.ts references — LABEL_FONT/LABEL_FONT_EMPHASIS — not the full basemaps-assets set) + sprites"
 rm -rf "$VENDOR_DIR/fonts" "$VENDOR_DIR/sprites"
-cp -r "$MAP_SRC/basemaps-assets/fonts" "$VENDOR_DIR/fonts"
+mkdir -p "$VENDOR_DIR/fonts"
+for stack in "Noto Sans Regular" "Noto Sans Medium"; do
+  cp -r "$MAP_SRC/basemaps-assets/fonts/$stack" "$VENDOR_DIR/fonts/$stack"
+done
+cp -f "$MAP_SRC/basemaps-assets/fonts/OFL.txt" "$VENDOR_DIR/fonts/OFL.txt" 2>/dev/null || true
 cp -r "$MAP_SRC/basemaps-assets/sprites" "$VENDOR_DIR/sprites"
 
 # TODO: sandia-trails.json ($MAP_SRC/sandia-trails.json, ~20MB raw Overpass

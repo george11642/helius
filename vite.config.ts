@@ -73,6 +73,14 @@ export default defineConfig({
             },
           },
           {
+            // Registered BEFORE ml-models on purpose: routes match in order,
+            // and graph.bin would otherwise be captured by the `.bin` rule and
+            // share the LLM shards' eviction budget.
+            urlPattern: /\/data\/packs\/.*\.(json|geojson|bin)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'pack-data' },
+          },
+          {
             // onnx_data_1/_2… suffixes: split >2GB weight files (E4B decoder)
             urlPattern: /\.(onnx|onnx_data(_\d+)?|bin|wasm)$/,
             handler: 'CacheFirst',
@@ -83,12 +91,6 @@ export default defineConfig({
             urlPattern: /\/vendor\/(fonts|sprites)\//,
             handler: 'CacheFirst',
             options: { cacheName: 'map-assets', expiration: { maxEntries: 400 } },
-          },
-          {
-            // region-pack metadata (pois/peaks/graph manifests)
-            urlPattern: /\/data\/packs\/.*\.(json|geojson)$/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'pack-data' },
           },
         ],
       },
