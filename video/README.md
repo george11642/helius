@@ -54,12 +54,22 @@ Keys come from `~/.config/global.env` (ELEVENLABS_API_KEY, FAL_KEY, PEXELS_API_K
 
 ```bash
 cd captions
-npx remotion render src/index.ts CaptionComp out/captions.webm \
-  --props="$(node -e 'console.log(JSON.stringify({alignment:require("../alignment.json").alignment,repoUrl:"github.com/george11642/helius"}))')" \
-  --pixel-format=yuva420p --codec=vp8 --image-format=png
-cp out/captions.webm ../captions.webm
+./render.sh          # → ../captions.mov (transparent QTRLE/argb)
 ```
-Transparent vp8/yuva420p so `assemble.sh` composites it with ffmpeg `overlay` (this ffmpeg build has no `libass`/`drawtext`, so all burned text goes through Remotion — better typography anyway, and it reads ElevenLabs' timing JSON directly).
+`render.sh` renders the word-synced overlay as a transparent PNG sequence, then
+muxes it to a QTRLE `.mov` (argb) that `assemble.sh` composites with ffmpeg
+`overlay`. All burned text goes through Remotion (this ffmpeg build has no
+`libass`/`drawtext` — better typography anyway, and it reads ElevenLabs' timing
+JSON directly).
+
+**Why a `.mov`, not a transparent `.webm`:** the Remotion webm-alpha encode is
+broken on this machine — vp8 *and* vp9, via the `--pixel-format=yuva420p` flag
+*and* `calculateMetadata`, all flatten to opaque `yuv420p` (the frames render
+`rgba`; the mux drops the alpha), and ffmpeg's own `libvpx-vp9` can't encode
+alpha here either. QTRLE `.mov` sidesteps it: lossless, real `argb` alpha, tiny
+for mostly-transparent frames, and `overlay` honors it. `assemble.sh` prefers
+`captions.mov`, and its guard skips any caption file lacking alpha (so it can
+never ship an all-black master).
 
 ## Assembling
 

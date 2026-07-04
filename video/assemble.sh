@@ -28,14 +28,19 @@ dur() { ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$1
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 
 # ---------- smoke self-test: fabricate inputs ----------
-VO="vo.mp3" MUSIC="music.mp3" CAPS="captions.webm"
+VO="vo.mp3" MUSIC="music.mp3"
+# Caption overlay: prefer the transparent .mov (QTRLE/argb from captions/render.sh).
+# The .webm alpha path is broken on this box (Remotion + libvpx both flatten to
+# opaque yuv420p — see captions/render.sh), so .mov is the real one; .webm stays a
+# legacy fallback. First existing wins; the alpha guard below still vets it.
+CAPS=""; for c in captions.mov captions.webm; do [ -f "$c" ] && { CAPS="$c"; break; }; done
 if [ "$SMOKE" = "1" ]; then
   echo "==> SMOKE: fabricating 6s inputs" >&2
   CAPTURE="$WORK/cap.mov"; VO="$WORK/vo.mp3"; MUSIC="$WORK/music.mp3"; OUT="youtube_master_smoke.mp4"
   ffmpeg -hide_banner -loglevel error -y -f lavfi -i "testsrc=size=1920x1080:rate=60:duration=6" -c:v libx264 -preset ultrafast -crf 18 -pix_fmt yuv420p "$CAPTURE"
   ffmpeg -hide_banner -loglevel error -y -f lavfi -i "sine=frequency=330:duration=5" -af "volume=0.6" -ar 44100 "$VO"
   ffmpeg -hide_banner -loglevel error -y -f lavfi -i "sine=frequency=110:duration=6" -ar 44100 "$MUSIC"
-  [ -f "captions.webm" ] || CAPS=""   # use real captions if already rendered, else skip
+  { [ -n "$CAPS" ] && [ -f "$CAPS" ]; } || CAPS=""   # use real captions if already rendered, else skip
 fi
 
 # ---------- resolve capture ----------
