@@ -267,7 +267,7 @@ struct SafetyPlanTool: Tool {
 struct ReadSignTool: Tool {
     static let name = "read_sign"
     static let description =
-        "Read a trail sign the user is pointing the camera at: transcribe it, translate to English if needed, and give one actionable line. Only works when a camera frame is available."
+        "Read and translate the trail sign the user just photographed. The captured photo is already available on-device — call this whenever the user asks you to read, translate, or interpret a sign. Transcribes the sign, translates it to English if needed, and gives one short actionable line."
 
     func run() async throws -> Any {
         let rt = HeliusRuntime.shared

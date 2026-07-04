@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import CoreLocation
 import CoreGraphics
+import UIKit
 import HeliusCore
 
 /// Owns app state and turns the engine/tool `AgentEvent` stream into observable
@@ -82,21 +83,41 @@ final class HeliusViewModel: ObservableObject {
                 DispatchQueue.main.async { self?.lifecycle = .loading(s) }
             }
             setStatus(.ready)
+            runTestSignIfRequested()
         } catch {
             setStatus(.error("\(error)".prefix(60).description))
         }
+    }
+
+    /// DEBUG-only test affordance: when launched with `HELIUS_TEST_SIGN=<image path>`,
+    /// load that image as the pending sign and fire read_sign — so the OCR→Gemma
+    /// translate path can be verified on the simulator without driving the
+    /// out-of-process photo picker. Never compiled into release builds.
+    private func runTestSignIfRequested() {
+        #if DEBUG
+        guard let path = ProcessInfo.processInfo.environment["HELIUS_TEST_SIGN"],
+              !path.isEmpty, let img = UIImage(contentsOfFile: path)?.cgImage else { return }
+        DispatchQueue.main.async {
+            HeliusRuntime.shared.pendingSignImage = img
+            self.send(Self.readSignPrompt, display: "\u{1F4F7} Read this trail sign.")
+        }
+        #endif
     }
 
     // MARK: Sending
 
     func sendCurrentInput() { send(input) }
 
-    func send(_ raw: String) {
+    /// - Parameter display: optional text shown in the user bubble instead of `raw`
+    ///   (the model still receives `raw`). Used by the sign-capture flow to show a
+    ///   clean "Read this trail sign" while sending the model an explicit read_sign
+    ///   instruction.
+    func send(_ raw: String, display: String? = nil) {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
         guard case .ready = lifecycle else { return }
 
-        messages.append(ChatMessage(role: .user, text: text))
+        messages.append(ChatMessage(role: .user, text: display ?? text))
         let helius = ChatMessage(role: .helius, text: "")
         currentHeliusId = helius.id
         messages.append(helius)
@@ -173,9 +194,14 @@ final class HeliusViewModel: ObservableObject {
         beaconActive = false
     }
 
+    /// The prompt auto-sent after a sign photo is captured. Phrased to signal that a
+    /// photo now exists, so the model calls read_sign instead of asking for an image.
+    static let readSignPrompt =
+        "Use the read_sign tool now to read the trail sign I just photographed (the photo is already captured on-device), then translate it to English and tell me in one line what it means for my hike."
+
     func onSignImage(_ cg: CGImage) {
         HeliusRuntime.shared.pendingSignImage = cg
-        send("Read this trail sign and tell me, in one line, what it means for my hike.")
+        send(Self.readSignPrompt, display: "\u{1F4F7} Read this trail sign.")
     }
 
     // MARK: Location / compass

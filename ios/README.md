@@ -178,7 +178,16 @@ end-to-end on the iOS Simulator (iPhone 17, iOS 26.5, arm64, CPU/XNNPACK).
 - **"If I walk 3 km with 200 m of climbing, how long + beat sunset?"** →
   `pace_eta()` fired; grounded answer: *"It will take about 56 minutes. You will
   beat sunset."* — 36 min flat + 20 min climb = 56 min Naismith, exact.
+- **read_sign** (a French trail-sign photo) → `read_sign()` fired (Vision OCR,
+  ~1.2 s), transcribed all three lines verbatim ("SENTIER DU LAC. Refuge - 2.4 km.
+  Danger: verglas.") and Gemma translated the hazard: *"Action: Be cautious of ice
+  on the trail."* ("verglas" → ice, correct). On the simulator the picker uses the
+  photo library (the sim's camera is synthetic); on device it uses the real camera.
+- **morse_beacon** ("Start an SOS beacon") → `morse_beacon()` fired, the SOS banner
+  lit with the `... --- ...` pattern + a STOP control; the torch loop runs (no-ops on
+  the simulator, flashes the real torch on device).
 - Screenshots: `docs/fullapp-toolchain-GO.jpg`, `docs/fullapp-pace_eta-GO.jpg`,
+  `docs/fullapp-read_sign-GO.jpg`, `docs/fullapp-sos-beacon.jpg`,
   `docs/probe-verdict-GO.jpg`.
 
 **Core math:** `HeliusCore` is unit-tested with `swift test` (5/5) against the La
