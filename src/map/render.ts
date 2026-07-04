@@ -375,7 +375,10 @@ type PendingActionKind = 'setFix' | 'drawRoute' | 'flyToRoute' | 'setBeaconMode'
 // for ordinary slowness. Not to be confused with the SEPARATE, much slower
 // 'load' wait further down in init(), which genuinely can take 40-150s+
 // under contention for reasons unrelated to style health.
-const ROUTE_SOURCE_READY_TIMEOUT_MS = 30_000;
+// 60s, not 30: under heavy multi-process load this box has taken >30s to give
+// even synchronous source registration a scheduling slot, and the failure mode
+// (map dead for the session) is far worse than a longer wait.
+const ROUTE_SOURCE_READY_TIMEOUT_MS = 60_000;
 
 export class HeliusMap {
   private map: maplibregl.Map | null = null;
