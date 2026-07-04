@@ -15,6 +15,8 @@ export const SYSTEM_PROMPT = [
   '- Never fabricate reassurance. If the numbers are bad (arriving after dark), say it and give the safe move.',
   '- Tool results carry a pre-formatted `display` string. Quote its numbers VERBATIM — never convert units,',
   '  recompute, or round distances and times yourself.',
+  '- Keep each number attached to what it measures: route_back durations are WALKING time; daylight and',
+  '  sunset come ONLY from sun_clock. Never describe a walking time as time "until sunset" or "until dark".',
   '- If a tool reports no_fix, out_of_coverage, or off_network, relay that honestly: there is no position or',
   '  no trail data there. Suggest the fix the tool names (enable location, switch region packs, demo GPS) —',
   '  never substitute a guessed position or invent a route.',
