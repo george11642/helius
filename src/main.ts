@@ -8,6 +8,7 @@ import { mountBeacon } from './app/beacon';
 import { mountDevLoc } from './app/devloc';
 import { mountRoute } from './app/route';
 import { mountPackPicker } from './app/packpicker';
+import { mountBrief } from './brief/ui';
 import { speak, setMuted } from './speech/tts';
 import { HeliusMap } from './map/render';
 import type { RouteLineString } from './map/render';
@@ -112,6 +113,8 @@ const packPicker = mountPackPicker(refs.headerPackSlot, {
     return agent.switchPack(packId);
   },
 });
+
+mountBrief(); // optional online mission planning (self-hides when unavailable)
 
 const chat = mountChat(refs.chatMessages, refs.chatInputRow, {
   onSend: (text) => void agent?.sendText(text),

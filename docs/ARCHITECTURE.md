@@ -179,9 +179,33 @@ context (SharedArrayBuffer / WASM threads). Dev (`vite.config.ts`) and prod
 `index.html` and `sw.js` are served `Cache-Control: no-cache` so PWA
 auto-updates aren't served stale.
 
+## Online mission planning (NVIDIA Nemotron — optional, bonus track)
+
+The one optional piece of server code, and it is strictly a pre-trip
+enhancement — the offline product is 100% Gemma on-device and never depends
+on it. Nemotron never does inference in the field; it is the online planning
+brain whose output gets cached into the pack for Gemma to consume offline:
+
+```
+online, pre-trip:  browser (src/brief/) ──POST /api/brief──▶ Pages Function (functions/api/brief.ts)
+                       │                                        │ pack pois + bbox + sun window → strict-JSON prompt
+                       │                                        ▼
+                       │                              NVIDIA NIM · nemotron-3-nano-30b-a3b
+                       ◀───────────── MissionBrief JSON ────────┘
+                       └─▶ cached on-device (localStorage, survives offline reload)
+
+offline, in the field:  Gemma ──mission_brief tool──▶ cached MissionBrief (no network, no Nemotron)
+```
+
+- **Shared handler** (`src/brief/protocol.ts`): one web-standard module runs identically as the Cloudflare Pages Function, the `vite dev`/`preview` middleware (`functions/dev-plugin.ts`), and in the node unit tests. Robust JSON extraction (reasoning blocks, fences, prose) + one corrective retry.
+- **Geo-truth normalization:** bail-out coordinates are always snapped to the pack's own `pois.json` trailheads by name; a bail-out the model invents is dropped. The prompt is strictly non-medical, mirroring the app's stance.
+- **Graceful degradation:** no `NVIDIA_API_KEY` secret → `501 not_configured` and the UI chip hides itself; `?brief=mock` returns a deterministic brief built from the same real pack data (no key, no upstream call) so the full path — prepare → cache → offline `mission_brief` in a Gemma tool trace — is testable anywhere.
+- **Secret:** `npx wrangler pages secret put NVIDIA_API_KEY --project-name=helius` (prod); plain env var for dev.
+
 ## Verification
 
 - `src/lib/parse.ts` — 37 unit tests (`tests/parse.test.ts`), incl. the exact spike tool-call strings, malformed input, and the streaming filter.
 - `src/tools/morse.ts` — 8 unit tests (`tests/morse.test.ts`).
 - Routing core — `scripts/test-route.mjs` (10 checks) runs the shipped `graph-core.mjs` against the real `graph.bin` (BFS connectivity, the demo route, off-network handling).
 - Runtime numbers — `spike/RESULTS.md`.
+- Mission-brief protocol — 40 unit tests (`tests/brief.test.ts`): the in-process `/api/brief` handler (mock / 501 / 400 / retry / upstream-failure paths), JSON extraction, and geo-truth bail-out snapping.

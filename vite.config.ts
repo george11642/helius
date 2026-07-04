@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { briefDevApi } from './functions/dev-plugin';
 
 // WebGPU + transformers.js need a crossOriginIsolated context for WASM
 // threads/SharedArrayBuffer. These headers turn that on for both `vite dev`
@@ -36,6 +37,9 @@ export default defineConfig({
     },
   },
   plugins: [
+    // /api/brief in dev/preview — same handler the Cloudflare Pages Function
+    // (functions/api/brief.ts) runs in prod. See functions/dev-plugin.ts.
+    briefDevApi(),
     VitePWA({
       registerType: 'autoUpdate',
       // Manual registration (src/main.ts calls navigator.serviceWorker.register

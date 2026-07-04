@@ -55,3 +55,15 @@ tool-grounded output — the line below is illustrative, not scripted.
 **Cutaway B-roll to have ready:** the tier chip flipping E2B↔E4B (elasticity beat); the offline badge; installing the PWA to the home screen; a close-up of the tool-trace chips with real numbers.
 
 **Hard rules for the cut:** keep airplane mode visible; never show a medical use; say "offline navigation, signaling, and procedural field tools," never "medical" or "image analyzer"; every number spoken/shown must be the app's real output.
+
+---
+
+## NVIDIA bonus track — Nemotron blurb (paste-ready)
+
+**One-liner:**
+> Nemotron plans your mission online; Gemma keeps you alive offline.
+
+**Blurb (~120 words):**
+> Helius uses **Nemotron 3 Nano** (`nvidia/nemotron-3-nano-30b-a3b`, via NVIDIA NIM) as the *online pre-trip planning brain* for an otherwise 100% on-device product. Before a hike — while there's still signal — a Cloudflare Pages Function feeds Nemotron the region pack's real data (trailheads and bail-out POIs, pack bounding box, our own offline sun math) under a strict-JSON, strictly non-medical contract. Nemotron's agentic output — a route/daylight plan, ranked bail-out points, water/gear checklist, terrain cautions, signal expectations, and key French phrases for the European packs — is validated (bail-out coordinates are snapped to real POIs, hallucinated exits dropped) and **cached on-device**. In the field, with zero connectivity, on-device **Gemma reads Nemotron's briefing through the `mission_brief` tool** — cloud-scale planning consumed inside a fully offline tool trace. Nemotron never runs in the offline product; it makes the offline agent smarter before you leave.
+
+**Where to look:** `functions/api/brief.ts` (Pages Function), `src/brief/` (client + shared protocol), `src/tools/brief.ts` (offline tool), `tests/brief.test.ts` (40 tests). Demo without a key: add `?brief=mock`, click **PLAN BRIEF**, go offline, ask "what are my bail-out options?"

@@ -10,6 +10,7 @@ import { getFix } from './location';
 import { morseTiming, morseDurationMs, toMorse } from './morse';
 import { takePendingFrame } from './camera';
 import { runRouteBack } from './route';
+import { missionBriefSpec, runMissionBrief } from './brief';
 
 /** Minimal engine surface the tools need (read_sign vision). */
 export interface EngineForTools {
@@ -98,6 +99,7 @@ const SPECS: Record<string, ToolSpec> = {
     {},
     [],
   ),
+  mission_brief: missionBriefSpec,
 };
 
 // -------------------------------------------------------------- tool impls ----
@@ -249,6 +251,7 @@ export function createTools(ctx: ToolContext): ToolRegistry {
     { spec: SPECS.morse_beacon, run: guard('morse_beacon', (a) => morseBeacon(a, ctx)) },
     { spec: SPECS.safety_plan, run: guard('safety_plan', (a) => safetyPlan(a, ctx)) },
     { spec: SPECS.read_sign, run: guard('read_sign', (a) => readSign(a, ctx)) },
+    { spec: SPECS.mission_brief, run: guard('mission_brief', () => runMissionBrief()) },
   ];
 
   const byName = new Map(tools.map((t) => [t.spec.function.name, t]));

@@ -114,6 +114,27 @@ The routing destination enum resolves against the pack's own trailheads in `pois
 
 ---
 
+## NVIDIA Nemotron — online mission planning (bonus track)
+
+> **Nemotron plans your mission online; Gemma keeps you alive offline.**
+
+An optional pre-trip enhancement — the offline product stays **100% Gemma on-device** and never depends on it:
+
+- While you still have signal, the **PLAN BRIEF** header chip calls `/api/brief` — a Cloudflare Pages Function that feeds the pack's *real* data (pois.json trailheads, manifest bbox, the app's own offline sun math) to **Nemotron 3 Nano** (`nvidia/nemotron-3-nano-30b-a3b` via NVIDIA NIM) under a strict-JSON, strictly non-medical contract.
+- The returned **MissionBrief** — route/daylight plan, ranked bail-out points (coordinates snapped to the pack's real POIs, never model-invented), water/gear checklist, terrain cautions, signal expectations, key French phrases for the Chamonix/Fontainebleau packs — is cached **on-device** alongside the pack.
+- Offline, Gemma reads it through the `mission_brief` tool: Nemotron's planning shows up inside a fully offline Gemma tool trace. Nemotron **never** does inference in the field.
+
+Setup (all optional — everything degrades gracefully key-less):
+
+```bash
+npx wrangler pages secret put NVIDIA_API_KEY --project-name=helius   # prod (Pages secret)
+NVIDIA_API_KEY=... pnpm dev                                          # dev (vite middleware reads the env var)
+```
+
+Without a key the endpoint answers `501 {reason:'not_configured'}` and the UI hides the feature; `?brief=mock` exercises the entire path (a deterministic brief built from the same real pack data) with no key and no upstream call. Code: `functions/api/brief.ts` (Pages Function), `src/brief/` (client + shared protocol, unit-tested in `tests/brief.test.ts`), `src/tools/brief.ts` (the offline tool).
+
+---
+
 ## Local development
 
 ```bash
