@@ -22,5 +22,8 @@ Runtime: @huggingface/transformers 4.2.0 · Model: onnx-community/gemma-4-E2B-it
 ## Native vision probe (03:49)
 Synthetic French trail sign rendered to canvas → `RawImage.fromCanvas` → user content `[{type:'image'},{type:'text',…}]` → **all four lines read verbatim, translated correctly ("verglas" → black ice), correct hiker-facing reasoning.** 12.0s for 220 tokens incl. vision encode (q4f16 encoder). `read_sign` tool upgrades to native Gemma 4 vision; tesseract OCR demoted to deterministic fallback.
 
+## E4B tier probe (04:03)
+`gemma-4-e4b-onnx` full q4f16 (incl. encoders): **load 19.4s, prefill 837ms, decode 16.0 tok/s**, clean output — with E2B still resident (both fit in 32GB unified). Elasticity beat CONFIRMED: E2B is 2.0× faster (32 vs 16 tok/s) → "battery low → morph E4B→E2B, latency halves" is real and visible. Engine will pre-warm both tiers for instant hot-swap.
+
 ## Decision
 **LOCKED:** transformers.js + Gemma 4 E2B q4f16 WebGPU as the only runtime. Native audio-in replaces the planned moonshine STT on the primary path (moonshine stays mirrored as fallback). Kokoro remains for TTS. E4B q4f16 text stack mirrored for the MatFormer elasticity beat. MediaPipe/LiteRT-LM paths retired unexercised.
