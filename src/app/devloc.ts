@@ -22,6 +22,12 @@ const PRESETS_BY_PACK: Record<string, LocationPreset[]> = {
     { label: 'Lac Blanc trail (default)', lat: 45.97, lon: 6.885, elevationM: 2352 },
     { label: "Plan de l'Aiguille", lat: 45.9089, lon: 6.8519, elevationM: 2233 },
   ],
+  fontainebleau: [
+    // Matches src/tools/pack.ts's own default fix for this pack exactly.
+    { label: 'Gorges de Franchard (default)', lat: 48.4058, lon: 2.6386, elevationM: 130 },
+    { label: 'Barbizon village', lat: 48.4462, lon: 2.6108, elevationM: 80 },
+    { label: 'Apremont boulders', lat: 48.43, lon: 2.628, elevationM: 120 },
+  ],
 };
 
 // Simulated fixes don't have a real accuracy reading; matches location.ts's
@@ -98,6 +104,9 @@ export function mountDevLoc(opts: DevLocOptions = {}): DevLocHandle {
   }
 
   function setPack(packId: string, fix: { lat: number; lon: number }): void {
+    if (!PRESETS_BY_PACK[packId]) {
+      console.warn(`[helius] devloc has no presets for pack "${packId}" — falling back to sandia's list (fix display is still accurate, just the preset dropdown isn't pack-appropriate)`);
+    }
     activePack = PRESETS_BY_PACK[packId] ? packId : 'sandia';
     activePresets = PRESETS_BY_PACK[activePack];
     renderOptions();

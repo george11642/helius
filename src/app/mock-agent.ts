@@ -29,6 +29,7 @@ const RESPONSE_TEXT =
 const MOCK_PACKS: PackInfo[] = [
   { id: 'sandia', name: 'Sandia', bbox: [-106.7, 34.9, -106.2, 35.4], center: [-106.4439, 35.1983], totalBytes: 42_000_000 },
   { id: 'chamonix', name: 'Chamonix', bbox: [6.7, 45.8, 7.1, 46.0], center: [6.885, 45.97], totalBytes: 38_000_000 },
+  { id: 'fontainebleau', name: 'Fontainebleau', bbox: [2.55, 48.38, 2.7, 48.48], center: [2.6386, 48.4058], totalBytes: 21_000_000 },
 ];
 
 function createTimerBag() {
