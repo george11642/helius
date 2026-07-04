@@ -1,85 +1,41 @@
-# Helius — build handoff (Sat Jul 4, ~09:35 MDT)
+# Helius — SUBMISSION-READY (Sat Jul 4, ~13:35 MDT)
 
-State of the RAISE 2026 build for a fresh session or for George. Everything below
-is **done and verified** unless a line says otherwise. Submission deadline:
-**04:00 MDT Sun / noon Paris** — George refines + submits the form himself.
+Everything is done except the form itself. **George submits the form** (deadline
+04:00 MDT Sun / noon Paris). Paste-ready text: `docs/SUBMISSION.md`.
 
-## The live deliverables (share these)
+## The three links that matter
+- **Judge URL:** https://helius-9d0.pages.dev (verified: onboarding gate, model
+  from R2, offline reload 3.0s, real turn, /api/brief live with NVIDIA key)
+- **Video (unlisted, 60.0s):** https://youtu.be/csRsCrKx_oM
+- **Repo (PUBLIC, tag v1.0):** https://github.com/george11642/helius
 
-- **Judge URL (live, real-model verified):** https://helius-9d0.pages.dev
-  - **Redeployed with the full Jul-4 wave + review fixes (commit 84c5b46)** and
-    re-verified cold in a fresh profile: E2B from R2 ready in ~71s, then
-    **network cut → reload → ready in 3.0s from OPFS → real offline turn
-    answered** (spike/offline-reload-check.mjs). `NVIDIA_API_KEY` Pages secret
-    set — `/api/brief` reports `configured:true` live.
-  - Offline map/pack assets still need the warm-up: keep the page online until
-    the OFFLINE-READY badge fills (pack pmtiles/manifest stream from R2 into
-    the SW cache after the SW activates) before cutting Wi-Fi.
-  - Cloudflare Pages project `helius`, account `d13d307f042336a52467a0583099794c`.
-    Deploy token in `~/.config/global.env` as `CLOUDFLARE_PAGES_TOKEN` (Pages:Write).
-  - Redeploy: `pnpm build && find dist -name '*.pmtiles' -delete && \
-    CLOUDFLARE_API_TOKEN=$CLOUDFLARE_PAGES_TOKEN CLOUDFLARE_ACCOUNT_ID=d13d307f042336a52467a0583099794c \
-    npx wrangler@latest pages deploy dist --project-name=helius --branch=main --commit-dirty=true`
-    (pmtiles are stripped from the upload — they exceed the 25 MiB Pages cap and
-    stream from R2 in prod via `src/map/pack-base.ts`).
-- **Repo:** https://github.com/george11642/helius (PRIVATE — make public before
-  submitting; clean in-window history begins 03:30:49 MDT Jul 4).
-- **iOS "Helius Go":** signed + installed + running on George's iPhone 16e.
-  Gemma 4 E2B loads on-device in ~6.2 s (A18, CPU), offline routing live.
-  Team `8ZBX3F56T7`, bundle `com.helius.go`, device UDID
-  `1A237960-FB80-582A-8579-008C02F1A2C7`. Unsigned archive at
-  `$CLAUDE_JOB_DIR/tmp/HeliusGo.xcarchive`. Sideload runbook: `ios/README.md`.
+## What shipped today after the morning handoff (wave 2)
+- Real geolocation primary + explicit Demo GPS + off-pack coverage honesty;
+  deterministic display numbers (model quotes tool strings verbatim).
+- Resumable chunked Range→OPFS model downloads, capability pre-flight
+  (go/degraded/unsupported), phone guidance, map-only mode, single-copy weights.
+- Onboarding gate: pack pick BEFORE the 3.4GB download, explicit start, staged
+  progress; mobile-first layout (bottom-sheet chat).
+- NVIDIA Nemotron bonus: /api/brief (Pages Function → nemotron-3-nano-30b-a3b)
+  → MissionBrief cached into the offline pack → Gemma's mission_brief tool
+  reads it OFFLINE. Key active in global.env + Pages secret.
+- iOS Helius Go: offline MapLibre map (WKWebView + Range scheme handler),
+  chip summaries, GPS gate fixed, settings, screen-strobe fallback.
+  (George's phone still has the PRE-wave build — resideload via ios/README.)
+- **Critical fix:** workbox RegExp routes never match cross-origin mid-URL →
+  R2 pack assets were silently uncacheable in prod. Function matchers fixed it;
+  OFFLINE-READY badge now reachable (warm ~1-2 min on good Wi-Fi).
+- 2 adversarial reviews + Codex + E2E: 15 findings fixed; tests 161 green.
 
-## Verified facts (see `spike/RESULTS.md` for the full log)
+## Video kit (for reruns)
+`CAPTURE=1 CAPTURE_SECONDS=150 CAPTURE_OUT=takes/<name>.mov TAKE_LABEL=<label>
+node video/scenes.mjs` — scenes spawns capture itself at t0 (sync by
+construction), chromeless --app window, measured crop. Then normalize to CFR
+(`ffmpeg -fps_mode cfr -r 60 -c:v h264_videotoolbox -b:v 30M`) and
+`CAPTURE_LEAD=$(t0Epoch/1000 - file birth) ./assemble.sh --capture <cfr.mov>`.
+ProRes videotoolbox drops ~15% frames at 1080p60 on this box — always CFR-normalize.
 
-- Runtime: transformers.js 4.2.0 + `onnx-community/gemma-4-E2B-it-ONNX` q4f16 on
-  WebGPU in a Worker. E2B 32 tok/s / E4B 16 tok/s; hot-swap 0 ms with `?prewarm=1`.
-- Native audio-in (STT ~1.2 s), native vision (French sign read + translated),
-  medical prompts refused by design.
-- **Airplane-mode PROVEN:** Wi-Fi physically off → ready 3.09 s → real grounded
-  turn (`video/wifi-proof.sh`, auto-restores Wi-Fi).
-- 3 region packs on R2 (`pub-186c78c24ee54dda820fe564c0ac4608.r2.dev/packs`):
-  **sandia** (demo, 3336 km), **chamonix** (Alps), **fontainebleau** (Paris day
-  trip). `scripts/make-pack.sh <id> <bbox> "<name>" [trailheads.json]` = any region.
-- 3 Codex adversarial review waves (12 + 7 + 7 findings) — all fixed + verified.
-
-## Docs (all committed)
-
-- `README.md` — judge-facing (hero, demo beats, architecture diagram, verified
-  numbers, non-medical scope, packs, dev quickstart, credits).
-- `docs/ARCHITECTURE.md`, `docs/SUBMISSION.md` (form draft + 60-s shot list +
-  CC-BY music attribution line), `docs/DEMO-RUNBOOK.md` (live-judging script +
-  recovery table — **run the demo in a FRESH Chrome profile**; a cache-heavy dev
-  profile can wedge the SW precache).
-
-## The one thing NOT done: the demo video
-
-- **Kit:** `video/` — `scenes.mjs` (Playwright driver, 9 scenes, dry-run-proven
-  real turns incl. grounded sign-read + SOS), `capture.sh` (avfoundation screen
-  cap, index 3, crop 1920x1080 @ 0,0), `assemble.sh` (paces scenes to the VO
-  beat → 60.0 s, two-pass loudnorm, guards opaque captions), `vo.mjs`/`music.mjs`/
-  `broll.mjs`, `captions/` (Remotion).
-- **Assets ready:** VO `vo.mp3` (58.5 s, Brian + `alignment.json`), music
-  `music.mp3` (real, "Ascending the Vale" / Kevin MacLeod / CC BY 4.0 — credit in
-  `video/music-CREDIT.txt` + SUBMISSION.md), b-roll ×2.
-- **To finish (no George input needed except a clear screen for the take):**
-  1. Roll a clean take: keep the Mac's top-left quarter clear, then
-     `./capture.sh --rough &` + `node scenes.mjs` (crash-restore dialog now
-     suppressed; screen-recording permission already works).
-  2. `./assemble.sh --rough --capture takes/<file>.mov` → review → final master.
-  3. Upload **unlisted** via authed Chrome at studio.youtube.com (channel `bpapp`
-     `UC0BaCe0TUTk55D3wRFX-Caw`, pre-authed; has 1 strike — George may swap).
-- **Captions:** DONE — transparent `captions.mov` (QTRLE/argb; vp8/vp9 alpha
-  encode is broken on this machine, proven, so .mov not .webm). Rebuild with
-  `video/captions/render.sh`. `assemble.sh` prefers `captions.mov` and overlays it.
-  The ONLY remaining video step is rolling a clean-content take + assemble +
-  upload — the kit itself is fully built and verified.
-
-## George's open items (all optional / his-to-do)
-
-- Confirm on the PHONE: header load time, the demo turn's chips + answer, **does
-  the rear torch actually flash SOS**, compass tracks on rotation.
-- Optional: fal.ai top-up (would swap the free CC-BY music for CassetteAI — not
-  needed); R2 custom domain (r2.dev has variable rate limits); YouTube channel swap.
-- Before submit: make the repo public, tag v1.0, paste judge URL + video link into
-  the form, submit himself.
+## George's remaining items
+1. **Submit the form** (docs/SUBMISSION.md has the draft + video link).
+2. Optional: re-sideload iOS with the new map build; finish Crusoe account
+   (payment info) for rate-limit-free Nemotron; fal top-up (not needed).
