@@ -16,3 +16,9 @@ public/models/
 *.litertlm
 *.traineddata
 *.traineddata.gz
+
+# iOS: build artifacts + the vendored LiteRT-LM binary frameworks (77MB+ each
+# slice — fetched by ios/Packages/LiteRTLM/README or SPM; sources are tracked)
+ios/**/.build/
+ios/**/DerivedData/
+ios/Packages/LiteRTLM/Frameworks/

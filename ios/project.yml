@@ -1,0 +1,53 @@
+name: HeliusGo
+options:
+  bundleIdPrefix: com.helius
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+# NOTE: Stage 1 (LiteRT integration probe) intentionally depends ONLY on the
+# LiteRTLM SPM package. The local HeliusCore package + unit-test target are
+# added back in Stage 2 once the core port lands. This keeps the highest-risk
+# item (does the prebuilt xcframework link + does a .litertlm load on-sim?)
+# isolated from everything else.
+packages:
+  LiteRTLM:
+    path: Packages/LiteRTLM
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    TARGETED_DEVICE_FAMILY: "1"
+
+targets:
+  HeliusGo:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: HeliusGo
+        excludes:
+          - "Info.plist"
+    dependencies:
+      - package: LiteRTLM
+        product: LiteRTLM
+    info:
+      path: HeliusGo/Info.plist
+      properties:
+        CFBundleDisplayName: Helius Go
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        NSLocationWhenInUseUsageDescription: Helius uses your location to place you on the trail and route you back before dark.
+        NSMicrophoneUsageDescription: Helius listens so you can talk to it hands-free while hiking.
+        NSSpeechRecognitionUsageDescription: Helius turns your speech into text entirely on-device.
+        NSCameraUsageDescription: Helius reads trail signs through your camera, on-device.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.helius.go
+        CODE_SIGNING_ALLOWED: "NO"
