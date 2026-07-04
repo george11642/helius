@@ -154,14 +154,42 @@ a one-time, ~10-minute session. Do it in order.
 
 ---
 
-## Verification
+## Verification — GO ✅ (full-app run complete, 2026-07-04)
 
-- Builds clean for **iOS Simulator (arm64)** and generic **iOS device** (unsigned
-  archive; signing happens at sideload).
-- `HeliusCore` routing/sun math unit-tested with `swift test` against the La Luz
-  oracle (10.64 km ±1%) and a known Albuquerque sunset.
-- Simulator run: app boots, real Gemma-4 loads and generates, tool trace renders,
-  torch no-ops gracefully, camera OCR works from a library image.
+**Verdict: GO.** The full Stage-2 app builds and the on-device agent loop runs
+end-to-end on the iOS Simulator (iPhone 17, iOS 26.5, arm64, CPU/XNNPACK).
 
-_(Verified numbers, screenshots, and the final GO/KILL call are appended at the
-bottom once the full app run completes.)_
+**Build**
+- **Simulator (arm64):** clean build, 0 errors. App boots, requests permissions,
+  loads `gemma-4-E2B-it.litertlm` (2.4 GB) in **~5.6 s**; header reads
+  "Gemma 4 E2B · GPS SIM · CPU · on-device · no network".
+- **Device (`generic/platform=iOS`, unsigned):** `xcodebuild archive` **SUCCEEDED**.
+  The `.xcarchive` main binary is `arm64`, the embedded `CLiteRTLM.framework` is the
+  `arm64` **device** slice, and `graph.bin`/`pois.json` are bundled. Unsigned
+  (`code object is not signed at all`) — signing happens at the 13:30 sideload.
+
+**On-device agent loop** (real turns driven on the simulator)
+- **"Get me back to the trailhead before dark"** → trace chips lit green
+  `locate()` → `sun_clock()` → `route_back()`; compass showed **10.6 km → LA LUZ
+  TRAILHEAD**; grounded answer: *"The trailhead is 10.6 km / 6.6 mi away. The
+  estimated time is 2 hours and 8 minutes. Proceed now."* — 10.64 km / 128 min,
+  **bit-identical to the HeliusCore La Luz oracle**. (The model used a 3-tool chain
+  because `route_back` already returns the ETA.)
+- **"If I walk 3 km with 200 m of climbing, how long + beat sunset?"** →
+  `pace_eta()` fired; grounded answer: *"It will take about 56 minutes. You will
+  beat sunset."* — 36 min flat + 20 min climb = 56 min Naismith, exact.
+- Screenshots: `docs/fullapp-toolchain-GO.jpg`, `docs/fullapp-pace_eta-GO.jpg`,
+  `docs/probe-verdict-GO.jpg`.
+
+**Core math:** `HeliusCore` is unit-tested with `swift test` (5/5) against the La
+Luz oracle (10638.5 m, 16 steps, 1584 coords) and an Albuquerque sunset.
+
+**Two runtime bugs found and fixed before this run:**
+1. **`pace_eta` args wouldn't decode.** `@ToolParam` property names must be
+   camelCase (`distanceM`), not snake_case (`distance_m`): LiteRT-LM exposes them to
+   the model as snake_case and decodes the model's args with `.convertFromSnakeCase`,
+   so a snake_case property fails to decode (`keyNotFound`) and the tool call throws.
+   Fixed; proven by the 56-minute turn above.
+2. **Constrained decoding was off.** Enabled
+   `ExperimentalFlags.enableConversationConstrainedDecoding` in `warmUp` (Google's
+   flag "primarily for function calling") for reliable tool-calling.
