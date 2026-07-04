@@ -1,0 +1,63 @@
+{
+  "t0": 1783171747326,
+  "url": "http://localhost:4174/?prewarm=1",
+  "label": "dry",
+  "totalMs": 201393,
+  "traceChips": 10,
+  "scenes": [
+    {
+      "n": 1,
+      "label": "idle-ready",
+      "startMs": 1503,
+      "endMs": 1509
+    },
+    {
+      "n": 2,
+      "label": "hero-ask",
+      "startMs": 3194,
+      "endMs": 3237
+    },
+    {
+      "n": 3,
+      "label": "trace-chips",
+      "startMs": 4904,
+      "endMs": 12509
+    },
+    {
+      "n": 4,
+      "label": "route-draw",
+      "startMs": 14205,
+      "endMs": 16794
+    },
+    {
+      "n": "2b",
+      "label": "mic-pulse",
+      "startMs": 18532,
+      "endMs": 19557
+    },
+    {
+      "n": 5,
+      "label": "tier-swap",
+      "startMs": 21238,
+      "endMs": 67797
+    },
+    {
+      "n": 6,
+      "label": "read-sign",
+      "startMs": 69557,
+      "endMs": 75404
+    },
+    {
+      "n": 7,
+      "label": "beacon",
+      "startMs": 77033,
+      "endMs": 198627
+    },
+    {
+      "n": 8,
+      "label": "end-hold",
+      "startMs": 200257,
+      "endMs": 201262
+    }
+  ]
+}

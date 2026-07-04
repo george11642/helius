@@ -1,0 +1,15 @@
+# tooling + heavy generated artifacts (scripts are committed; media regenerates)
+node_modules/
+.chrome-profile/
+captions/node_modules/
+captions/out/
+takes/
+*.mov
+*.y4m
+*.mjpeg
+vo.mp3
+music.mp3
+alignment.json
+captions.webm
+youtube_master*.mp4
+broll/*.mp4
