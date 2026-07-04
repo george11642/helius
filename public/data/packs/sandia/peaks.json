@@ -1,0 +1,501 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-06-12T12:14:17Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 357569770,
+  "lat": 35.0400067,
+  "lon": -106.4238847,
+  "tags": {
+    "ele": "2317",
+    "gnis:feature_id": "885493",
+    "name": "Manzano Mountain",
+    "natural": "peak",
+    "wikidata": "Q49047827"
+  }
+},
+{
+  "type": "node",
+  "id": 357578280,
+  "lat": 35.3484725,
+  "lon": -106.6980536,
+  "tags": {
+    "ele": "1809",
+    "gnis:feature_id": "893249",
+    "name": "Picuda Peak",
+    "natural": "peak",
+    "wikidata": "Q49061094"
+  }
+},
+{
+  "type": "node",
+  "id": 357582995,
+  "lat": 35.2558751,
+  "lon": -106.2061349,
+  "tags": {
+    "ele": "2290",
+    "gnis:feature_id": "897890",
+    "name": "Cerro Columbo",
+    "natural": "peak",
+    "wikidata": "Q49019364"
+  }
+},
+{
+  "type": "node",
+  "id": 357583213,
+  "lat": 35.3550373,
+  "lon": -106.6647515,
+  "tags": {
+    "ele": "1782",
+    "gnis:feature_id": "897999",
+    "name": "Loma Machete",
+    "natural": "peak",
+    "wikidata": "Q49045954"
+  }
+},
+{
+  "type": "node",
+  "id": 357586096,
+  "lat": 35.2714293,
+  "lon": -106.6653055,
+  "tags": {
+    "ele": "1701",
+    "gnis:feature_id": "899728",
+    "name": "Loma Colorado de Abajo",
+    "natural": "peak",
+    "wikidata": "Q49045939"
+  }
+},
+{
+  "type": "node",
+  "id": 357591478,
+  "lat": 35.3597596,
+  "lon": -106.6289174,
+  "tags": {
+    "ele": "1748",
+    "gnis:feature_id": "902829",
+    "name": "Loma Barbon",
+    "natural": "peak",
+    "wikidata": "Q49045930"
+  }
+},
+{
+  "type": "node",
+  "id": 357592687,
+  "lat": 35.3580936,
+  "lon": -106.5403043,
+  "tags": {
+    "ele": "1616",
+    "gnis:feature_id": "904498",
+    "name": "Canjilon Hill",
+    "natural": "peak",
+    "wikidata": "Q49017899"
+  }
+},
+{
+  "type": "node",
+  "id": 357592744,
+  "lat": 35.2191045,
+  "lon": -106.4090340,
+  "tags": {
+    "ele": "2723",
+    "gnis:feature_id": "904764",
+    "name": "Capulin Peak",
+    "natural": "peak",
+    "wikidata": "Q49018076"
+  }
+},
+{
+  "type": "node",
+  "id": 357592850,
+  "lat": 35.0531029,
+  "lon": -106.3516913,
+  "tags": {
+    "ele": "2369",
+    "gnis:feature_id": "904887",
+    "name": "Cedro Peak",
+    "natural": "peak",
+    "wikidata": "Q49019104"
+  }
+},
+{
+  "type": "node",
+  "id": 357593152,
+  "lat": 35.0309058,
+  "lon": -106.4376981,
+  "tags": {
+    "ele": "2274",
+    "gnis:feature_id": "904989",
+    "name": "Cerro Pelon",
+    "natural": "peak",
+    "wikidata": "Q49019536"
+  }
+},
+{
+  "type": "node",
+  "id": 357596178,
+  "lat": 35.3100400,
+  "lon": -106.4489135,
+  "tags": {
+    "ele": "1867",
+    "gnis:feature_id": "908140",
+    "name": "Lomos Altos",
+    "natural": "peak",
+    "wikidata": "Q49045987"
+  }
+},
+{
+  "type": "node",
+  "id": 357597024,
+  "lat": 35.1955988,
+  "lon": -106.2705802,
+  "tags": {
+    "ele": "2298",
+    "gnis:feature_id": "908843",
+    "name": "Monte Largo",
+    "natural": "peak",
+    "wikidata": "Q49051059"
+  }
+},
+{
+  "type": "node",
+  "id": 357597551,
+  "lat": 35.2339313,
+  "lon": -106.4047462,
+  "tags": {
+    "ele": "2647",
+    "gnis:feature_id": "909457",
+    "name": "Palomas Peak",
+    "natural": "peak",
+    "wikidata": "Q49059593"
+  }
+},
+{
+  "type": "node",
+  "id": 357598818,
+  "lat": 35.2351313,
+  "lon": -106.4567155,
+  "tags": {
+    "ele": "3184",
+    "gnis:feature_id": "910748",
+    "name": "North Sandia Peak",
+    "natural": "peak",
+    "wikidata": "Q49057518"
+  }
+},
+{
+  "type": "node",
+  "id": 357599246,
+  "lat": 34.9722723,
+  "lon": -106.4144676,
+  "tags": {
+    "ele": "2285",
+    "gnis:feature_id": "911192",
+    "name": "Sol se Mete Peak",
+    "natural": "peak",
+    "wikidata": "Q49075441"
+  }
+},
+{
+  "type": "node",
+  "id": 357599310,
+  "lat": 35.1205889,
+  "lon": -106.4306973,
+  "tags": {
+    "ele": "2982",
+    "gnis:feature_id": "911272",
+    "name": "South Sandia Peak",
+    "natural": "peak",
+    "wikidata": "Q49076070"
+  }
+},
+{
+  "type": "node",
+  "id": 357611005,
+  "lat": 35.1842103,
+  "lon": -106.2197468,
+  "tags": {
+    "ele": "2665",
+    "gnis:feature_id": "928820",
+    "name": "South Mountain",
+    "natural": "peak",
+    "wikidata": "Q49075943"
+  }
+},
+{
+  "type": "node",
+  "id": 357612963,
+  "lat": 34.9611894,
+  "lon": -106.4130002,
+  "tags": {
+    "ele": "2347",
+    "gnis:feature_id": "933099",
+    "name": "Mount Washington",
+    "natural": "peak",
+    "wikidata": "Q49055103"
+  }
+},
+{
+  "type": "node",
+  "id": 357621400,
+  "lat": 35.1980990,
+  "lon": -106.3994684,
+  "tags": {
+    "ele": "2684",
+    "gnis:feature_id": "1986209",
+    "name": "Tecolote Peak",
+    "natural": "peak",
+    "wikidata": "Q49081728"
+  }
+},
+{
+  "type": "node",
+  "id": 1004077539,
+  "lat": 35.0812851,
+  "lon": -106.4807918,
+  "tags": {
+    "ele": "1922",
+    "name": "U Mound",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1319676267,
+  "lat": 35.1976286,
+  "lon": -106.4451254,
+  "tags": {
+    "ele": "2947",
+    "name": "Hail Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1319676268,
+  "lat": 35.1963645,
+  "lon": -106.4435451,
+  "tags": {
+    "name": "Dragons Tooth",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1511839839,
+  "lat": 35.2275021,
+  "lon": -106.4588683,
+  "tags": {
+    "ele": "3127",
+    "name": "The Needle",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 2346942325,
+  "lat": 35.2100245,
+  "lon": -106.4496247,
+  "tags": {
+    "ele": "3255",
+    "name": "Sandia Crest",
+    "natural": "peak",
+    "wikidata": "Q104720600"
+  }
+},
+{
+  "type": "node",
+  "id": 4143880981,
+  "lat": 35.0493321,
+  "lon": -106.4644068,
+  "tags": {
+    "name": "Twin Peaks North",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 4143880982,
+  "lat": 35.0448174,
+  "lon": -106.4630336,
+  "tags": {
+    "name": "Twin Peaks South",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 6679978640,
+  "lat": 35.2311480,
+  "lon": -106.4662801,
+  "tags": {
+    "ele": "2733",
+    "name": "The Prow",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 6679978641,
+  "lat": 35.2203640,
+  "lon": -106.4533077,
+  "tags": {
+    "ele": "3048",
+    "name": "Tombstone",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 6679978644,
+  "lat": 35.1892501,
+  "lon": -106.4360113,
+  "tags": {
+    "ele": "3014",
+    "name": "Jawbone",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7257521161,
+  "lat": 35.3084927,
+  "lon": -106.3964750,
+  "tags": {
+    "ele": "2317",
+    "name": "Crest of Montezuma",
+    "name:en": "Crest of Montezuma",
+    "name:es": "Creston de Montezuma",
+    "natural": "peak",
+    "wikidata": "Q49685355"
+  }
+},
+{
+  "type": "node",
+  "id": 8567559000,
+  "lat": 35.2473386,
+  "lon": -106.4936972,
+  "tags": {
+    "ele": "2488",
+    "name": "Rincón Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 8567629324,
+  "lat": 35.2457330,
+  "lon": -106.4867235,
+  "tags": {
+    "ele": "2523",
+    "name": "Rincón High Point",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 8567661500,
+  "lat": 35.2398096,
+  "lon": -106.4986969,
+  "tags": {
+    "ele": "2499",
+    "name": "Juan Tabo Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10155563070,
+  "lat": 35.2043830,
+  "lon": -106.4542794,
+  "tags": {
+    "ele": "3081",
+    "name": "The Thumb",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10181496308,
+  "lat": 35.2013250,
+  "lon": -106.4568791,
+  "tags": {
+    "ele": "2926",
+    "fixme": "height slightly low",
+    "name": "Whiskey Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10268848849,
+  "lat": 35.3746136,
+  "lon": -106.6715502,
+  "tags": {
+    "name": "The Monarch",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10602646056,
+  "lat": 35.0073623,
+  "lon": -106.4908723,
+  "tags": {
+    "name": "Manzano Saddle",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10720336911,
+  "lat": 35.2129929,
+  "lon": -106.4540119,
+  "tags": {
+    "ele": "3051",
+    "name": "The Chimney",
+    "natural": "peak",
+    "source:website": "https://www.summitpost.org/the-chimney/795490"
+  }
+},
+{
+  "type": "node",
+  "id": 10737273476,
+  "lat": 35.2116534,
+  "lon": -106.4533313,
+  "tags": {
+    "description": "A granite summit on the ridge between upper La Cueva and Chimney canyons.",
+    "name": "The Sentinel",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10737332900,
+  "lat": 35.1988995,
+  "lon": -106.4426978,
+  "tags": {
+    "name": "Alioth",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11369324166,
+  "lat": 35.3161530,
+  "lon": -106.6659667,
+  "tags": {
+    "gnis:feature_id": "2830283",
+    "name": "Loma Coyote",
+    "natural": "peak"
+  }
+}
+
+  ]
+}

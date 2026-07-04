@@ -8,7 +8,7 @@ dev-dist/
 
 # Large runtime-fetched binaries — reproduced by scripts/, streamed from CDN/R2 at runtime.
 # Kept out of git so the repo stays clone-fast; see README for the asset pipeline.
-public/data/*.pmtiles
+public/data/**/*.pmtiles
 public/models/
 *.onnx
 *.onnx_data
